@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acesso Restrito - MotoFlow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #121418; /* Fundo hiper escuro AG Diesel */
+        }
+        .input-dark { 
+            background-color: #121418; 
+            border: 1px solid #2d333f; 
+            color: #f3f4f6; 
+            transition: all 0.2s;
+        }
+        .input-dark:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 0 2px rgba(59,130,246,0.2); }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- Caixa de Login Centralizada (Estilo AG Diesel) -->
+    <div class="bg-[#1f232b] border border-[#2d333f] rounded-xl p-8 w-full max-w-sm shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+        
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-bold text-white tracking-tight mb-2">MotoFlow <span class="text-blue-500">PRO</span></h1>
+            <p class="text-[10px] text-slate-400 uppercase tracking-widest">Acesso Restrito ao Sistema</p>
+        </div>
+
+        <form id="formLogin" class="space-y-4">
+            <div>
+                <input type="text" id="loginUser" required placeholder="Usuário (ex: admin)" class="input-dark w-full rounded-md p-3 text-sm" autocomplete="off">
+            </div>
+            
+            <div>
+                <input type="password" id="loginSenha" required placeholder="Senha" class="input-dark w-full rounded-md p-3 text-sm">
+            </div>
+
+            <p id="msgErro" class="text-red-500 text-xs font-bold hidden text-center pt-2">Usuário ou senha incorretos.</p>
+
+            <button type="submit" id="btnEntrar" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-md text-sm transition mt-4 tracking-wider">
+                ENTRAR NO SISTEMA
+            </button>
+        </form>
+
+        <div class="mt-6 text-center">
+            <p class="text-[10px] text-slate-500">Uso exclusivo de funcionários autorizados.</p>
+        </div>
+    </div>
+
+   <script>
+        document.getElementById('formLogin').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const user = document.getElementById('loginUser').value;
+            const pass = document.getElementById('loginSenha').value;
+            const btn = document.getElementById('btnEntrar');
+            const erro = document.getElementById('msgErro');
+
+            btn.innerText = "A AUTENTICAR...";
+            btn.disabled = true;
+            erro.classList.add('hidden');
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ login: user, senha: pass })
+                });
+
+                if (res.ok) {
+                    const dados = await res.json();
+                    // Guarda o Token e os dados da sessão
+                    localStorage.setItem('motoFlowToken', dados.token);
+                    localStorage.setItem('motoFlowUserNome', dados.nome);
+                    localStorage.setItem('motoFlowUserCargo', dados.cargo);
+
+                    window.location.href = "index.html";
+                } else {
+                    erro.innerText = "Utilizador ou senha incorretos.";
+                    erro.classList.remove('hidden');
+                }
+            } catch (err) {
+                erro.innerText = "Falha de comunicação com o servidor.";
+                erro.classList.remove('hidden');
+            } finally {
+                btn.innerText = "ENTRAR NO SISTEMA";
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

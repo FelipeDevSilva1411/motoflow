@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imprimir Ordem de Serviço - MotoFlow PRO</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Inter:wght@400;600;700;800&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #1a1d24;
+            font-family: 'Inter', -apple-system, sans-serif;
+            color: #111827;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 10px;
+            min-height: 100vh;
+        }
+
+        /* Barra de Ações Superior (Oculta na Impressão) */
+        .toolbar {
+            width: 100%;
+            max-width: 800px;
+            background: #1f232b;
+            border: 1px solid #2d333f;
+            border-radius: 8px;
+            padding: 12px 18px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #f3f4f6;
+        }
+
+        .btn {
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-print { background-color: #10b981; color: white; }
+        .btn-print:hover { background-color: #059669; }
+        .btn-mode { background-color: #374151; color: white; }
+        .btn-mode:hover { background-color: #4b5563; }
+
+        /* Contentor do Documento */
+        .document-sheet {
+            background: #ffffff;
+            color: #000000;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            padding: 25px;
+            transition: all 0.3s;
+        }
+
+        /* Modo Padrão: Bobina Térmica 80mm */
+        .format-thermal {
+            width: 80mm;
+            min-width: 80mm;
+            max-width: 80mm;
+            font-family: 'Courier Prime', monospace;
+            font-size: 11px;
+            line-height: 1.35;
+            padding: 15px 12px;
+        }
+
+        /* Modo A4 Formal */
+        .format-a4 {
+            width: 210mm;
+            min-height: 297mm;
+            max-width: 100%;
+            font-size: 13px;
+            line-height: 1.45;
+            border-radius: 4px;
+        }
+
+        .divider {
+            border-top: 1px dashed #000;
+            margin: 10px 0;
+        }
+
+        .divider-solid {
+            border-top: 1.5px solid #000;
+            margin: 12px 0;
+        }
+
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .bold { font-weight: 700; }
+        .uppercase { text-transform: uppercase; }
+
+        .row-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin: 2px 0;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+        }
+
+        .items-table th {
+            border-bottom: 1px dashed #000;
+            padding: 4px 0;
+            font-size: 10px;
+            text-align: left;
+        }
+
+        .items-table td {
+            padding: 4px 0;
+            vertical-align: top;
+        }
+
+        .tag-garantia {
+            border: 1px dashed #000;
+            padding: 8px;
+            font-size: 9.5px;
+            margin: 12px 0;
+            text-align: justify;
+        }
+
+        .signature-box {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .signature-line {
+            border-top: 1px solid #000;
+            width: 85%;
+            margin: 0 auto 5px auto;
+        }
+
+        /* Ajustes Estritos de Impressão */
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .document-sheet {
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 auto !important;
+            }
+
+            .format-thermal {
+                width: 100% !important;
+                max-width: 78mm !important;
+            }
+
+            .format-a4 {
+                width: 100% !important;
+                padding: 15mm !important;
+            }
+
+            @page {
+                margin: 3mm;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Barra de Ferramentas / Impressão -->
+    <div class="toolbar no-print">
+        <div>
+            <span class="bold">MotoFlow PRO</span> &bull; 
+            <span id="txtModoExibicao">Formato Térmico (80mm)</span>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <button class="btn btn-mode" onclick="alternarFormato()">Trocar para A4 / 80mm</button>
+            <button class="btn btn-print" onclick="window.print()">🖨️ Imprimir Ordem</button>
+        </div>
+    </div>
+
+    <!-- Folha do Documento -->
+    <div id="docFolha" class="document-sheet format-thermal">
+        
+        <!-- Cabeçalho Oficina -->
+        <div class="text-center">
+            <h2 class="bold uppercase" style="font-size: 15px; letter-spacing: 1px;">MOTOFLOW PRO</h2>
+            <p class="uppercase" style="font-size: 10px;">Oficina Mecânica Especializada em Motocicletas</p>
+            <p style="font-size: 9.5px;">Fortaleza - CE | WhatsApp: (85) 99999-0000</p>
+            <p style="font-size: 9.5px;">CNPJ: 00.000.000/0001-00</p>
+        </div>
+
+        <div class="divider-solid"></div>
+
+        <!-- Identificação OS -->
+        <div class="row-between">
+            <span class="bold">ORDEM DE SERVIÇO:</span>
+            <span id="docCodigo" class="bold font-mono" style="font-size: 13px;">MF-XXXXXX</span>
+        </div>
+        <div class="row-between">
+            <span>DATA/HORA ENTRADA:</span>
+            <span id="docDataEntrada">--/--/---- --:--</span>
+        </div>
+        <div class="row-between">
+            <span>STATUS ATUAL:</span>
+            <span id="docStatus" class="bold uppercase">RECEBIDA</span>
+        </div>
+        <div class="row-between">
+            <span>MECÂNICO RESP.:</span>
+            <span id="docMecanico" class="bold uppercase">A DEFINIR</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Dados Cliente e Veículo -->
+        <div>
+            <div class="bold uppercase" style="margin-bottom: 3px;">CLIENTE E VEÍCULO</div>
+            <div class="row-between">
+                <span>NOME:</span>
+                <span id="docClienteNome" class="bold uppercase">---</span>
+            </div>
+            <div class="row-between">
+                <span>TELEFONE:</span>
+                <span id="docClienteTel">---</span>
+            </div>
+            <div class="row-between">
+                <span>VEÍCULO:</span>
+                <span id="docMotoModelo" class="bold uppercase">---</span>
+            </div>
+            <div class="row-between">
+                <span>MATRÍCULA / PLACA:</span>
+                <span id="docMotoPlaca" class="bold font-mono uppercase" style="font-size: 12px;">---</span>
+            </div>
+            <div class="row-between">
+                <span>KM ATUAL:</span>
+                <span id="docMotoKm">0 KM</span>
+            </div>
+            <div class="row-between">
+                <span>COMBUSTÍVEL:</span>
+                <span id="docCombustivel" class="uppercase">--</span>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Relato e Diagnóstico -->
+        <div>
+            <div class="bold uppercase" style="margin-bottom: 2px;">SINTOMA / RELATO DO CLIENTE:</div>
+            <p id="docRelato" style="font-style: italic; margin-bottom: 6px;">Nenhum sintoma detalhado informado.</p>
+
+            <div class="bold uppercase" style="margin-bottom: 2px;">AVARIAS PRÉVIAS / VISTORIA:</div>
+            <p id="docAvarias" style="font-style: italic;">Sem observações adicionais.</p>
+        </div>
+
+        <div class="divider-solid"></div>
+
+        <!-- Tabela de Itens (Peças e Serviços) -->
+        <div>
+            <div class="bold uppercase text-center" style="margin-bottom: 4px;">DISCRIMINAÇÃO DE ITENS E SERVIÇOS</div>
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">QTD</th>
+                        <th style="width: 50%;">DESCRIÇÃO</th>
+                        <th style="width: 15%; text-align: right;">UNIT</th>
+                        <th style="width: 20%; text-align: right;">TOTAL</th>
+                    </tr>
+                </thead>
+                <tbody id="docTabelaItens">
+                    <tr><td colspan="4" class="text-center" style="padding: 10px;">Sem itens lançados até o momento.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Fecho Financeiro -->
+        <div>
+            <div class="row-between">
+                <span>SUBTOTAL:</span>
+                <span id="docSubtotal" class="bold">R$ 0,00</span>
+            </div>
+            <div class="row-between">
+                <span>DESCONTO:</span>
+                <span id="docDesconto">R$ 0,00</span>
+            </div>
+            <div class="row-between" style="font-size: 13px; margin-top: 4px;">
+                <span class="bold">TOTAL LIQUIDAÇÃO:</span>
+                <span id="docTotalFinal" class="bold">R$ 0,00</span>
+            </div>
+            <div class="row-between" style="font-size: 10px; margin-top: 2px;">
+                <span>FORMA DE PGTO:</span>
+                <span id="docFormaPgto" class="bold uppercase">PENDENTE</span>
+            </div>
+        </div>
+
+        <!-- Termo de Garantia Formal (Estilo AG Diesel) -->
+        <div class="tag-garantia">
+            <strong>TERMO DE GARANTIA E CONDIÇÕES:</strong><br>
+            A oficina concede garantia legal de <strong>90 (noventa) dias</strong> sobre serviços executados e peças novas fornecidas pela empresa, a contar da data de entrega, conforme Art. 26 do CDC. A garantia fica automaticamente invalidada em casos de mau uso, adulteração, acidentes ou intervenção de terceiros não autorizados. Orçamentos têm validade de 10 dias.
+        </div>
+
+        <!-- Assinaturas -->
+        <div class="signature-box">
+            <div class="signature-line"></div>
+            <p class="uppercase" style="font-size: 10px;" id="docAssinaturaCliente">Assinatura do Cliente / Proprietário</p>
+        </div>
+
+        <div class="signature-box" style="margin-top: 20px;">
+            <div class="signature-line"></div>
+            <p class="uppercase" style="font-size: 10px;">MotoFlow PRO - Responsável Técnico</p>
+        </div>
+
+        <div class="text-center" style="margin-top: 15px; font-size: 9px; color: #555;">
+            Documento emitido eletronicamente via Sistema MotoFlow PRO
+        </div>
+
+    </div>
+
+    <!-- Script de Carregamento e Alternância -->
+    <script>
+        // 1. Obtém o parâmetro de URL (ex: imprimir.html?codigo=MF-ABC123)
+        const params = new URLSearchParams(window.location.search);
+        const codigo = params.get('codigo');
+        const token = localStorage.getItem('motoFlowToken');
+
+        // Alternador de formato de impressão (80mm vs A4)
+        function alternarFormato() {
+            const folha = document.getElementById('docFolha');
+            const txt = document.getElementById('txtModoExibicao');
+            if (folha.classList.contains('format-thermal')) {
+                folha.classList.remove('format-thermal');
+                folha.classList.add('format-a4');
+                txt.innerText = 'Formato Folha Completa (A4)';
+            } else {
+                folha.classList.remove('format-a4');
+                folha.classList.add('format-thermal');
+                txt.innerText = 'Formato Térmico (80mm)';
+            }
+        }
+
+        async function carregarOrdem() {
+            if (!codigo) {
+                alert('Nenhum código de OS fornecido para impressão.');
+                return;
+            }
+
+            try {
+                const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+                const res = await fetch(`/api/os/rastreio/${codigo}`, { headers });
+
+                if (!res.ok) {
+                    alert('Ordem de serviço não localizada.');
+                    return;
+                }
+
+                const os = await res.json();
+                preencherDocumento(os);
+            } catch (err) {
+                console.error(err);
+                alert('Falha ao comunicar com o servidor.');
+            }
+        }
+
+        function preencherDocumento(os) {
+            document.getElementById('docCodigo').innerText = os.codigoRastreio;
+            document.getElementById('docDataEntrada').innerText = new Date(os.dataEntrada).toLocaleString('pt-BR');
+            document.getElementById('docStatus').innerText = (os.status || '').replace('_', ' ');
+            document.getElementById('docMecanico').innerText = os.mecanicoResponsavel ? os.mecanicoResponsavel.nome : 'NÃO ATRIBUÍDO';
+
+            if (os.cliente) {
+                document.getElementById('docClienteNome').innerText = os.cliente.nome;
+                document.getElementById('docClienteTel').innerText = os.cliente.telefoneWhatsapp || 'NÃO INFORMADO';
+                document.getElementById('docAssinaturaCliente').innerText = os.cliente.nome;
+            }
+
+            if (os.moto) {
+                document.getElementById('docMotoModelo').innerText = os.moto.modelo;
+                document.getElementById('docMotoPlaca').innerText = os.moto.placa;
+                document.getElementById('docMotoKm').innerText = (os.moto.kmAtual || 0) + ' KM';
+            }
+
+            document.getElementById('docCombustivel').innerText = os.nivelCombustivel || 'NÃO ESPECIFICADO';
+            if (os.relatoCliente) document.getElementById('docRelato').innerText = os.relatoCliente;
+            if (os.avariasPrevia) document.getElementById('docAvarias').innerText = os.avariasPrevia;
+
+            // Preenchimento dos Itens
+            const tbody = document.getElementById('docTabelaItens');
+            tbody.innerHTML = '';
+
+            let subtotalCalculado = 0;
+
+            if (os.itens && os.itens.length > 0) {
+                os.itens.forEach(item => {
+                    const qtd = item.quantidade || 1;
+                    const unit = item.valorUnitario || 0;
+                    const totalItem = qtd * unit;
+                    subtotalCalculado += totalItem;
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="bold font-mono">${qtd}x</td>
+                            <td class="uppercase">${item.descricao} <small>(${item.tipo})</small></td>
+                            <td class="text-right font-mono">${unit.toFixed(2)}</td>
+                            <td class="text-right font-mono bold">${totalItem.toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center" style="padding: 10px;">Sem peças ou serviços lançados.</td></tr>`;
+            }
+
+            const valorBruto = os.valorTotal > 0 ? os.valorTotal : subtotalCalculado;
+            const desconto = os.desconto || 0;
+            const valorFinal = os.pago ? (os.valorFinal || (valorBruto - desconto)) : (valorBruto - desconto);
+
+            document.getElementById('docSubtotal').innerText = valorBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            document.getElementById('docDesconto').innerText = desconto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            document.getElementById('docTotalFinal').innerText = valorFinal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            document.getElementById('docFormaPgto').innerText = os.pago ? (os.formaPagamento || 'LIQUIDADO') : 'PENDENTE DE PAGAMENTO';
+        }
+
+        // Executa ao abrir
+        carregarOrdem();
+    </script>
+</body>
+</html>

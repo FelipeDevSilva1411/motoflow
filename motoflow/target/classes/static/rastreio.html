@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acompanhamento de OS - MotoFlow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-6 flex flex-col items-center justify-start font-sans">
+
+    <div class="w-full max-w-md space-y-5">
+        
+        <!-- Topo / Identificação -->
+        <header class="text-center space-y-1">
+            <h1 class="text-2xl font-black text-amber-500 tracking-wider uppercase">MotoFlow</h1>
+            <p class="text-xs text-slate-400">Acompanhamento de Manutenção em Tempo Real</p>
+        </header>
+
+        <!-- Campo de Pesquisa Manual -->
+        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg space-y-3">
+            <label class="block text-xs uppercase text-slate-400 font-bold">Código da Ordem de Serviço</label>
+            <div class="flex gap-2">
+                <input type="text" id="inputCodigo" placeholder="Ex: MF-FBBA55" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono uppercase text-sm outline-none focus:border-amber-500">
+                <button onclick="buscarRastreio()" id="btnBuscar" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-2 rounded-lg text-sm transition">
+                    Consultar
+                </button>
+            </div>
+            <p id="msgErro" class="hidden text-xs text-rose-400 font-semibold"></p>
+        </div>
+
+        <!-- Indicador de Carregamento -->
+        <div id="loading" class="hidden text-center py-6 text-sm text-slate-400">
+            A procurar informações da sua moto...
+        </div>
+
+        <!-- Cartão com Resultado do Rastreio -->
+        <div id="resultadoOS" class="hidden bg-slate-900 border border-slate-800 p-5 rounded-xl shadow-2xl space-y-5">
+            
+            <!-- Cabeçalho do Cartão -->
+            <div class="flex justify-between items-start border-b border-slate-800 pb-3">
+                <div>
+                    <span id="osCodigo" class="text-xs font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded">MF-XXXXXX</span>
+                    <h2 id="motoModelo" class="text-lg font-black text-white uppercase mt-1">-</h2>
+                    <p id="motoPlaca" class="text-xs text-slate-400 font-mono">-</p>
+                </div>
+                <div class="text-right">
+                    <span id="osStatus" class="inline-block text-[11px] font-bold px-2.5 py-1 rounded-full uppercase bg-slate-800 text-slate-200 border border-slate-700"></span>
+                    <p id="osData" class="text-[10px] text-slate-500 mt-1"></p>
+                </div>
+            </div>
+
+            <!-- Linha do Tempo Visual de Etapas -->
+            <div class="space-y-2">
+                <span class="text-xs font-bold uppercase text-slate-400">Progresso do Serviço</span>
+                <div class="grid grid-cols-4 gap-1 text-[10px] text-center font-bold">
+                    <div id="step-RECEBIDA" class="p-1.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Recepção</div>
+                    <div id="step-ORCAMENTO" class="p-1.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Orçamento</div>
+                    <div id="step-EM_MANUTENCAO" class="p-1.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Oficina</div>
+                    <div id="step-PRONTA" class="p-1.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Pronta</div>
+                </div>
+            </div>
+
+            <!-- Sintoma / Checklist -->
+            <div class="bg-slate-950/70 p-3 rounded-lg border border-slate-800/80 text-xs space-y-1.5">
+                <p class="text-slate-400"><strong>Sintoma:</strong> <span id="relato" class="text-slate-200 italic">-</span></p>
+                <p class="text-slate-400"><strong>Quilometragem:</strong> <span id="km" class="text-slate-200 font-mono">-</span></p>
+            </div>
+
+            <!-- Peças e Mão de Obra -->
+            <div class="space-y-2 text-xs">
+                <span class="font-bold text-slate-400 uppercase block">Peças e Mão de Obra</span>
+                <div id="listaItens" class="space-y-1.5"></div>
+                <div class="flex justify-between items-center pt-2 border-t border-slate-800 font-bold text-sm">
+                    <span class="text-slate-300">Total:</span>
+                    <span id="valorTotal" class="text-emerald-400 text-base font-black font-mono">R$ 0,00</span>
+                </div>
+            </div>
+
+            <div class="text-[11px] text-slate-500 text-center pt-2 border-t border-slate-800/60">
+                Dúvidas? Entre em contacto direto com a nossa recepção via WhatsApp.
+            </div>
+        </div>
+
+        <!-- Botão de Guardar/Descarregar OS para o Cliente -->
+        <div class="mt-5 pt-4 border-t border-[#2d333f] flex flex-col sm:flex-row gap-3">
+            <button onclick="descarregarOSCliente()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl text-xs uppercase tracking-wider transition flex items-center justify-center gap-2 shadow-lg">
+                📥 Guardar / Descarregar OS (PDF)
+            </button>
+</div>
+
+    </div>
+
+    <script>
+        // Rota relativa: funciona em localhost, IP da rede e domínio na nuvem
+        const API = '/api/os/rastreio';
+
+        const params = new URLSearchParams(window.location.search);
+        const codigoUrl = params.get('codigo');
+
+        if (codigoUrl) {
+            document.getElementById('inputCodigo').value = codigoUrl;
+            buscarRastreio();
+        }
+
+        async function buscarRastreio() {
+            const input = document.getElementById('inputCodigo');
+            const codigo = input.value.trim().toUpperCase();
+            const msgErro = document.getElementById('msgErro');
+            const resultado = document.getElementById('resultadoOS');
+            const loading = document.getElementById('loading');
+
+            msgErro.classList.add('hidden');
+            if (!codigo) {
+                msgErro.innerText = 'Por favor, introduza o código de rastreio.';
+                msgErro.classList.remove('hidden');
+                return;
+            }
+
+            loading.classList.remove('hidden');
+            resultado.classList.add('hidden');
+
+            try {
+                const res = await fetch(`${API}/${encodeURIComponent(codigo)}`);
+                loading.classList.add('hidden');
+
+                if (!res.ok) {
+                    msgErro.innerText = 'Ordem de serviço não encontrada. Verifique o código digitado.';
+                    msgErro.classList.remove('hidden');
+                    return;
+                }
+
+                const os = await res.json();
+                renderizarDetalhes(os);
+                resultado.classList.remove('hidden');
+            } catch (err) {
+                loading.classList.add('hidden');
+                msgErro.innerText = 'Não foi possível ligar ao servidor. Verifique a conexão Wi-Fi.';
+                msgErro.classList.remove('hidden');
+                console.error(err);
+            }
+        }
+
+        function renderizarDetalhes(os) {
+            document.getElementById('osCodigo').innerText = os.codigoRastreio;
+            document.getElementById('motoModelo').innerText = os.moto.modelo;
+            document.getElementById('motoPlaca').innerText = `Placa: ${os.moto.placa}`;
+            document.getElementById('osStatus').innerText = os.status;
+            document.getElementById('osData').innerText = new Date(os.dataEntrada).toLocaleString('pt-BR');
+            document.getElementById('relato').innerText = os.relatoCliente || 'Revisão periódica';
+            document.getElementById('km').innerText = os.moto.kmAtual ? `${os.moto.kmAtual} KM` : 'N/A';
+
+            // Destaque visual da linha do tempo
+            const etapas = ['RECEBIDA', 'ORCAMENTO', 'EM_MANUTENCAO', 'PRONTA'];
+            etapas.forEach(etapa => {
+                const el = document.getElementById(`step-${etapa}`);
+                if (el) {
+                    el.className = 'p-1.5 rounded bg-slate-800 text-slate-500 border border-slate-700';
+                }
+            });
+
+            const etapaAtual = os.status;
+            const elAtual = document.getElementById(`step-${etapaAtual}`);
+            if (elAtual) {
+                elAtual.className = 'p-1.5 rounded bg-amber-500 text-slate-950 font-bold border border-amber-400 shadow';
+            }
+
+            // Itens e Total
+            const containerItens = document.getElementById('listaItens');
+            containerItens.innerHTML = '';
+
+            if (os.itens && os.itens.length > 0) {
+                os.itens.forEach(item => {
+                    const subtotal = (item.quantidade * item.valorUnitario).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                    containerItens.innerHTML += `
+                        <div class="flex justify-between items-center bg-slate-950/40 p-2 rounded border border-slate-800/60">
+                            <div>
+                                <span class="text-slate-200 block">${item.descricao}</span>
+                                <span class="text-[10px] text-slate-500">${item.quantidade}x (${item.tipo})</span>
+                            </div>
+                            <span class="font-mono font-semibold text-slate-300">${subtotal}</span>
+                        </div>
+                    `;
+                });
+            } else {
+                containerItens.innerHTML = '<p class="text-slate-500 italic text-center py-1">Aguardando lançamento de itens/orçamento.</p>';
+            }
+
+            const valorFinal = os.pago ? (os.valorFinal || 0) : (os.valorTotal || 0);
+            document.getElementById('valorTotal').innerText = valorFinal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function descarregarOSCliente() {
+    if (!osAtual || !osAtual.codigoRastreio) {
+        alert('Não foi possível identificar o código da ordem.');
+        return;
+    }
+    // Abre o modelo de documento em nova aba pronto para guardar como PDF no telemóvel
+    window.open(`imprimir.html?codigo=${osAtual.codigoRastreio}`, '_blank');
+}
+    </script>
+</body>
+</html>
