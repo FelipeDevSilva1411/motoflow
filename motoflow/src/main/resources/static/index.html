@@ -304,6 +304,15 @@
         let ordensCache = [], mecanicosCache = [], agendaCache = [], itensNovaOSCache = [];
         let chartFatLucro = null;
 
+        // AS COLUNAS DO KANBAN QUE ESTAVAM FALTANDO:
+        const KANBAN_COLS = [
+            { id: 'ORCAMENTO', tit: 'ORÇAMENTOS', cor: 'border-t-amber-500', accepts: ['RECEBIDA', 'ORCAMENTO'] },
+            { id: 'AGUARDANDO_PECAS', tit: 'AGUARDANDO PEÇAS', cor: 'border-t-blue-500', accepts: ['APROVADA', 'AGUARDANDO', 'AGUARDANDO_PECAS'] },
+            { id: 'EM_MANUTENCAO', tit: 'EM SERVIÇO', cor: 'border-t-red-500', accepts: ['EM_MANUTENCAO', 'TESTE_RODAGEM', 'EM_SERVICO'] },
+            { id: 'PRONTA', tit: 'PRONTO / PÁTIO', cor: 'border-t-green-500', accepts: ['PRONTA'] },
+            { id: 'FINALIZADA', tit: 'ENTREGUES', cor: 'border-t-slate-500', accepts: ['FINALIZADA'] }
+        ];
+
         function fazerLogout() { localStorage.clear(); window.location.href = 'login.html'; }
 
         // Inicializador Global e Correção de Data
