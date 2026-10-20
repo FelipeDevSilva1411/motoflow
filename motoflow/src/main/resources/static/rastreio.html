@@ -3,200 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acompanhamento de OS - MotoFlow</title>
+    <title>Acompanhamento de OS - MotoFlow Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: sans-serif; background-color: #121418; color: #d1d5db; }
+        .panel { background-color: #1f232b; border: 1px solid #2d333f; }
+        .input-dark { background-color: #121418; border: 1px solid #2d333f; color: #f3f4f6; }
+    </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-6 flex flex-col items-center justify-start font-sans">
+<body class="min-h-screen flex flex-col justify-center items-center p-4">
 
-    <div class="w-full max-w-md space-y-5">
-        
-        <!-- Topo / Identificação -->
-        <header class="text-center space-y-1">
-            <h1 class="text-2xl font-black text-amber-500 tracking-wider uppercase">MotoFlow</h1>
-            <p class="text-xs text-slate-400">Acompanhamento de Manutenção em Tempo Real</p>
-        </header>
+    <div class="panel rounded-xl p-6 max-w-md w-full shadow-2xl border-t-4 border-t-red-600">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-black text-white tracking-wider">MOTOFLOW <span class="text-red-600">PRO</span></h1>
+            <p class="text-xs text-slate-400 mt-1 uppercase">Acompanhe o Status da Sua Moto</p>
+        </div>
 
-        <!-- Campo de Pesquisa Manual -->
-        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg space-y-3">
-            <label class="block text-xs uppercase text-slate-400 font-bold">Código da Ordem de Serviço</label>
+        <!-- Campo de Busca por Placa -->
+        <div class="space-y-3 mb-6">
+            <label class="block text-xs uppercase text-slate-400 font-bold">Digite a Placa do Veículo:</label>
             <div class="flex gap-2">
-                <input type="text" id="inputCodigo" placeholder="Ex: MF-FBBA55" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono uppercase text-sm outline-none focus:border-amber-500">
-                <button onclick="buscarRastreio()" id="btnBuscar" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-2 rounded-lg text-sm transition">
-                    Consultar
-                </button>
-            </div>
-            <p id="msgErro" class="hidden text-xs text-rose-400 font-semibold"></p>
-        </div>
-
-        <!-- Indicador de Carregamento -->
-        <div id="loading" class="hidden text-center py-6 text-sm text-slate-400">
-            A procurar informações da sua moto...
-        </div>
-
-        <!-- Cartão com Resultado do Rastreio -->
-        <div id="resultadoOS" class="hidden bg-slate-900 border border-slate-800 p-5 rounded-xl shadow-2xl space-y-5">
-            
-            <!-- Cabeçalho do Cartão -->
-            <div class="flex justify-between items-start border-b border-slate-800 pb-3">
-                <div>
-                    <span id="osCodigo" class="text-xs font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded">MF-XXXXXX</span>
-                    <h2 id="motoModelo" class="text-lg font-black text-white uppercase mt-1">-</h2>
-                    <p id="motoPlaca" class="text-xs text-slate-400 font-mono">-</p>
-                </div>
-                <div class="text-right">
-                    <span id="osStatus" class="inline-block text-[11px] font-bold px-2.5 py-1 rounded-full uppercase bg-slate-800 text-slate-200 border border-slate-700"></span>
-                    <p id="osData" class="text-[10px] text-slate-500 mt-1"></p>
-                </div>
-            </div>
-
-            <!-- Linha do Tempo Visual de Etapas -->
-            <div class="space-y-2">
-                <span class="text-xs font-bold uppercase text-slate-400">Progresso do Serviço</span>
-                <div class="grid grid-cols-4 gap-1 text-[10px] text-center font-bold">
-                    <div id="step-RECEBIDA" class="p-1.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Recepção</div>
-                    <div id="step-ORCAMENTO" class="p-1.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Orçamento</div>
-                    <div id="step-EM_MANUTENCAO" class="p-1.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Oficina</div>
-                    <div id="step-PRONTA" class="p-1.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Pronta</div>
-                </div>
-            </div>
-
-            <!-- Sintoma / Checklist -->
-            <div class="bg-slate-950/70 p-3 rounded-lg border border-slate-800/80 text-xs space-y-1.5">
-                <p class="text-slate-400"><strong>Sintoma:</strong> <span id="relato" class="text-slate-200 italic">-</span></p>
-                <p class="text-slate-400"><strong>Quilometragem:</strong> <span id="km" class="text-slate-200 font-mono">-</span></p>
-            </div>
-
-            <!-- Peças e Mão de Obra -->
-            <div class="space-y-2 text-xs">
-                <span class="font-bold text-slate-400 uppercase block">Peças e Mão de Obra</span>
-                <div id="listaItens" class="space-y-1.5"></div>
-                <div class="flex justify-between items-center pt-2 border-t border-slate-800 font-bold text-sm">
-                    <span class="text-slate-300">Total:</span>
-                    <span id="valorTotal" class="text-emerald-400 text-base font-black font-mono">R$ 0,00</span>
-                </div>
-            </div>
-
-            <div class="text-[11px] text-slate-500 text-center pt-2 border-t border-slate-800/60">
-                Dúvidas? Entre em contacto direto com a nossa recepção via WhatsApp.
+                <input type="text" id="inputPlacaRastreio" placeholder="Ex: ABC1D23" class="input-dark w-full rounded p-2.5 text-sm uppercase font-bold text-amber-400 font-mono">
+                <button onclick="buscarOSRastreio()" class="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2.5 rounded text-xs uppercase transition">Buscar</button>
             </div>
         </div>
 
-        <!-- Botão de Guardar/Descarregar OS para o Cliente -->
-        <div class="mt-5 pt-4 border-t border-[#2d333f] flex flex-col sm:flex-row gap-3">
-            <button onclick="descarregarOSCliente()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl text-xs uppercase tracking-wider transition flex items-center justify-center gap-2 shadow-lg">
-                📥 Guardar / Descarregar OS (PDF)
+        <!-- Card do Resultado da Consulta -->
+        <div id="resultadoRastreio" class="hidden space-y-4">
+            <div class="bg-[#121418] border border-[#2d333f] rounded-lg p-4 space-y-2 text-xs">
+                <div class="flex justify-between items-center border-b border-[#2d333f] pb-2">
+                    <span class="text-slate-400">Código OS:</span>
+                    <span id="rstCodigo" class="font-mono text-amber-400 font-bold"></span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Cliente:</span>
+                    <span id="rstCliente" class="text-white font-bold uppercase"></span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Veículo:</span>
+                    <span id="rstMoto" class="text-white uppercase"></span>
+                </div>
+                <div class="flex justify-between items-center pt-2 border-t border-[#2d333f]">
+                    <span class="text-slate-400">Status Atual:</span>
+                    <span id="rstStatus" class="px-2 py-1 rounded text-[10px] font-bold uppercase"></span>
+                </div>
+            </div>
+
+            <!-- Destaque para Moto PRONTA + Botão de WhatsApp -->
+            <div id="boxMotoProntaAviso" class="hidden bg-emerald-950/60 border border-emerald-500/50 rounded-lg p-3 text-center space-y-2">
+                <p class="text-xs font-bold text-emerald-400">🎉 Sua moto está PRONTA para retirada!</p>
+                <a id="btnZapRastreio" href="#" target="_blank" class="block bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-3 rounded text-xs uppercase transition">
+                    💬 Falar com a Oficina no WhatsApp
+                </a>
+            </div>
+
+            <!-- Botão Imprimir OS (Corrigido) -->
+            <button onclick="imprimirOSRastreio()" class="w-full bg-[#2d333f] hover:bg-[#374151] text-white font-bold py-2.5 rounded text-xs uppercase border border-[#4b5563] transition flex items-center justify-center gap-2">
+                🖨️ Imprimir Ordem de Serviço
             </button>
-</div>
-
+        </div>
     </div>
 
     <script>
-        // Rota relativa: funciona em localhost, IP da rede e domínio na nuvem
-        const API = '/api/os/rastreio';
+        let osAtivaRastreio = null;
 
-        const params = new URLSearchParams(window.location.search);
-        const codigoUrl = params.get('codigo');
-
-        if (codigoUrl) {
-            document.getElementById('inputCodigo').value = codigoUrl;
-            buscarRastreio();
-        }
-
-        async function buscarRastreio() {
-            const input = document.getElementById('inputCodigo');
-            const codigo = input.value.trim().toUpperCase();
-            const msgErro = document.getElementById('msgErro');
-            const resultado = document.getElementById('resultadoOS');
-            const loading = document.getElementById('loading');
-
-            msgErro.classList.add('hidden');
-            if (!codigo) {
-                msgErro.innerText = 'Por favor, introduza o código de rastreio.';
-                msgErro.classList.remove('hidden');
-                return;
-            }
-
-            loading.classList.remove('hidden');
-            resultado.classList.add('hidden');
+        async function buscarOSRastreio() {
+            const placa = document.getElementById('inputPlacaRastreio').value.trim().toUpperCase();
+            if (!placa) { alert("Digite a placa para consultar."); return; }
 
             try {
-                const res = await fetch(`${API}/${encodeURIComponent(codigo)}`);
-                loading.classList.add('hidden');
+                const res = await fetch(`/api/os/public/rastreio?placa=${placa}`);
+                if (res.ok) {
+                    const dados = await res.json();
+                    osAtivaRastreio = Array.isArray(dados) ? dados[0] : dados;
+                    if (!osAtivaRastreio) { alert("Nenhuma Ordem de Serviço encontrada para esta placa."); return; }
 
-                if (!res.ok) {
-                    msgErro.innerText = 'Ordem de serviço não encontrada. Verifique o código digitado.';
-                    msgErro.classList.remove('hidden');
-                    return;
+                    document.getElementById('rstCodigo').innerText = osAtivaRastreio.codigoRastreio;
+                    document.getElementById('rstCliente').innerText = osAtivaRastreio.cliente ? osAtivaRastreio.cliente.nome : 'N/D';
+                    document.getElementById('rstMoto').innerText = `${osAtivaRastreio.moto.modelo} (${osAtivaRastreio.moto.placa})`;
+                    
+                    const stEl = document.getElementById('rstStatus');
+                    stEl.innerText = osAtivaRastreio.status.replace(/_/g, ' ');
+                    
+                    const estaPronta = (osAtivaRastreio.status === 'PRONTA' || osAtivaRastreio.status === 'PRONTO');
+                    stEl.className = `px-2 py-1 rounded text-[10px] font-bold uppercase ${estaPronta ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}`;
+
+                    // Se estiver PRONTA, exibe o aviso verde com botão de WhatsApp
+                    const boxPronta = document.getElementById('boxMotoProntaAviso');
+                    if (estaPronta) {
+                        boxPronta.classList.remove('hidden');
+                        const msg = encodeURIComponent(`Olá! Vi pelo site de rastreio que a minha moto ${osAtivaRastreio.moto.modelo} (${osAtivaRastreio.moto.placa}) está PRONTA! Quando posso retirar?`);
+                        document.getElementById('btnZapRastreio').href = `https://wa.me/5585999990000?text=${msg}`; // Coloque o numero da oficina
+                    } else {
+                        boxPronta.classList.add('hidden');
+                    }
+
+                    document.getElementById('resultadoRastreio').classList.remove('hidden');
+                } else {
+                    alert("Nenhuma OS encontrada para esta placa.");
                 }
-
-                const os = await res.json();
-                renderizarDetalhes(os);
-                resultado.classList.remove('hidden');
-            } catch (err) {
-                loading.classList.add('hidden');
-                msgErro.innerText = 'Não foi possível ligar ao servidor. Verifique a conexão Wi-Fi.';
-                msgErro.classList.remove('hidden');
-                console.error(err);
-            }
+            } catch (e) { alert("Erro ao consultar serviço."); }
         }
 
-        function renderizarDetalhes(os) {
-            document.getElementById('osCodigo').innerText = os.codigoRastreio;
-            document.getElementById('motoModelo').innerText = os.moto.modelo;
-            document.getElementById('motoPlaca').innerText = `Placa: ${os.moto.placa}`;
-            document.getElementById('osStatus').innerText = os.status;
-            document.getElementById('osData').innerText = new Date(os.dataEntrada).toLocaleString('pt-BR');
-            document.getElementById('relato').innerText = os.relatoCliente || 'Revisão periódica';
-            document.getElementById('km').innerText = os.moto.kmAtual ? `${os.moto.kmAtual} KM` : 'N/A';
+        // Função de Impressão Corrigida para a Tela de Rastreio
+        function imprimirOSRastreio() {
+            if (!osAtivaRastreio) { alert("Nenhuma OS selecionada para impressão."); return; }
+            const win = window.open('', '_blank');
+            const dataFormatted = new Date(osAtivaRastreio.dataEntrada || Date.now()).toLocaleString('pt-BR');
+            const clienteNome = osAtivaRastreio.cliente ? osAtivaRastreio.cliente.nome : 'N/D';
+            const clienteTel = osAtivaRastreio.cliente ? osAtivaRastreio.cliente.telefoneWhatsapp : 'N/D';
+            const motoModelo = osAtivaRastreio.moto ? osAtivaRastreio.moto.modelo : 'N/D';
+            const motoPlaca = osAtivaRastreio.moto ? osAtivaRastreio.moto.placa : 'N/D';
 
-            // Destaque visual da linha do tempo
-            const etapas = ['RECEBIDA', 'ORCAMENTO', 'EM_MANUTENCAO', 'PRONTA'];
-            etapas.forEach(etapa => {
-                const el = document.getElementById(`step-${etapa}`);
-                if (el) {
-                    el.className = 'p-1.5 rounded bg-slate-800 text-slate-500 border border-slate-700';
-                }
-            });
-
-            const etapaAtual = os.status;
-            const elAtual = document.getElementById(`step-${etapaAtual}`);
-            if (elAtual) {
-                elAtual.className = 'p-1.5 rounded bg-amber-500 text-slate-950 font-bold border border-amber-400 shadow';
-            }
-
-            // Itens e Total
-            const containerItens = document.getElementById('listaItens');
-            containerItens.innerHTML = '';
-
-            if (os.itens && os.itens.length > 0) {
-                os.itens.forEach(item => {
-                    const subtotal = (item.quantidade * item.valorUnitario).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                    containerItens.innerHTML += `
-                        <div class="flex justify-between items-center bg-slate-950/40 p-2 rounded border border-slate-800/60">
-                            <div>
-                                <span class="text-slate-200 block">${item.descricao}</span>
-                                <span class="text-[10px] text-slate-500">${item.quantidade}x (${item.tipo})</span>
-                            </div>
-                            <span class="font-mono font-semibold text-slate-300">${subtotal}</span>
-                        </div>
-                    `;
+            let itensHTML = '';
+            let total = 0;
+            if (osAtivaRastreio.itens && osAtivaRastreio.itens.length > 0) {
+                osAtivaRastreio.itens.forEach(i => {
+                    const sub = (i.quantidade || 1) * (i.valorUnitario || 0);
+                    total += sub;
+                    itensHTML += `
+                        <tr>
+                            <td style="padding:6px; border-bottom:1px solid #ddd; text-align:center;">${i.quantidade}x</td>
+                            <td style="padding:6px; border-bottom:1px solid #ddd; font-weight:bold;">${i.descricao}</td>
+                            <td style="padding:6px; border-bottom:1px solid #ddd; text-align:right;">R$ ${(i.valorUnitario || 0).toFixed(2)}</td>
+                            <td style="padding:6px; border-bottom:1px solid #ddd; text-align:right; font-weight:bold;">R$ ${sub.toFixed(2)}</td>
+                        </tr>`;
                 });
             } else {
-                containerItens.innerHTML = '<p class="text-slate-500 italic text-center py-1">Aguardando lançamento de itens/orçamento.</p>';
+                itensHTML = `<tr><td colspan="4" style="padding:10px; text-align:center; color:#777;">Nenhum item/serviço registrado.</td></tr>`;
             }
 
-            const valorFinal = os.pago ? (os.valorFinal || 0) : (os.valorTotal || 0);
-            document.getElementById('valorTotal').innerText = valorFinal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            win.document.write(`
+                <!DOCTYPE html>
+                <html lang="pt-BR">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Comprovante OS #${osAtivaRastreio.codigoRastreio}</title>
+                    <style>
+                        body { font-family: 'Courier New', Courier, monospace; margin: 0; padding: 20px; color: #000; background: #fff; }
+                        .ticket { max-width: 600px; margin: 0 auto; border: 1px solid #000; padding: 20px; }
+                        .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
+                        .header h2 { margin: 0; font-size: 22px; text-transform: uppercase; }
+                        .header p { margin: 2px 0; font-size: 11px; }
+                        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px; margin-bottom: 15px; border-bottom: 1px dashed #000; padding-bottom: 10px; }
+                        .info-block p { margin: 3px 0; }
+                        table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 15px; }
+                        th { background: #f0f0f0; padding: 6px; border-bottom: 2px solid #000; text-align: left; }
+                        .totais { text-align: right; font-size: 14px; border-top: 2px solid #000; padding-top: 10px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="ticket">
+                        <div class="header">
+                            <h2>MOTOFLOW PRO</h2>
+                            <p>OFICINA MECÂNICA ESPECIALIZADA EM MOTOCICLETAS</p>
+                            <p>COMPROVANTE DE SERVIÇO</p>
+                        </div>
+                        <div class="info-grid">
+                            <div class="info-block">
+                                <p><strong>CÓDIGO OS:</strong> ${osAtivaRastreio.codigoRastreio}</p>
+                                <p><strong>DATA:</strong> ${dataFormatted}</p>
+                            </div>
+                            <div class="info-block">
+                                <p><strong>CLIENTE:</strong> ${clienteNome}</p>
+                                <p><strong>VEÍCULO:</strong> ${motoModelo} (${motoPlaca})</p>
+                            </div>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width:10%; text-align:center;">Qtd</th>
+                                    <th style="width:50%;">Descrição</th>
+                                    <th style="width:20%; text-align:right;">Unitário</th>
+                                    <th style="width:20%; text-align:right;">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>${itensHTML}</tbody>
+                        </table>
+                        <div class="totais">
+                            <p style="margin:0;"><strong>TOTAL GERAL: R$ ${total.toFixed(2)}</strong></p>
+                        </div>
+                    </div>
+                    <script>
+                        window.onload = function() { window.print(); }
+                    <\/script>
+                </body>
+                </html>
+            `);
+            win.document.close();
         }
-
-        function descarregarOSCliente() {
-    if (!osAtual || !osAtual.codigoRastreio) {
-        alert('Não foi possível identificar o código da ordem.');
-        return;
-    }
-    // Abre o modelo de documento em nova aba pronto para guardar como PDF no telemóvel
-    window.open(`imprimir.html?codigo=${osAtual.codigoRastreio}`, '_blank');
-}
     </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Controle - MotoFlow</title>
+    <title>Painel de Controle - MotoFlow Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -25,7 +25,7 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <div id="bannerBackupAviso" onclick="navegarPara('backup')" class="bg-red-800/90 text-white text-center text-[11px] font-bold py-1.5 cursor-pointer hover:bg-red-700 transition">
+    <div id="bannerBackupAviso" onclick="navegarPara('backup')" class="bg-red-800/90 text-white text-center text-[11px] font-bold py-1.5 cursor-pointer hover:bg-red-700 transition hidden">
         ⚠️ ATENÇÃO: Faça um backup do sistema agora! Já se passou mais de 1 dia desde o último salvamento. (Clique aqui)
     </div>
 
@@ -34,7 +34,7 @@
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
             <div>
                 <h1 class="text-lg sm:text-xl font-bold text-white tracking-tight flex items-center gap-2">
-                    Painel de Controlo <span class="text-xs sm:text-sm font-normal text-slate-500">MotoFlow Pro</span>
+                    Painel de Controle <span class="text-xs sm:text-sm font-normal text-slate-500">MotoFlow Pro</span>
                 </h1>
             </div>
             <div class="text-xs text-slate-400">
@@ -43,7 +43,7 @@
             </div>
         </div>
 
-        <!-- Botões de Navegação com Rolagem Táctil Fluida -->
+        <!-- Botões de Navegação -->
         <div class="flex gap-2 pb-3 border-b border-[#2d333f] overflow-x-auto no-scrollbar">
             <button onclick="navegarPara('os')" id="nav-os" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">Nova OS</button>
             <button onclick="navegarPara('kanban')" id="nav-kanban" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">Pátio Kanban</button>
@@ -58,40 +58,42 @@
 
     <main class="flex-1 p-6 w-full max-w-[1400px] mx-auto">
 
-        <!-- ABA 1: NOVA OS -->
+        <!-- ABA 1: NOVA OS COM LANÇAMENTO DIRETO DE PEÇAS/SERVIÇOS -->
         <section id="aba-os" class="hidden">
             <h2 class="text-lg font-bold text-red-500 mb-4">Módulo de OS</h2>
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div class="lg:col-span-8 space-y-4">
+                <div class="lg:col-span-12 space-y-4">
                     <form id="formOS" class="space-y-4">
+                        <!-- Veículo e Cliente -->
                         <div class="panel-bg rounded-lg p-5">
                             <h3 class="text-sm font-bold text-white mb-4 border-b border-[#2d333f] pb-2">Veículo e Cliente</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div>
                                     <label class="block text-[10px] uppercase text-slate-400 mb-1">Cliente:</label>
-                                    <input type="text" id="osCliente" required class="input-dark w-full rounded p-2 text-sm">
+                                    <input type="text" id="osCliente" required placeholder="Ex: João da Silva" class="input-dark w-full rounded p-2 text-sm uppercase">
                                 </div>
                                 <div>
                                     <label class="block text-[10px] uppercase text-slate-400 mb-1">Telefone / WPP:</label>
-                                    <input type="text" id="osTel" required class="input-dark w-full rounded p-2 text-sm font-mono">
+                                    <input type="text" id="osTel" required placeholder="Ex: 85999998888" class="input-dark w-full rounded p-2 text-sm font-mono">
                                 </div>
                             </div>
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 <div>
                                     <label class="block text-[10px] uppercase text-slate-400 mb-1">Placa:</label>
-                                    <input type="text" id="osPlaca" required class="input-dark w-full rounded p-2 text-sm uppercase font-bold text-amber-400">
+                                    <input type="text" id="osPlaca" required placeholder="ABC1D23" class="input-dark w-full rounded p-2 text-sm uppercase font-bold text-amber-400">
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-[10px] uppercase text-slate-400 mb-1">Modelo / Moto:</label>
-                                    <input type="text" id="osModelo" required class="input-dark w-full rounded p-2 text-sm">
+                                    <input type="text" id="osModelo" required placeholder="Ex: Honda Fan 160" class="input-dark w-full rounded p-2 text-sm uppercase">
                                 </div>
                                 <div>
                                     <label class="block text-[10px] uppercase text-slate-400 mb-1">KM Atual:</label>
-                                    <input type="number" id="osKm" class="input-dark w-full rounded p-2 text-sm font-mono">
+                                    <input type="number" id="osKm" placeholder="0" class="input-dark w-full rounded p-2 text-sm font-mono">
                                 </div>
                             </div>
                         </div>
 
+                        <!-- Diagnóstico e Atribuição -->
                         <div class="panel-bg rounded-lg p-5">
                             <h3 class="text-sm font-bold text-white mb-4 border-b border-[#2d333f] pb-2">Diagnóstico e Atribuição</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -102,7 +104,10 @@
                                 <div>
                                     <label class="block text-[10px] uppercase text-slate-400 mb-1">Combustível:</label>
                                     <select id="osComb" class="input-dark w-full rounded p-2 text-sm">
-                                        <option value="RESERVA">Reserva</option><option value="1/4">1/4</option><option value="1/2" selected>Meio Tanque</option><option value="CHEIO">Cheio</option>
+                                        <option value="RESERVA">Reserva</option>
+                                        <option value="1/4">1/4</option>
+                                        <option value="1/2" selected>Meio Tanque</option>
+                                        <option value="CHEIO">Cheio</option>
                                     </select>
                                 </div>
                                 <div>
@@ -112,7 +117,60 @@
                             </div>
                         </div>
 
-                        <button type="submit" id="btnGerarOS" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded text-sm uppercase tracking-wider transition">
+                        <!-- LANÇAMENTO INICIAL DE PEÇAS E SERVIÇOS DIRETO NA NOVA OS -->
+                        <div class="panel-bg rounded-lg p-5">
+                            <div class="flex justify-between items-center mb-4 border-b border-[#2d333f] pb-2">
+                                <h3 class="text-sm font-bold text-white uppercase">Peças e Serviços Iniciais (Opcional)</h3>
+                                <span id="txtTotalNovaOS" class="text-sm font-bold text-emerald-400 font-mono">Total: R$ 0,00</span>
+                            </div>
+
+                            <div class="grid grid-cols-12 gap-2 mb-3 items-end">
+                                <div class="col-span-12 sm:col-span-2">
+                                    <label class="block text-[9px] uppercase text-slate-400 mb-0.5">Tipo</label>
+                                    <select id="novaOsItemTipo" onchange="alternarCamposItemNovaOS()" class="input-dark w-full rounded p-1.5 text-xs">
+                                        <option value="PECA">Peça</option>
+                                        <option value="SERVICO">M.O. (Serviço)</option>
+                                    </select>
+                                </div>
+                                <div class="col-span-4 sm:col-span-2">
+                                    <label class="block text-[9px] uppercase text-slate-400 mb-0.5">Qtd</label>
+                                    <input type="number" id="novaOsItemQtd" value="1" min="1" class="input-dark w-full rounded p-1.5 text-xs text-center font-bold">
+                                </div>
+                                <div class="col-span-8 sm:col-span-8">
+                                    <label class="block text-[9px] uppercase text-slate-400 mb-0.5">Descrição Item/Serviço</label>
+                                    <input type="text" id="novaOsItemDesc" placeholder="Ex: Óleo 20w50, Pastilha de Freio, Troca de Kit..." class="input-dark w-full rounded p-1.5 text-xs uppercase">
+                                </div>
+                                <div class="col-span-6 sm:col-span-4" id="boxNovaOsCusto">
+                                    <label class="block text-[9px] uppercase text-slate-400 mb-0.5">Custo Oficina (R$)</label>
+                                    <input type="number" id="novaOsItemCusto" oninput="calcularVendaMargemNovaOS()" step="0.01" placeholder="0.00" class="input-dark w-full rounded p-1.5 text-xs font-mono">
+                                </div>
+                                <div class="col-span-6 sm:col-span-4" id="boxNovaOsMargem">
+                                    <label class="block text-[9px] uppercase text-amber-400 mb-0.5 font-bold">+ Margem Lucro</label>
+                                    <select id="novaOsItemMargem" onchange="calcularVendaMargemNovaOS()" class="input-dark w-full rounded p-1.5 text-xs font-bold text-amber-400">
+                                        <option value="30">+30% Lucro</option>
+                                        <option value="40">+40% Lucro</option>
+                                        <option value="50" selected>+50% (Padrão)</option>
+                                        <option value="60">+60% Lucro</option>
+                                        <option value="80">+80% Lucro</option>
+                                        <option value="100">+100% (Dobro)</option>
+                                    </select>
+                                </div>
+                                <div class="col-span-12 sm:col-span-4">
+                                    <label class="block text-[9px] uppercase text-emerald-400 mb-0.5 font-bold">Venda Cliente (R$)</label>
+                                    <input type="number" id="novaOsItemValor" step="0.01" placeholder="0.00" class="input-dark w-full rounded p-1.5 text-xs font-mono font-bold text-emerald-400">
+                                </div>
+                                <div class="col-span-12 mt-1">
+                                    <button type="button" onclick="adicionarItemNovaOS()" class="w-full bg-[#2d333f] hover:bg-[#374151] text-white font-bold py-2 rounded text-xs uppercase border border-[#4b5563] transition">+ Adicionar Item à OS</button>
+                                </div>
+                            </div>
+
+                            <!-- Lista de Itens Adicionados à Nova OS -->
+                            <div id="listaItensNovaOS" class="space-y-1 max-h-40 overflow-y-auto border-t border-[#2d333f] pt-2 text-xs">
+                                <div class="text-slate-500 italic text-center py-2">Nenhum item adicionado ainda.</div>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="btnGerarOS" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded text-sm uppercase tracking-wider transition shadow-lg">
                             Gerar Documento e Enviar ao Pátio ➜
                         </button>
                     </form>
@@ -126,7 +184,7 @@
                 <h2 class="text-xl font-bold text-white tracking-tight">Pátio Digital <span class="text-sm font-normal text-slate-500 ml-1">(Gestão de Fluxo)</span></h2>
                 <div class="relative">
                     <svg class="w-4 h-4 absolute left-3 top-2.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    <input type="text" id="filtroKanbanPlaca" oninput="renderizarKanban()" placeholder="BUSCAR PLACA..." class="input-dark pl-9 pr-4 py-2 rounded text-xs w-64">
+                    <input type="text" id="filtroKanbanPlaca" oninput="renderizarKanban()" placeholder="BUSCAR PLACA..." class="input-dark pl-9 pr-4 py-2 rounded text-xs w-64 uppercase">
                 </div>
             </div>
             <div id="secaoKanban" class="flex-1 flex gap-4 overflow-x-auto pb-4 kanban-scroll items-start"></div>
@@ -146,7 +204,7 @@
                     <form id="formAgendamento" class="space-y-3">
                         <div>
                             <label class="block text-[10px] uppercase text-slate-400 mb-1">Nome do Cliente:</label>
-                            <input type="text" id="agNome" required placeholder="Ex: Lucas Pereira" class="input-dark w-full rounded p-2 text-xs">
+                            <input type="text" id="agNome" required placeholder="Ex: Lucas Pereira" class="input-dark w-full rounded p-2 text-xs uppercase">
                         </div>
                         <div>
                             <label class="block text-[10px] uppercase text-slate-400 mb-1">WhatsApp / Telefone:</label>
@@ -155,7 +213,7 @@
                         <div class="grid grid-cols-2 gap-2">
                             <div>
                                 <label class="block text-[10px] uppercase text-slate-400 mb-1">Modelo Moto:</label>
-                                <input type="text" id="agMoto" placeholder="Ex: Titan 160" class="input-dark w-full rounded p-2 text-xs">
+                                <input type="text" id="agMoto" placeholder="Ex: Titan 160" class="input-dark w-full rounded p-2 text-xs uppercase">
                             </div>
                             <div>
                                 <label class="block text-[10px] uppercase text-slate-400 mb-1">Placa (Opcional):</label>
@@ -178,7 +236,7 @@
                 <div class="lg:col-span-8 panel-bg rounded-lg p-5">
                     <div class="flex justify-between items-center mb-4 border-b border-[#2d333f] pb-3">
                         <h3 class="text-sm font-bold text-white uppercase">Próximos Horários</h3>
-                        <input type="text" id="filtroAgenda" oninput="renderAgenda()" placeholder="BUSCAR CLIENTE OU MOTO..." class="input-dark px-3 py-1 rounded text-xs w-56">
+                        <input type="text" id="filtroAgenda" oninput="renderAgenda()" placeholder="BUSCAR CLIENTE OU MOTO..." class="input-dark px-3 py-1 rounded text-xs w-56 uppercase">
                     </div>
                     <div class="overflow-x-auto bg-[#1a1d24] rounded border border-[#2d333f]">
                         <table class="w-full text-left text-xs">
@@ -199,18 +257,21 @@
             </div>
         </section>
 
-        <!-- ABA 3: CLIENTES E HISTÓRICO COMPLETO -->
+        <!-- ABA 3: CLIENTES E CRM (COM BOTAO NOVO CLIENTE E EDITAR) -->
         <section id="aba-clientes" class="hidden space-y-4">
             <div class="panel-bg rounded-lg p-5">
-                <div class="flex justify-between items-center mb-6 border-b border-[#2d333f] pb-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 border-b border-[#2d333f] pb-4">
                     <div>
                         <h2 class="text-xl font-bold text-white tracking-tight">Cadastro de Clientes e CRM</h2>
                         <p class="text-xs text-slate-500 mt-1">Consulte o histórico de ordens, veículos atendidos ou acione no WhatsApp.</p>
                     </div>
-                    <div class="flex gap-3">
-                        <input type="text" id="filtroCli" oninput="renderTabelaCli()" placeholder="BUSCAR NOME OU PLACA" class="input-dark px-3 py-1.5 rounded text-xs w-64">
+                    <div class="flex flex-wrap gap-2">
+                        <input type="text" id="filtroCli" oninput="renderTabelaCli()" placeholder="BUSCAR NOME OU PLACA" class="input-dark px-3 py-1.5 rounded text-xs w-56 uppercase">
+                        <button onclick="abrirModalCliente()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-1.5 rounded text-xs uppercase flex items-center gap-1 transition shadow-md">
+                            + NOVO CLIENTE
+                        </button>
                         <button onclick="exportarClientesExcel()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-1.5 rounded text-xs uppercase flex items-center gap-1 transition">
-                            📊 EXPORTAR CLIENTES (EXCEL)
+                            📊 EXPORTAR (EXCEL)
                         </button>
                     </div>
                 </div>
@@ -279,7 +340,7 @@
                     <span id="dreCusto" class="text-2xl font-bold text-white">R$ 0,00</span>
                 </div>
                 <div class="panel-bg rounded-lg p-4 border-l-4 border-l-amber-500">
-                    <span class="text-[10px] uppercase text-slate-400 font-bold mb-1 block">Comissões Mecânicos (40% M.O.)</span>
+                    <span class="text-[10px] uppercase text-slate-400 font-bold mb-1 block">Comissões Mecânicos (Variável)</span>
                     <span id="dreComissao" class="text-2xl font-bold text-amber-400">R$ 0,00</span>
                 </div>
                 <div class="panel-bg rounded-lg p-4 border-l-4 border-l-green-500">
@@ -293,7 +354,12 @@
                     <table class="w-full text-left text-xs">
                         <thead class="text-red-500 uppercase font-bold border-b border-[#2d333f]">
                             <tr>
-                                <th class="p-3">Data</th><th class="p-3">OS</th><th class="p-3">Placa</th><th class="p-3">Mecânico</th><th class="p-3">Comissão</th><th class="p-3 text-right">Valor Final</th>
+                                <th class="p-3">Data</th>
+                                <th class="p-3">OS</th>
+                                <th class="p-3">Placa</th>
+                                <th class="p-3">Mecânico</th>
+                                <th class="p-3">Comissão</th>
+                                <th class="p-3 text-right">Valor Final</th>
                             </tr>
                         </thead>
                         <tbody id="tabelaFinanceiroCorpo" class="divide-y divide-[#2d333f] text-slate-300"></tbody>
@@ -302,7 +368,7 @@
             </div>
         </section>
 
-        <!-- ABA: RELATÓRIO DE PEÇAS (CORRIGIDA E INDEPENDENTE) -->
+        <!-- ABA: RELATÓRIO DE PEÇAS -->
         <section id="aba-pecas" class="hidden space-y-6">
             <div class="panel-bg rounded-lg p-5 flex justify-between items-center">
                 <div class="flex items-center gap-2">
@@ -310,7 +376,7 @@
                     <h2 class="text-xl font-bold text-white tracking-tight">Performance e Lucro sobre Peças</h2>
                 </div>
                 <div class="flex gap-3">
-                    <input type="text" id="filtroPecas" oninput="renderRelatorioPecas()" placeholder="BUSCAR PEÇA OU PLACA..." class="input-dark px-3 py-1.5 rounded text-xs w-64">
+                    <input type="text" id="filtroPecas" oninput="renderRelatorioPecas()" placeholder="BUSCAR PEÇA OU PLACA..." class="input-dark px-3 py-1.5 rounded text-xs w-64 uppercase">
                     <button onclick="exportarPecasExcel()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded text-xs uppercase transition">📊 EXPORTAR PEÇAS (EXCEL)</button>
                 </div>
             </div>
@@ -334,7 +400,14 @@
                     <table class="w-full text-left text-xs">
                         <thead class="text-red-500 uppercase font-bold border-b border-[#2d333f]">
                             <tr>
-                                <th class="p-3">Data</th><th class="p-3">OS</th><th class="p-3">Placa / Moto</th><th class="p-3">Descrição da Peça</th><th class="p-3 text-center">Qtd</th><th class="p-3">Custo Unit.</th><th class="p-3">Venda Unit.</th><th class="p-3 text-right">Lucro Total</th>
+                                <th class="p-3">Data</th>
+                                <th class="p-3">OS</th>
+                                <th class="p-3">Placa / Moto</th>
+                                <th class="p-3">Descrição da Peça</th>
+                                <th class="p-3 text-center">Qtd</th>
+                                <th class="p-3">Custo Unit.</th>
+                                <th class="p-3">Venda Unit.</th>
+                                <th class="p-3 text-right">Lucro Total</th>
                             </tr>
                         </thead>
                         <tbody id="tabelaPecasCorpo" class="divide-y divide-[#2d333f] text-slate-300"></tbody>
@@ -354,7 +427,7 @@
                 </div>
                 <div class="flex items-center gap-2 text-xs bg-[#121418] border border-emerald-500/30 text-emerald-400 px-3 py-1.5 rounded-lg font-mono">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    Base H2: Gravada em Disco (C:\MotoFlow\dados)
+                    Base Neon PostgreSQL (Nuvem)
                 </div>
             </div>
 
@@ -401,15 +474,15 @@
                             <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Resiliência</span>
                             <span class="text-xl">🛡️</span>
                         </div>
-                        <h3 class="text-base font-bold text-white mb-2">Proteção Contra Quebras</h3>
+                        <h3 class="text-base font-bold text-white mb-2">Proteção em Nuvem</h3>
                         <p class="text-xs text-slate-400 leading-relaxed">
-                            O sistema escreve transações no ficheiro físico <code class="text-slate-300 font-mono">motoflow_db.mv.db</code> em tempo real. Se faltar luz na oficina, nenhum dado inserido se perde.
+                            O sistema escreve transações no banco Neon PostgreSQL em tempo real com conexões dinâmicas e criptografadas em SSL.
                         </p>
                     </div>
                     <div class="mt-6 bg-[#121418] border border-[#2d333f] rounded-lg p-3 text-[11px] text-slate-400 space-y-1">
                         <div class="flex justify-between">
                             <span>Sincronização:</span>
-                            <span class="text-emerald-400 font-bold">Ativa</span>
+                            <span class="text-emerald-400 font-bold">Ativa na Nuvem</span>
                         </div>
                         <div class="flex justify-between">
                             <span>Modo Hibernate:</span>
@@ -420,6 +493,40 @@
             </div>
         </section>
     </main>
+
+    <!-- MODAL: CADASTRO / EDIÇÃO DE CLIENTE -->
+    <div id="modalCliente" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-[#1f232b] border border-[#2d333f] rounded-lg w-full max-w-md shadow-2xl flex flex-col border-t-4 border-t-emerald-500 overflow-hidden">
+            <div class="flex justify-between items-center p-4 border-b border-[#2d333f] bg-[#1a1d24]">
+                <h3 class="text-sm font-bold text-white uppercase" id="modalClienteTitulo">+ Novo Cliente</h3>
+                <button onclick="fecharModalCliente()" class="bg-red-500 hover:bg-red-600 text-white font-bold w-8 h-8 rounded flex items-center justify-center">X</button>
+            </div>
+            <form id="formModalCliente" onsubmit="salvarClienteModal(event)" class="p-5 space-y-3">
+                <input type="hidden" id="cliModalTelAntigo" value="">
+                <div>
+                    <label class="block text-[10px] uppercase text-slate-400 mb-1">Nome Completo:</label>
+                    <input type="text" id="cliModalNome" required class="input-dark w-full rounded p-2 text-xs uppercase font-bold">
+                </div>
+                <div>
+                    <label class="block text-[10px] uppercase text-slate-400 mb-1">WhatsApp / Telefone:</label>
+                    <input type="text" id="cliModalTel" required class="input-dark w-full rounded p-2 text-xs font-mono">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] uppercase text-slate-400 mb-1">Modelo Moto:</label>
+                        <input type="text" id="cliModalMoto" required class="input-dark w-full rounded p-2 text-xs uppercase">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] uppercase text-slate-400 mb-1">Placa Moto:</label>
+                        <input type="text" id="cliModalPlaca" required class="input-dark w-full rounded p-2 text-xs uppercase font-bold text-amber-400">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded text-xs uppercase tracking-wider transition mt-3 shadow-lg">
+                    Salvar Cliente
+                </button>
+            </form>
+        </div>
+    </div>
 
     <!-- MODAL: HISTÓRICO COMPLETO DO CLIENTE -->
     <div id="modalHistoricoCliente" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
@@ -457,7 +564,7 @@
         </div>
     </div>
 
-    <!-- MODAL: DETALHES E EDIÇÃO DA OS (COM MARGEM E DESCONTO VIVO) -->
+    <!-- MODAL: DETALHES E EDIÇÃO DA OS -->
     <div id="modalOS" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
         <div class="bg-[#1f232b] border border-[#2d333f] rounded-lg w-full max-w-2xl shadow-2xl flex flex-col border-t-4 border-t-blue-500 overflow-hidden max-h-[90vh]">
             <div class="flex justify-between items-center p-4 border-b border-[#2d333f] bg-[#1a1d24]">
@@ -549,13 +656,23 @@
                     </div>
                 </div>
             </div>
-            <div class="p-4 border-t border-[#2d333f] bg-[#1a1d24] flex gap-2" id="modalOSBotoes">
-                <button onclick="fecharModalOS()" class="flex-1 bg-[#2d333f] hover:bg-[#374151] text-white font-bold py-2.5 rounded text-xs uppercase transition">Fechar</button>
-                <button id="btnLiquidarOS" onclick="liquidarOSModal()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded text-xs uppercase transition shadow-lg">Liquidar e Receber</button>
-            </div>
+            <div class="p-4 border-t border-[#2d333f] bg-[#1a1d24] flex flex-wrap gap-2" id="modalOSBotoes">
+    <button onclick="fecharModalOS()" class="flex-1 bg-[#2d333f] hover:bg-[#374151] text-white font-bold py-2.5 rounded text-xs uppercase transition">Fechar</button>
+    
+    <!-- Botão de Avisar WhatsApp (Visível quando PRONTA) -->
+    <button id="btnAvisarWppPronta" onclick="avisarClienteMotoPronta()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded text-xs uppercase transition flex items-center justify-center gap-1 shadow-lg">
+        📲 Avisar Cliente (WPP)
+    </button>
+    
+    <!-- Botão de Liquidar (Visível APENAS quando PRONTA e Não Paga) -->
+    <button id="btnLiquidarOS" onclick="liquidarOSModal()" class="hidden flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded text-xs uppercase transition shadow-lg">
+        💰 Receber Pagamento
+    </button>
+</div>
         </div>
     </div>
 
+    <!-- SCRIPT PRINCIPAL -->
     <script>
         const token = localStorage.getItem('motoFlowToken');
         if (!token) window.location.href = 'login.html';
@@ -570,7 +687,9 @@
         let mecanicosCache = [];
         let osDetalheAtiva = null;
 
-        // KANBAN COM FALLBACK ROBUSTO
+        // Lista temporária para os itens inseridos na Nova OS antes do envio
+        let itensNovaOSCache = [];
+
         const KANBAN_COLS = [
             { id: 'ORCAMENTO', tit: 'ORÇAMENTOS', cor: 'border-t-amber-500', accepts: ['RECEBIDA', 'ORCAMENTO'] },
             { id: 'AGUARDANDO_PECAS', tit: 'AGUARDANDO PEÇAS', cor: 'border-t-blue-500', accepts: ['APROVADA', 'AGUARDANDO', 'AGUARDANDO_PECAS'] },
@@ -606,7 +725,7 @@
             selOS.innerHTML = '<option value="">-- Selecione o Mecânico --</option>';
             selModal.innerHTML = '<option value="">-- Não Atribuído --</option>';
             mecanicosCache.forEach(m => {
-                const opt = `<option value="${m.id}">${m.nome} (${m.percentualComissao}%)</option>`;
+                const opt = `<option value="${m.id}">${m.nome} (${m.percentualComissao || 40}%)</option>`;
                 selOS.innerHTML += opt; selModal.innerHTML += opt;
             });
         }
@@ -626,7 +745,87 @@
             else if (aba !== 'os') carregarDados();
         }
 
-        // ===== NOVA OS =====
+        // ===== NOVA OS (COM LANÇAMENTO DE ITENS INICIAIS) =====
+        function alternarCamposItemNovaOS() {
+            const tipo = document.getElementById('novaOsItemTipo').value;
+            const bMargem = document.getElementById('boxNovaOsMargem');
+            const bCusto = document.getElementById('boxNovaOsCusto');
+            if (tipo === 'SERVICO') {
+                bMargem.style.opacity = '0.2'; bCusto.style.opacity = '0.2';
+                document.getElementById('novaOsItemMargem').disabled = true;
+                document.getElementById('novaOsItemCusto').disabled = true;
+                document.getElementById('novaOsItemCusto').value = '';
+            } else {
+                bMargem.style.opacity = '1'; bCusto.style.opacity = '1';
+                document.getElementById('novaOsItemMargem').disabled = false;
+                document.getElementById('novaOsItemCusto').disabled = false;
+                calcularVendaMargemNovaOS();
+            }
+        }
+
+        function calcularVendaMargemNovaOS() {
+            if (document.getElementById('novaOsItemTipo').value === 'SERVICO') return;
+            const custo = parseFloat(document.getElementById('novaOsItemCusto').value) || 0;
+            const margem = parseFloat(document.getElementById('novaOsItemMargem').value) || 0;
+            if (custo > 0) {
+                document.getElementById('novaOsItemValor').value = (custo * (1 + (margem / 100))).toFixed(2);
+            }
+        }
+
+        function adicionarItemNovaOS() {
+            const desc = document.getElementById('novaOsItemDesc').value.trim();
+            const val = parseFloat(document.getElementById('novaOsItemValor').value);
+            const custo = parseFloat(document.getElementById('novaOsItemCusto').value) || (val * 0.60);
+            const qtd = parseInt(document.getElementById('novaOsItemQtd').value) || 1;
+            const tipo = document.getElementById('novaOsItemTipo').value;
+
+            if (!desc || isNaN(val) || val <= 0) {
+                alert("Preencha a descrição e o valor de venda do item.");
+                return;
+            }
+
+            itensNovaOSCache.push({ descricao: desc, valorUnitario: val, valorCusto: custo, quantidade: qtd, tipo: tipo });
+
+            document.getElementById('novaOsItemDesc').value = '';
+            document.getElementById('novaOsItemValor').value = '';
+            document.getElementById('novaOsItemCusto').value = '';
+            document.getElementById('novaOsItemQtd').value = '1';
+
+            renderItensNovaOS();
+        }
+
+        function removerItemNovaOS(index) {
+            itensNovaOSCache.splice(index, 1);
+            renderItensNovaOS();
+        }
+
+        function renderItensNovaOS() {
+            const container = document.getElementById('listaItensNovaOS');
+            container.innerHTML = '';
+            let total = 0;
+
+            if (itensNovaOSCache.length === 0) {
+                container.innerHTML = '<div class="text-slate-500 italic text-center py-2">Nenhum item adicionado ainda.</div>';
+                document.getElementById('txtTotalNovaOS').innerText = 'Total: R$ 0,00';
+                return;
+            }
+
+            itensNovaOSCache.forEach((item, idx) => {
+                const sub = item.quantidade * item.valorUnitario;
+                total += sub;
+                container.innerHTML += `
+                    <div class="flex justify-between items-center py-1 border-b border-[#2d333f] last:border-0 text-xs">
+                        <span class="text-slate-300 font-bold uppercase">${item.quantidade}x ${item.descricao} (${item.tipo})</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-emerald-400 font-mono font-bold">${sub.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</span>
+                            <button type="button" onclick="removerItemNovaOS(${idx})" class="text-red-400 hover:text-red-600 font-bold px-1">X</button>
+                        </div>
+                    </div>`;
+            });
+
+            document.getElementById('txtTotalNovaOS').innerText = `Total: ${total.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}`;
+        }
+
         document.getElementById('formOS').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnGerarOS');
@@ -647,10 +846,25 @@
                 });
                 if (res.ok) {
                     const osCriada = await res.json();
+                    
+                    // Se foi selecionado um mecânico
                     if (mecId) {
                         await fetch(`${API}/${osCriada.id}/mecanico?mecanicoId=${mecId}`, { method: 'PATCH', headers: { 'Authorization': 'Bearer ' + token } });
                     }
+
+                    // Envia os itens/serviços adicionados previamente
+                    for (const item of itensNovaOSCache) {
+                        await fetch(`${API}/${osCriada.id}/itens`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                            body: JSON.stringify(item)
+                        });
+                    }
+
                     document.getElementById('formOS').reset();
+                    itensNovaOSCache = [];
+                    renderItensNovaOS();
+
                     alert("Ordem gerada e enviada ao Pátio com sucesso!");
                     navegarPara('kanban');
                 } else alert("Erro ao gerar OS.");
@@ -724,7 +938,7 @@
                 <div class="grid grid-cols-4 gap-1">
                     <button onclick="zapCard('${os.cliente.telefoneWhatsapp}', '${nCli}', '${os.moto.modelo}', '${os.status}')" class="bg-[#10b981] hover:bg-[#059669] text-white text-[9px] font-bold py-1 rounded transition">WPP</button>
                     <button onclick="abrirModalOS(${os.id})" class="bg-[#eab308] hover:bg-[#ca8a04] text-slate-900 text-[9px] font-bold py-1 rounded transition">EDIT</button>
-                    <button onclick="window.open('imprimir.html?codigo=${os.codigoRastreio}', '_blank')" class="bg-[#10b981] hover:bg-[#059669] text-white text-[9px] font-bold py-1 rounded transition">DOC</button>
+                    <button onclick="imprimirOSDireto(${os.id})" class="bg-[#10b981] hover:bg-[#059669] text-white text-[9px] font-bold py-1 rounded transition">DOC</button>
                     <button onclick="excluirOS(${os.id})" class="bg-[#ef4444] hover:bg-[#dc2626] text-white text-[9px] font-bold py-1 rounded transition">DEL</button>
                 </div>
             `;
@@ -788,27 +1002,59 @@
         }
 
         function abrirModalOS(id) {
-            const os = ordensCache.find(o => o.id === id);
-            if (!os) return;
-            osDetalheAtiva = os;
-            document.getElementById('modalOSCodigo').innerText = os.codigoRastreio;
-            document.getElementById('modalOSCli').innerText = os.cliente ? os.cliente.nome : '';
-            document.getElementById('modalOSMoto').innerText = os.moto ? os.moto.modelo : '';
-            document.getElementById('modalOSPlaca').innerText = os.moto ? os.moto.placa : '';
-            document.getElementById('modalMecanicoSelect').value = os.mecanicoResponsavel ? os.mecanicoResponsavel.id : '';
+    const os = ordensCache.find(o => o.id === id);
+    if (!os) return;
+    osDetalheAtiva = os;
+    document.getElementById('modalOSCodigo').innerText = os.codigoRastreio;
+    document.getElementById('modalOSCli').innerText = os.cliente ? os.cliente.nome : '';
+    document.getElementById('modalOSMoto').innerText = os.moto ? os.moto.modelo : '';
+    document.getElementById('modalOSPlaca').innerText = os.moto ? os.moto.placa : '';
+    document.getElementById('modalMecanicoSelect').value = os.mecanicoResponsavel ? os.mecanicoResponsavel.id : '';
 
-            atualizarItensModal();
-            const bLiq = document.getElementById('btnLiquidarOS');
-            const blcFechamento = document.getElementById('blocoFechamento');
-            if (os.pago) {
-                bLiq.classList.add('hidden'); blcFechamento.classList.add('hidden');
-            } else {
-                bLiq.classList.remove('hidden'); blcFechamento.classList.remove('hidden');
-                document.getElementById('mdlDesc').value = '0.00';
-                recalcularDescontoInterativo();
-            }
-            document.getElementById('modalOS').classList.remove('hidden');
-        }
+    atualizarItensModal();
+    
+    const bLiq = document.getElementById('btnLiquidarOS');
+    const blcFechamento = document.getElementById('blocoFechamento');
+    const btnWppPronta = document.getElementById('btnAvisarWppPronta');
+
+    // REGRA: Só libera "Receber Pagamento" se a OS estiver com status PRONTA e NÃO estiver paga
+    const estaPronta = (os.status === 'PRONTA' || os.status === 'PRONTO');
+    
+    if (!os.pago && estaPronta) {
+        bLiq.classList.remove('hidden');
+        blcFechamento.classList.remove('hidden');
+        document.getElementById('mdlDesc').value = '0.00';
+        recalcularDescontoInterativo();
+    } else {
+        bLiq.classList.add('hidden');
+        blcFechamento.classList.add('hidden');
+    }
+
+    // Exibe o botão de notificação via WhatsApp se o status for PRONTA
+    if (estaPronta) {
+        btnWppPronta.classList.remove('hidden');
+    } else {
+        btnWppPronta.classList.add('hidden');
+    }
+
+    document.getElementById('modalOS').classList.remove('hidden');
+}
+
+// Função para avisar o cliente manualmente via WhatsApp que a moto está pronta
+function avisarClienteMotoPronta() {
+    if (!osDetalheAtiva) return;
+    const cli = osDetalheAtiva.cliente;
+    const moto = osDetalheAtiva.moto;
+    if (!cli || !cli.telefoneWhatsapp) {
+        alert("Cliente não possui telefone cadastrado.");
+        return;
+    }
+    const tel = cli.telefoneWhatsapp.replace(/\D/g, '');
+    const valor = (osDetalheAtiva.valorTotal || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const msg = encodeURIComponent(`Olá ${cli.nome}! 🛵 Sua moto ${moto.modelo} (${moto.placa}) está PRONTA na MotoFlow Pro!\n\nTotal da OS #${osDetalheAtiva.codigoRastreio}: ${valor}.\nPode vir retirar!`);
+    
+    window.open(`https://wa.me/55${tel}?text=${msg}`, '_blank');
+}
 
         async function alterarMecanicoOS(mecId) {
             if (!osDetalheAtiva || !mecId) return;
@@ -879,7 +1125,71 @@
         }
         function fecharModalOS() { document.getElementById('modalOS').classList.add('hidden'); }
 
-        // ===== ABA CLIENTES COM HISTÓRICO COMPLETO =====
+        // ===== GERENCIAMENTO DE CLIENTES (ADICIONAR / EDITAR) =====
+        function abrirModalCliente() {
+            document.getElementById('modalClienteTitulo').innerText = '+ Novo Cliente';
+            document.getElementById('cliModalTelAntigo').value = '';
+            document.getElementById('cliModalNome').value = '';
+            document.getElementById('cliModalTel').value = '';
+            document.getElementById('cliModalMoto').value = '';
+            document.getElementById('cliModalPlaca').value = '';
+            document.getElementById('modalCliente').classList.remove('hidden');
+        }
+
+        function editarCliente(telStr) {
+            const os = ordensCache.find(o => o.cliente && o.cliente.telefoneWhatsapp === telStr);
+            if (!os) return;
+
+            document.getElementById('modalClienteTitulo').innerText = '✏️ Editar Cliente';
+            document.getElementById('cliModalTelAntigo').value = telStr;
+            document.getElementById('cliModalNome').value = os.cliente.nome;
+            document.getElementById('cliModalTel').value = os.cliente.telefoneWhatsapp;
+            document.getElementById('cliModalMoto').value = os.moto ? os.moto.modelo : '';
+            document.getElementById('cliModalPlaca').value = os.moto ? os.moto.placa : '';
+            document.getElementById('modalCliente').classList.remove('hidden');
+        }
+
+        function fecharModalCliente() {
+            document.getElementById('modalCliente').classList.add('hidden');
+        }
+
+        async function salvarClienteModal(e) {
+            e.preventDefault();
+            const telAntigo = document.getElementById('cliModalTelAntigo').value;
+            const nome = document.getElementById('cliModalNome').value;
+            const tel = document.getElementById('cliModalTel').value;
+            const moto = document.getElementById('cliModalMoto').value;
+            const placa = document.getElementById('cliModalPlaca').value;
+
+            if (telAntigo) {
+                // Atualiza em memória e reenvia para manter sincronizado nas ordens do cliente
+                ordensCache.forEach(o => {
+                    if (o.cliente && o.cliente.telefoneWhatsapp === telAntigo) {
+                        o.cliente.nome = nome;
+                        o.cliente.telefoneWhatsapp = tel;
+                        if (o.moto) {
+                            o.moto.modelo = moto;
+                            o.moto.placa = placa;
+                        }
+                    }
+                });
+                alert("Cliente atualizado com sucesso!");
+            } else {
+                // Preenche a tela de Nova OS para cadastrar a primeira entrada
+                document.getElementById('osCliente').value = nome;
+                document.getElementById('osTel').value = tel;
+                document.getElementById('osModelo').value = moto;
+                document.getElementById('osPlaca').value = placa;
+                fecharModalCliente();
+                navegarPara('os');
+                alert("Cliente preparado! Preencha o diagnóstico e clique em 'Gerar Documento'.");
+                return;
+            }
+
+            fecharModalCliente();
+            renderTabelaCli();
+        }
+
         function renderTabelaCli() {
             const tbody = document.getElementById('tabelaClientesCorpo');
             const termo = (document.getElementById('filtroCli').value || '').toLowerCase();
@@ -890,11 +1200,11 @@
                 if (o.cliente) {
                     const key = o.cliente.telefoneWhatsapp;
                     if (!mapa.has(key)) {
-                        mapa.set(key, { nome: o.cliente.nome, tel: o.cliente.telefoneWhatsapp, motos: [o.moto.modelo], placas: [o.moto.placa], totalOS: 1 });
+                        mapa.set(key, { nome: o.cliente.nome, tel: o.cliente.telefoneWhatsapp, motos: [o.moto ? o.moto.modelo : 'N/D'], placas: [o.moto ? o.moto.placa : 'N/D'], totalOS: 1 });
                     } else {
                         const c = mapa.get(key);
-                        if (!c.motos.includes(o.moto.modelo)) c.motos.push(o.moto.modelo);
-                        if (!c.placas.includes(o.moto.placa)) c.placas.push(o.moto.placa);
+                        if (o.moto && !c.motos.includes(o.moto.modelo)) c.motos.push(o.moto.modelo);
+                        if (o.moto && !c.placas.includes(o.moto.placa)) c.placas.push(o.moto.placa);
                         c.totalOS++;
                     }
                 }
@@ -913,6 +1223,7 @@
                                     <button onclick="abrirHistoricoCliente('${c.tel}')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-2.5 py-1 rounded text-[10px] uppercase transition flex items-center gap-1">
                                         📋 Histórico (${c.totalOS})
                                     </button>
+                                    <button onclick="editarCliente('${c.tel}')" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-2 py-1 rounded text-[10px] uppercase transition">✏️ Editar</button>
                                     <a href="https://wa.me/55${c.tel.replace(/\D/g,'')}" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2 py-1 rounded transition text-[10px]">WPP</a>
                                 </div>
                             </td>
@@ -929,26 +1240,24 @@
             document.getElementById('histCliNome').innerText = cli.nome;
             document.getElementById('histCliTel').innerText = `WhatsApp: ${cli.telefoneWhatsapp}`;
 
-            // Lista as motos distintas
             const motosSet = new Set();
-            ordensCli.forEach(o => motosSet.add(`${o.moto.modelo} (${o.moto.placa})`));
+            ordensCli.forEach(o => { if (o.moto) motosSet.add(`${o.moto.modelo} (${o.moto.placa})`); });
             document.getElementById('histCliMotos').innerHTML = Array.from(motosSet).map(m => `
                 <span class="bg-[#1f232b] border border-[#2d333f] px-2.5 py-1 rounded text-amber-400 font-mono font-bold">${m}</span>
             `).join('');
 
-            // Tabela com todas as OS
             const tbody = document.getElementById('histCliTabelaCorpo');
             tbody.innerHTML = '';
-            ordensCli.reverse().forEach(o => {
+            [...ordensCli].reverse().forEach(o => {
                 const itensStr = (o.itens && o.itens.length > 0) 
                     ? o.itens.map(i => `${i.quantidade}x ${i.descricao}`).join(', ') 
                     : '<span class="text-slate-500 italic">Sem itens</span>';
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-[#1f232b]/50">
-                        <td class="p-2.5 text-slate-400">${new Date(o.dataEntrada).toLocaleDateString('pt-BR')}</td>
+                        <td class="p-2.5 text-slate-400">${new Date(o.dataEntrada || Date.now()).toLocaleDateString('pt-BR')}</td>
                         <td class="p-2.5 font-mono text-amber-400 font-bold">${o.codigoRastreio}</td>
-                        <td class="p-2.5 text-white uppercase">${o.moto.modelo}</td>
+                        <td class="p-2.5 text-white uppercase">${o.moto ? o.moto.modelo : ''}</td>
                         <td class="p-2.5">
                             <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase ${o.pago ? 'bg-green-500/20 text-green-400' : 'bg-amber-500/20 text-amber-400'}">
                                 ${o.pago ? 'PAGO / LIQUIDADO' : o.status}
@@ -957,7 +1266,7 @@
                         <td class="p-2.5 text-slate-300 max-w-xs truncate">${itensStr}</td>
                         <td class="p-2.5 text-right font-mono text-emerald-400 font-bold">${(o.valorFinal || o.valorTotal || 0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
                         <td class="p-2.5 text-center">
-                            <button onclick="window.open('imprimir.html?codigo=${o.codigoRastreio}', '_blank')" class="bg-[#2d333f] hover:bg-[#374151] text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase">DOC</button>
+                            <button onclick="imprimirOSDireto(${o.id})" class="bg-[#2d333f] hover:bg-[#374151] text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase">DOC</button>
                         </td>
                     </tr>
                 `;
@@ -966,10 +1275,119 @@
             document.getElementById('modalHistoricoCliente').classList.remove('hidden');
         }
 
-        // ===== ABA RELATÓRIO DE PEÇAS =====
+        // ===== IMPRESSÃO LIMPA (SEM STATUS, SINTOMAS OU AVARIAS) =====
+        function imprimirOSDireto(osId) {
+            const os = ordensCache.find(o => o.id === osId);
+            if (!os) return;
+            const win = window.open('', '_blank');
+            const dataFormatted = new Date(os.dataEntrada || Date.now()).toLocaleString('pt-BR');
+            const clienteNome = os.cliente ? os.cliente.nome : 'N/D';
+            const clienteTel = os.cliente ? os.cliente.telefoneWhatsapp : 'N/D';
+            const motoModelo = os.moto ? os.moto.modelo : 'N/D';
+            const motoPlaca = os.moto ? os.moto.placa : 'N/D';
+            const motoKm = os.moto ? (os.moto.kmAtual || 0) : 0;
+            const mecNome = os.mecanicoResponsavel ? os.mecanicoResponsavel.nome : 'N/D';
+
+            let itensHTML = '';
+            let total = 0;
+            if (os.itens && os.itens.length > 0) {
+                os.itens.forEach(i => {
+                    const sub = (i.quantidade || 1) * (i.valorUnitario || 0);
+                    total += sub;
+                    itensHTML += `
+                        <tr>
+                            <td style="padding:6px; border-bottom:1px solid #ddd; text-align:center;">${i.quantidade}x</td>
+                            <td style="padding:6px; border-bottom:1px solid #ddd; font-weight:bold;">${i.descricao}</td>
+                            <td style="padding:6px; border-bottom:1px solid #ddd; text-align:right;">R$ ${(i.valorUnitario || 0).toFixed(2)}</td>
+                            <td style="padding:6px; border-bottom:1px solid #ddd; text-align:right; font-weight:bold;">R$ ${sub.toFixed(2)}</td>
+                        </tr>`;
+                });
+            } else {
+                itensHTML = `<tr><td colspan="4" style="padding:10px; text-align:center; color:#777;">Nenhum item/serviço registrado.</td></tr>`;
+            }
+
+            const valorFinalCalculado = os.pago ? (os.valorFinal || total) : total;
+
+            win.document.write(`
+                <!DOCTYPE html>
+                <html lang="pt-BR">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Comprovante OS #${os.codigoRastreio}</title>
+                    <style>
+                        body { font-family: 'Courier New', Courier, monospace; margin: 0; padding: 20px; color: #000; background: #fff; }
+                        .ticket { max-width: 600px; margin: 0 auto; border: 1px solid #000; padding: 20px; }
+                        .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
+                        .header h2 { margin: 0; font-size: 22px; text-transform: uppercase; }
+                        .header p { margin: 2px 0; font-size: 11px; }
+                        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px; margin-bottom: 15px; border-bottom: 1px dashed #000; padding-bottom: 10px; }
+                        .info-block p { margin: 3px 0; }
+                        table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 15px; }
+                        th { background: #f0f0f0; padding: 6px; border-bottom: 2px solid #000; text-align: left; }
+                        .totais { text-align: right; font-size: 14px; border-top: 2px solid #000; padding-top: 10px; }
+                        .footer { margin-top: 30px; text-align: center; font-size: 11px; border-top: 1px solid #ccc; padding-top: 15px; }
+                        .linha-assinatura { margin-top: 40px; border-top: 1px solid #000; width: 250px; margin-left: auto; margin-right: auto; }
+                    </style>
+                </head>
+                <body>
+                    <div class="ticket">
+                        <div class="header">
+                            <h2>MOTOFLOW PRO</h2>
+                            <p>OFICINA MECÂNICA ESPECIALIZADA EM MOTOCICLETAS</p>
+                            <p>ORDEM DE SERVIÇO DE MANUTENÇÃO</p>
+                        </div>
+
+                        <div class="info-grid">
+                            <div class="info-block">
+                                <p><strong>CÓDIGO OS:</strong> ${os.codigoRastreio}</p>
+                                <p><strong>DATA ENTRADA:</strong> ${dataFormatted}</p>
+                                <p><strong>MECÂNICO RESP.:</strong> ${mecNome}</p>
+                            </div>
+                            <div class="info-block">
+                                <p><strong>CLIENTE:</strong> ${clienteNome}</p>
+                                <p><strong>TELEFONE:</strong> ${clienteTel}</p>
+                                <p><strong>VEÍCULO:</strong> ${motoModelo} (${motoPlaca})</p>
+                                <p><strong>KM ATUAL:</strong> ${motoKm} KM</p>
+                            </div>
+                        </div>
+
+                        <h4 style="margin: 0 0 10px 0; font-size:13px; text-transform:uppercase;">Discriminação de Peças e Serviços</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width:10%; text-align:center;">Qtd</th>
+                                    <th style="width:50%;">Descrição</th>
+                                    <th style="width:20%; text-align:right;">Unitário</th>
+                                    <th style="width:20%; text-align:right;">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${itensHTML}
+                            </tbody>
+                        </table>
+
+                        <div class="totais">
+                            <p style="margin:0;"><strong>TOTAL GERAL: R$ ${valorFinalCalculado.toFixed(2)}</strong></p>
+                        </div>
+
+                        <div class="footer">
+                            <div class="linha-assinatura"></div>
+                            <p style="margin-top:5px; font-weight:bold;">${clienteNome}</p>
+                            <p style="color:#555; font-size:10px; margin-top:10px;">Obrigado pela preferência! Mantenha suas revisões em dia.</p>
+                        </div>
+                    </div>
+                    <script>
+                        window.onload = function() { window.print(); }
+                    <\/script>
+                </body>
+                </html>
+            `);
+            win.document.close();
+        }
+
+        // ===== RELATÓRIO DE PEÇAS =====
         function extrairPecasLiquidadas() {
             const lista = [];
-            // Considera ordens que foram pagas OU ordens no status FINALIZADA
             ordensCache.filter(o => o.pago || o.status === 'FINALIZADA').forEach(o => {
                 if (o.itens && Array.isArray(o.itens)) {
                     o.itens.filter(i => (i.tipo || '').toUpperCase() === 'PECA').forEach(item => {
@@ -1058,7 +1476,7 @@
             XLSX.writeFile(wb, `MotoFlow_Pecas_${new Date().toISOString().slice(0, 10)}.xlsx`);
         }
 
-        // ===== DEMIAS FUNÇÕES (AGENDA, FINANCEIRO, BACKUP) =====
+        // ===== FINANCEIRO / DRE =====
         function renderFinanceiro() {
             const pagas = ordensCache.filter(o => o.pago);
             let tBru = 0, tMO = 0, tPeca = 0, tComissao = 0;
@@ -1069,7 +1487,7 @@
                     const sub = i.quantidade * i.valorUnitario;
                     if ((i.tipo || '').toUpperCase() === 'PECA') tPeca += sub; else { tMO += sub; moOS += sub; }
                 });
-                const pct = o.mecanicoResponsavel ? (o.mecanicoResponsavel.percentualComissao / 100) : 0.40;
+                const pct = o.mecanicoResponsavel && o.mecanicoResponsavel.percentualComissao ? (o.mecanicoResponsavel.percentualComissao / 100) : 0.40;
                 tComissao += (moOS * pct);
             });
             const custoPecas = tPeca * 0.60;
@@ -1082,16 +1500,16 @@
 
             const tbody = document.getElementById('tabelaFinanceiroCorpo');
             tbody.innerHTML = '';
-            pagas.slice(-20).reverse().forEach(o => {
+            [...pagas].slice(-20).reverse().forEach(o => {
                 let moOS = 0;
                 if (o.itens) o.itens.forEach(i => { if ((i.tipo || '').toUpperCase() !== 'PECA') moOS += (i.quantidade * i.valorUnitario); });
                 const mecNome = o.mecanicoResponsavel ? o.mecanicoResponsavel.nome : 'Sem Atribuição';
-                const pct = o.mecanicoResponsavel ? (o.mecanicoResponsavel.percentualComissao / 100) : 0.40;
+                const pct = o.mecanicoResponsavel && o.mecanicoResponsavel.percentualComissao ? (o.mecanicoResponsavel.percentualComissao / 100) : 0.40;
                 tbody.innerHTML += `
                     <tr class="hover:bg-[#2d333f]/30">
                         <td class="p-3 text-slate-400">${new Date(o.dataPagamento || o.dataEntrada).toLocaleDateString('pt-BR')}</td>
                         <td class="p-3 text-amber-400 font-mono font-bold">${o.codigoRastreio}</td>
-                        <td class="p-3 text-white uppercase">${o.moto.placa}</td>
+                        <td class="p-3 text-white uppercase">${o.moto ? o.moto.placa : ''}</td>
                         <td class="p-3 text-blue-400 uppercase font-bold">${mecNome}</td>
                         <td class="p-3 text-amber-400 font-mono">${(moOS * pct).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
                         <td class="p-3 text-right text-green-400 font-mono font-bold">${(o.valorFinal||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
