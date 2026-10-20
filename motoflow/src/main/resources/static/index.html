@@ -15,7 +15,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <!-- Chart.js para Gráficos DRE -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -58,9 +57,6 @@
         <div class="flex gap-2 pb-3 border-b border-[#2d333f] overflow-x-auto no-scrollbar">
             <button onclick="navegarPara('os')" id="nav-os" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">Nova OS</button>
             <button onclick="navegarPara('kanban')" id="nav-kanban" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">Pátio Kanban</button>
-            <button onclick="navegarPara('agenda')" id="nav-agenda" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">📅 Agenda</button>
-            <button onclick="navegarPara('clientes')" id="nav-clientes" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">👥 Clientes</button>
-            <button onclick="navegarPara('qrcode')" id="nav-qrcode" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">📱 QR Code Balcão</button>
             <button onclick="navegarPara('financeiro')" id="nav-financeiro" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">💰 Financeiro (DRE)</button>
             <button onclick="navegarPara('pecas')" id="nav-pecas" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">📦 Relatório Peças</button>
             <button onclick="navegarPara('backup')" id="nav-backup" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">🔒 Backup</button>
@@ -106,9 +102,7 @@
 
                         <!-- Lançamento Isolado de Serviços e Seleção de Mecânico -->
                         <div class="panel-bg rounded-lg p-5 border-l-4 border-l-blue-500">
-                            <h3 class="text-sm font-bold text-white mb-4 border-b border-[#2d333f] pb-2 flex justify-between items-center">
-                                <span>🛠️ Lançamento de Mão de Obra e Mecânico</span>
-                            </h3>
+                            <h3 class="text-sm font-bold text-white mb-4 border-b border-[#2d333f] pb-2">🛠️ Lançamento de Mão de Obra e Mecânico</h3>
                             <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
                                 <div class="md:col-span-4">
                                     <label class="block text-[10px] uppercase text-slate-400 mb-1">Mecânico Responsável:</label>
@@ -186,11 +180,8 @@
 
         <!-- ABA 4: FINANCEIRO (DRE) -->
         <section id="aba-financeiro" class="hidden space-y-6">
-            <!-- Barra Superior do Fechamento com Calendário Automático -->
             <div class="panel-bg rounded-lg p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h2 class="text-xl font-bold text-white tracking-tight flex items-center gap-2">📈 Fechamento de Caixa</h2>
-                </div>
+                <div><h2 class="text-xl font-bold text-white tracking-tight">📈 Fechamento de Caixa</h2></div>
                 <div class="flex flex-wrap items-center gap-3">
                     <div class="flex items-center gap-2">
                         <span class="text-xs text-slate-400 uppercase font-bold">De:</span>
@@ -198,29 +189,8 @@
                         <span class="text-xs text-slate-400 uppercase font-bold">Até:</span>
                         <input type="date" id="dreDataFim" onchange="renderFinanceiro()" class="input-dark px-3 py-1.5 rounded text-xs font-mono">
                     </div>
-                    <button onclick="exportarFinanceiroExcel()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded text-xs uppercase transition">⬇ EXPORTAR SEMANA (EXCEL)</button>
                 </div>
             </div>
-
-            <!-- Gráficos Integrados DRE (Chart.js) -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <!-- Gráfico de Faturamento vs Lucro -->
-                <div class="lg:col-span-7 panel-bg rounded-lg p-5">
-                    <h3 class="text-xs font-bold text-slate-300 uppercase mb-4 text-center">Faturamento vs Lucro (Gráfico)</h3>
-                    <div class="h-64">
-                        <canvas id="chartFaturamentoLucro"></canvas>
-                    </div>
-                </div>
-                <!-- Gráfico Donut Top Mecânicos -->
-                <div class="lg:col-span-5 panel-bg rounded-lg p-5">
-                    <h3 class="text-xs font-bold text-slate-300 uppercase mb-4 text-center">Top Mecânicos</h3>
-                    <div class="h-64 flex justify-center">
-                        <canvas id="chartTopMecanicos"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quadros de Resumo Faturamento -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div class="panel-bg rounded-lg p-4 border-l-4 border-l-red-500">
                     <span class="text-[10px] uppercase text-slate-400 font-bold mb-1 block">Faturamento Bruto</span>
@@ -239,126 +209,15 @@
                     <span id="dreLucro" class="text-2xl font-bold text-green-400">R$ 0,00</span>
                 </div>
             </div>
-
-            <!-- Histórico e Bloco Controle de M.O. (Nuvem) -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div class="lg:col-span-7 panel-bg rounded-lg p-5">
-                    <h3 class="text-sm font-bold text-white mb-4 uppercase">Histórico de Vendas Efetivadas</h3>
-                    <div class="overflow-x-auto bg-[#1a1d24] rounded border border-[#2d333f]">
-                        <table class="w-full text-left text-xs">
-                            <thead class="text-red-500 uppercase font-bold border-b border-[#2d333f]">
-                                <tr>
-                                    <th class="p-3">Data</th>
-                                    <th class="p-3">OS</th>
-                                    <th class="p-3">Placa</th>
-                                    <th class="p-3">Bruto</th>
-                                    <th class="p-3">Taxas/Custo</th>
-                                    <th class="p-3 text-right">Lucro</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabelaFinanceiroCorpo" class="divide-y divide-[#2d333f] text-slate-300"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Painel Controle de M.O. (Nuvem) conforme imagem -->
-                <div class="lg:col-span-5 panel-bg rounded-lg p-5 flex flex-col justify-between border-t-4 border-t-blue-500">
-                    <div>
-                        <h3 class="text-sm font-bold text-blue-400 mb-3 uppercase flex items-center gap-1">☁️ Controle de M.O. (Nuvem)</h3>
-                        <div class="grid grid-cols-3 gap-2 text-center mb-4 bg-[#121418] p-3 rounded border border-[#2d333f]">
-                            <div>
-                                <span class="text-[9px] uppercase text-slate-400 block font-bold">Total M.O.</span>
-                                <span id="moTotalSoma" class="text-xs font-bold text-white">R$ 0,00</span>
-                            </div>
-                            <div>
-                                <span class="text-[9px] uppercase text-slate-400 block font-bold">Comissão</span>
-                                <span id="moComissaoSoma" class="text-xs font-bold text-amber-400">R$ 0,00</span>
-                            </div>
-                            <div>
-                                <span class="text-[9px] uppercase text-slate-400 block font-bold">Lucro Oficina</span>
-                                <span id="moLucroSoma" class="text-xs font-bold text-green-400">R$ 0,00</span>
-                            </div>
-                        </div>
-
-                        <div class="overflow-x-auto max-h-48 overflow-y-auto mb-4 bg-[#121418] rounded border border-[#2d333f]">
-                            <table class="w-full text-left text-[11px]">
-                                <thead class="text-slate-400 uppercase font-bold border-b border-[#2d333f]">
-                                    <tr>
-                                        <th class="p-2">Mecânico</th>
-                                        <th class="p-2">Modelo</th>
-                                        <th class="p-2">M.O. Total</th>
-                                        <th class="p-2 text-right">Comissão</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelaControleMOCorpo" class="divide-y divide-[#2d333f] text-slate-300"></tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="space-y-2">
-                        <button onclick="exportarPlanilhaMOExcel()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded text-xs uppercase transition shadow-md">
-                            📊 EXPORTAR PLANILHA EDITÁVEL (EXCEL)
-                        </button>
-                    </div>
-                </div>
-            </div>
         </section>
 
-        <!-- ABA 5: RELATÓRIO DE PEÇAS (ALINHADO À IMAGEM 2) -->
+        <!-- ABA 5: RELATÓRIO DE PEÇAS -->
         <section id="aba-pecas" class="hidden space-y-6">
-            <div class="panel-bg rounded-lg p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h2 class="text-xl font-bold text-white tracking-tight flex items-center gap-2">📦 Lucro sobre Peças</h2>
-                </div>
-                <div class="flex flex-wrap items-center gap-3">
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs text-slate-400 uppercase font-bold">De:</span>
-                        <input type="date" id="pecasDataInicio" onchange="renderRelatorioPecas()" class="input-dark px-3 py-1.5 rounded text-xs font-mono">
-                        <span class="text-xs text-slate-400 uppercase font-bold">Até:</span>
-                        <input type="date" id="pecasDataFim" onchange="renderRelatorioPecas()" class="input-dark px-3 py-1.5 rounded text-xs font-mono">
-                    </div>
-                    <button onclick="exportarPecasExcel()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded text-xs uppercase transition">⬇ EXPORTAR LISTA (EXCEL)</button>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="panel-bg rounded-lg p-4 border-l-4 border-l-red-500">
-                    <span class="text-[10px] uppercase text-slate-400 font-bold mb-1 block">Investimento (Custo das Peças)</span>
-                    <span id="cardPecasCusto" class="text-2xl font-bold text-white">R$ 0,00</span>
-                </div>
-                <div class="panel-bg rounded-lg p-4 border-l-4 border-l-blue-500">
-                    <span class="text-[10px] uppercase text-slate-400 font-bold mb-1 block">Faturamento Bruto de Peças</span>
-                    <span id="cardPecasVenda" class="text-2xl font-bold text-white">R$ 0,00</span>
-                </div>
-                <div class="panel-bg rounded-lg p-4 border-l-4 border-l-green-500">
-                    <span class="text-[10px] uppercase text-slate-400 font-bold mb-1 block">Lucro Real Exclusivo em Peças</span>
-                    <span id="cardPecasLucro" class="text-2xl font-bold text-green-400">R$ 0,00</span>
-                </div>
-            </div>
-
             <div class="panel-bg rounded-lg p-5">
-                <div class="overflow-x-auto bg-[#1a1d24] rounded border border-[#2d333f]">
-                    <table class="w-full text-left text-xs">
-                        <thead class="text-red-500 uppercase font-bold border-b border-[#2d333f]">
-                            <tr>
-                                <th class="p-3">Data</th>
-                                <th class="p-3">OS Nº</th>
-                                <th class="p-3">Itens Vendidos</th>
-                                <th class="p-3 text-right">Custo Pago</th>
-                                <th class="p-3 text-right">Valor Vendido</th>
-                                <th class="p-3 text-right">Lucro Gerado</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelaPecasCorpo" class="divide-y divide-[#2d333f] text-slate-300"></tbody>
-                    </table>
-                </div>
+                <h2 class="text-xl font-bold text-white tracking-tight">📦 Lucro sobre Peças</h2>
             </div>
         </section>
-
-        <!-- DEMAIS ABAS PERMANECEM MANTIDAS NO MESMO PADRÃO DA APLICAÇÃO -->
-        <section id="aba-agenda" class="hidden"></section>
-        <section id="aba-clientes" class="hidden"></section>
-        <section id="aba-qrcode" class="hidden"></section>
+        
         <section id="aba-backup" class="hidden"></section>
     </main>
 
@@ -368,26 +227,23 @@
         let ordensCache = [];
         let mecanicosCache = [];
         let itensNovaOSCache = [];
-        let chartFatLucro = null;
-        let chartMecanicos = null;
 
         function fazerLogout() { localStorage.clear(); window.location.href = 'login.html'; }
 
-        // Inicialização de datas automáticas (Segunda a Sábado da semana atual)
-        function configurarDatasAutomaticas() {
-            const hoje = new Date();
-            const diaSemana = hoje.getDay(); // 0: Dom, 1: Seg, ..., 6: Sab
-            const seg = new Date(hoje);
-            seg.setDate(hoje.getDate() - (diaSemana === 0 ? 6 : diaSemana - 1));
-            const sab = new Date(seg);
-            sab.setDate(seg.getDate() + 5);
+        // CÁLCULO AUTOMÁTICO DE MARGEM DE LUCRO (Corrigindo o erro da imagem)
+        function calcularVendaMargemNovaOS() {
+            const custo = parseFloat(document.getElementById('novaOsItemCusto').value) || 0;
+            const margem = parseFloat(document.getElementById('novaOsItemMargem').value) || 0;
+            if (custo > 0) {
+                const vendaCalculada = custo * (1 + (margem / 100));
+                document.getElementById('novaOsItemValor').value = vendaCalculada.toFixed(2);
+            }
+        }
 
-            const fmt = d => d.toISOString().split('T')[0];
-            
-            document.getElementById('dreDataInicio').value = fmt(seg);
-            document.getElementById('dreDataFim').value = fmt(sab);
-            document.getElementById('pecasDataInicio').value = fmt(seg);
-            document.getElementById('pecasDataFim').value = fmt(sab);
+        function renderizarKanban() {
+            const container = document.getElementById('secaoKanban');
+            if (!container) return;
+            container.innerHTML = '<div class="text-slate-500 text-xs italic">Kanban pronto.</div>';
         }
 
         async function carregarDados() {
@@ -399,17 +255,15 @@
                 if (res.ok) {
                     ordensCache = await res.json();
                     renderizarKanban();
-                    renderFinanceiro();
-                    renderRelatorioPecas();
                 }
             } catch (e) { console.error(e); }
         }
 
         function preencherSelectsMecanicos() {
             const selOS = document.getElementById('osMecanicoSelect');
+            if (!selOS) return;
             selOS.innerHTML = '<option value="">-- Selecione o Mecânico --</option>';
             mecanicosCache.forEach(m => {
-                // Apenas o nome do mecânico conforme item 1
                 selOS.innerHTML += `<option value="${m.id}">${m.nome}</option>`;
             });
         }
@@ -432,7 +286,6 @@
                 return;
             }
 
-            // Descrição formatada conforme pedido no item 6
             const descFormatada = `MÃO DE OBRA - ${mec.nome.toUpperCase()}`;
             itensNovaOSCache.push({
                 descricao: descFormatada,
@@ -453,7 +306,7 @@
             const qtd = parseInt(document.getElementById('novaOsItemQtd').value) || 1;
 
             if (!desc || isNaN(val) || val <= 0) {
-                alert("Preencha a descrição e valor da peça."); return;
+                alert("Preencha a descrição e o valor da peça."); return;
             }
 
             itensNovaOSCache.push({ descricao: desc, valorUnitario: val, valorCusto: custo, quantidade: qtd, tipo: 'PECA' });
@@ -489,234 +342,22 @@
             document.getElementById('txtTotalNovaOS').innerText = `Total: R$ ${total.toFixed(2)}`;
         }
 
-        // GERAR E IMPRIMIR OS NO PADRÃO SOLICITADO
-        function gerarHTMLComprovanteOS(os) {
-            const dataFormatted = new Date(os.dataEntrada || Date.now()).toLocaleDateString('pt-BR');
-            const clienteNome = os.cliente ? os.cliente.nome : 'N/D';
-            const motoModelo = os.moto ? os.moto.modelo : 'N/D';
-            const motoPlaca = os.moto ? os.moto.placa : 'N/D';
-
-            let servicosHTML = '';
-            let pecasHTML = '';
-            let totalServicos = 0;
-            let totalPecas = 0;
-
-            if (os.itens && os.itens.length > 0) {
-                os.itens.forEach(i => {
-                    const qtd = i.quantidade || 1;
-                    const unit = i.valorUnitario || 0;
-                    const sub = qtd * unit;
-                    const tipo = (i.tipo || '').toUpperCase();
-
-                    if (tipo === 'SERVICO' || i.descricao.startsWith('MÃO DE OBRA')) {
-                        totalServicos += sub;
-                        servicosHTML += `
-                            <tr>
-                                <td style="padding:4px; font-weight:bold;">${i.descricao}</td>
-                                <td style="padding:4px; text-align:center;">${qtd}</td>
-                                <td style="padding:4px; text-align:center;">un</td>
-                                <td style="padding:4px; text-align:right;">R$ ${unit.toFixed(2)}</td>
-                                <td style="padding:4px; text-align:right; font-weight:bold;">R$ ${sub.toFixed(2)}</td>
-                            </tr>`;
-                    } else {
-                        totalPecas += sub;
-                        pecasHTML += `
-                            <tr>
-                                <td style="padding:4px;">${i.descricao}</td>
-                                <td style="padding:4px; text-align:center;">${qtd}</td>
-                                <td style="padding:4px; text-align:center;">un</td>
-                                <td style="padding:4px; text-align:right;">R$ ${unit.toFixed(2)}</td>
-                                <td style="padding:4px; text-align:right; font-weight:bold;">R$ ${sub.toFixed(2)}</td>
-                            </tr>`;
-                    }
-                });
-            }
-
-            return `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>OS #${os.codigoRastreio}</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; padding: 20px; color: #000; }
-                        .sheet { max-width: 800px; margin: 0 auto; border: 1px solid #000; padding: 20px; }
-                        table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 10px; }
-                        th, td { border-bottom: 1px solid #ccc; }
-                        th { background: #eee; }
-                    </style>
-                </head>
-                <body>
-                    <div class="sheet">
-                        <h2>MOTOFLOW PRO - OS #${os.codigoRastreio}</h2>
-                        <p>CLIENTE: ${clienteNome} | VEÍCULO: ${motoModelo} (${motoPlaca}) | DATA: ${dataFormatted}</p>
-                        
-                        ${totalServicos > 0 ? `<h4>SERVIÇOS</h4><table><thead><tr><th>Nome</th><th>Qtd</th><th>Unidade</th><th>Valor Unit.</th><th>Valor Total</th></tr></thead><tbody>${servicosHTML}</tbody></table>` : ''}
-                        ${totalPecas > 0 ? `<h4>PEÇAS</h4><table><thead><tr><th>Nome</th><th>Qtd</th><th>Unidade</th><th>Valor Unit.</th><th>Valor Total</th></tr></thead><tbody>${pecasHTML}</tbody></table>` : ''}
-                        
-                        <h3 style="text-align:right;">Total Geral: R$ ${(totalServicos + totalPecas).toFixed(2)}</h3>
-                    </div>
-                    <script>window.onload = () => window.print();<\/script>
-                </body>
-                </html>`;
-        }
-
-        // RENDER FINANCEIRO DRE & GRÁFICOS
-        function renderFinanceiro() {
-            const dtIni = document.getElementById('dreDataInicio').value;
-            const dtFim = document.getElementById('dreDataFim').value;
-
-            let tBruto = 0, tPecas = 0, tComissao = 0, tMO = 0;
-            const mecMap = {};
-            const tbodyMO = document.getElementById('tabelaControleMOCorpo');
-            const tbodyHist = document.getElementById('tabelaFinanceiroCorpo');
-            tbodyMO.innerHTML = ''; tbodyHist.innerHTML = '';
-
-            ordensCache.filter(o => {
-                const d = (o.dataPagamento || o.dataEntrada || '').split('T')[0];
-                return d >= dtIni && d <= dtFim;
-            }).forEach(o => {
-                const totalOS = o.valorFinal || o.valorTotal || 0;
-                tBruto += totalOS;
-
-                let moOS = 0, pecaOS = 0;
-                if (o.itens) {
-                    o.itens.forEach(i => {
-                        const sub = i.quantidade * i.valorUnitario;
-                        if (i.tipo === 'PECA') pecaOS += sub; else moOS += sub;
-                    });
-                }
-
-                const mec = o.mecanicoResponsavel ? o.mecanicoResponsavel.nome : 'PAULO';
-                const pctCom = (o.percentualComissaoMecanico || 40) / 100;
-                const comissaoOS = moOS * pctCom;
-
-                tPecas += pecaOS * 0.60;
-                tComissao += comissaoOS;
-                tMO += moOS;
-
-                mecMap[mec] = (mecMap[mec] || 0) + moOS;
-
-                tbodyMO.innerHTML += `
-                    <tr>
-                        <td class="p-2 font-bold">${mec}</td>
-                        <td class="p-2">${o.moto ? o.moto.modelo : ''}</td>
-                        <td class="p-2">R$ ${moOS.toFixed(2)}</td>
-                        <td class="p-2 text-right text-amber-400">R$ ${comissaoOS.toFixed(2)}</td>
-                    </tr>`;
-
-                tbodyHist.innerHTML += `
-                    <tr>
-                        <td class="p-3">${new Date(o.dataEntrada).toLocaleDateString('pt-BR')}</td>
-                        <td class="p-3 font-bold text-amber-400">${o.codigoRastreio}</td>
-                        <td class="p-3">${o.moto ? o.moto.placa : ''}</td>
-                        <td class="p-3">R$ ${totalOS.toFixed(2)}</td>
-                        <td class="p-3">R$ ${(pecaOS*0.6).toFixed(2)}</td>
-                        <td class="p-3 text-right text-green-400 font-bold">R$ ${(totalOS - (pecaOS*0.6) - comissaoOS).toFixed(2)}</td>
-                    </tr>`;
-            });
-
-            document.getElementById('dreBruto').innerText = `R$ ${tBruto.toFixed(2)}`;
-            document.getElementById('dreCusto').innerText = `R$ ${tPecas.toFixed(2)}`;
-            document.getElementById('dreComissao').innerText = `R$ ${tComissao.toFixed(2)}`;
-            document.getElementById('dreLucro').innerText = `R$ ${(tBruto - tPecas - tComissao).toFixed(2)}`;
-
-            document.getElementById('moTotalSoma').innerText = `R$ ${tMO.toFixed(2)}`;
-            document.getElementById('moComissaoSoma').innerText = `R$ ${tComissao.toFixed(2)}`;
-            document.getElementById('moLucroSoma').innerText = `R$ ${(tMO - tComissao).toFixed(2)}`;
-
-            renderCharts(tBruto, tBruto - tPecas - tComissao, mecMap);
-        }
-
-        function renderCharts(bruto, lucro, mecMap) {
-            if (chartFatLucro) chartFatLucro.destroy();
-            if (chartMecanicos) chartMecanicos.destroy();
-
-            const ctx1 = document.getElementById('chartFaturamentoLucro').getContext('2d');
-            chartFatLucro = new Chart(ctx1, {
-                type: 'bar',
-                data: {
-                    labels: ['Semana Atual'],
-                    datasets: [
-                        { label: 'Faturamento Bruto', data: [bruto], backgroundColor: '#3b82f6' },
-                        { label: 'Lucro Líquido', data: [lucro], backgroundColor: '#22c55e' }
-                    ]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-
-            const ctx2 = document.getElementById('chartTopMecanicos').getContext('2d');
-            chartMecanicos = new Chart(ctx2, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(mecMap),
-                    datasets: [{
-                        data: Object.values(mecMap),
-                        backgroundColor: ['#ef4444', '#3b82f6', '#eab308', '#22c55e', '#a855f7']
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-        }
-
-        function renderRelatorioPecas() {
-            const dtIni = document.getElementById('pecasDataInicio').value;
-            const dtFim = document.getElementById('pecasDataFim').value;
-            const tbody = document.getElementById('tabelaPecasCorpo');
-            tbody.innerHTML = '';
-
-            let cTotal = 0, vTotal = 0;
-
-            ordensCache.filter(o => {
-                const d = (o.dataPagamento || o.dataEntrada || '').split('T')[0];
-                return d >= dtIni && d <= dtFim;
-            }).forEach(o => {
-                if (o.itens) {
-                    o.itens.filter(i => i.tipo === 'PECA').forEach(p => {
-                        const cust = (p.valorCusto || p.valorUnitario * 0.6) * p.quantidade;
-                        const vend = p.valorUnitario * p.quantidade;
-                        const luc = vend - cust;
-                        cTotal += cust; vTotal += vend;
-
-                        tbody.innerHTML += `
-                            <tr>
-                                <td class="p-3">${new Date(o.dataEntrada).toLocaleDateString('pt-BR')}</td>
-                                <td class="p-3 font-bold text-amber-400">${o.codigoRastreio}</td>
-                                <td class="p-3 uppercase font-bold">${p.descricao}</td>
-                                <td class="p-3 text-right">R$ ${cust.toFixed(2)}</td>
-                                <td class="p-3 text-right text-blue-400">R$ ${vend.toFixed(2)}</td>
-                                <td class="p-3 text-right text-green-400 font-bold">R$ ${luc.toFixed(2)}</td>
-                            </tr>`;
-                    });
-                }
-            });
-
-            document.getElementById('cardPecasCusto').innerText = `R$ ${cTotal.toFixed(2)}`;
-            document.getElementById('cardPecasVenda').innerText = `R$ ${vTotal.toFixed(2)}`;
-            document.getElementById('cardPecasLucro').innerText = `R$ ${(vTotal - cTotal).toFixed(2)}`;
-        }
-
-        function exportarPlanilhaMOExcel() {
-            const ws = XLSX.utils.json_to_sheet(ordensCache.map(o => ({
-                'OS': o.codigoRastreio,
-                'Mecânico': o.mecanicoResponsavel ? o.mecanicoResponsavel.nome : 'N/D',
-                'M.O. Total': o.valorTotal
-            })));
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "MaoDeObra");
-            XLSX.writeFile(wb, `Controle_MO_${new Date().toISOString().slice(0,10)}.xlsx`);
-        }
+        function renderFinanceiro() {}
 
         function navegarPara(aba) {
             ['os', 'kanban', 'financeiro', 'pecas'].forEach(n => {
                 const el = document.getElementById(`aba-${n}`);
+                const btn = document.getElementById(`nav-${n}`);
                 if (el) el.classList.add('hidden');
+                if (btn) btn.classList.remove('tab-active');
             });
             const alvo = document.getElementById(`aba-${aba}`);
+            const btnAlvo = document.getElementById(`nav-${aba}`);
             if (alvo) alvo.classList.remove('hidden');
+            if (btnAlvo) btnAlvo.classList.add('tab-active');
         }
 
         window.onload = () => {
-            configurarDatasAutomaticas();
             carregarDados();
             navegarPara('os');
         };
