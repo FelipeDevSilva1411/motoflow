@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel de Controle - MotoFlow Pro</title>
-    <!-- Proteção contra piscar a tela antes do login -->
     <style> body { display: none; } </style>
     <script>
         const tokenVal = localStorage.getItem('motoFlowToken');
@@ -36,7 +35,7 @@
 <body class="min-h-screen flex-col">
 
     <div id="bannerBackupAviso" onclick="navegarPara('backup')" class="bg-red-800/90 text-white text-center text-[11px] font-bold py-1.5 cursor-pointer hover:bg-red-700 transition hidden">
-        ⚠️ ATENÇÃO: Faça um backup do sistema agora! Já se passou mais de 1 dia desde o último salvamento. (Clique aqui)
+        ⚠️ ATENÇÃO: Faça um backup do sistema agora! Já se passou mais de 1 dia desde o último salvamento.
     </div>
 
     <!-- Header e Navegação Responsiva -->
@@ -53,10 +52,13 @@
             </div>
         </div>
 
-        <!-- Botões de Navegação -->
+        <!-- Botões de Navegação (RESTAURADOS) -->
         <div class="flex gap-2 pb-3 border-b border-[#2d333f] overflow-x-auto no-scrollbar">
             <button onclick="navegarPara('os')" id="nav-os" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">Nova OS</button>
             <button onclick="navegarPara('kanban')" id="nav-kanban" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">Pátio Kanban</button>
+            <button onclick="navegarPara('agenda')" id="nav-agenda" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">📅 Agenda</button>
+            <button onclick="navegarPara('clientes')" id="nav-clientes" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">👥 Clientes</button>
+            <button onclick="navegarPara('qrcode')" id="nav-qrcode" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">📱 QR Code</button>
             <button onclick="navegarPara('financeiro')" id="nav-financeiro" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">💰 Financeiro (DRE)</button>
             <button onclick="navegarPara('pecas')" id="nav-pecas" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">📦 Relatório Peças</button>
             <button onclick="navegarPara('backup')" id="nav-backup" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">🔒 Backup</button>
@@ -71,36 +73,19 @@
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <div class="lg:col-span-12 space-y-4">
                     <form id="formOS" class="space-y-4">
-                        <!-- Veículo e Cliente -->
                         <div class="panel-bg rounded-lg p-5">
                             <h3 class="text-sm font-bold text-white mb-4 border-b border-[#2d333f] pb-2">Veículo e Cliente</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                <div>
-                                    <label class="block text-[10px] uppercase text-slate-400 mb-1">Cliente:</label>
-                                    <input type="text" id="osCliente" required placeholder="Ex: João da Silva" class="input-dark w-full rounded p-2 text-sm uppercase">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] uppercase text-slate-400 mb-1">Telefone / WPP:</label>
-                                    <input type="text" id="osTel" required placeholder="Ex: 85999998888" class="input-dark w-full rounded p-2 text-sm font-mono">
-                                </div>
+                                <div><label class="block text-[10px] uppercase text-slate-400 mb-1">Cliente:</label><input type="text" id="osCliente" required class="input-dark w-full rounded p-2 text-sm uppercase"></div>
+                                <div><label class="block text-[10px] uppercase text-slate-400 mb-1">Telefone / WPP:</label><input type="text" id="osTel" required class="input-dark w-full rounded p-2 text-sm font-mono"></div>
                             </div>
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <div>
-                                    <label class="block text-[10px] uppercase text-slate-400 mb-1">Placa:</label>
-                                    <input type="text" id="osPlaca" required placeholder="ABC1D23" class="input-dark w-full rounded p-2 text-sm uppercase font-bold text-amber-400">
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label class="block text-[10px] uppercase text-slate-400 mb-1">Modelo / Moto:</label>
-                                    <input type="text" id="osModelo" required placeholder="Ex: Honda Fan 160" class="input-dark w-full rounded p-2 text-sm uppercase">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] uppercase text-slate-400 mb-1">KM Atual:</label>
-                                    <input type="number" id="osKm" placeholder="0" class="input-dark w-full rounded p-2 text-sm font-mono">
-                                </div>
+                                <div><label class="block text-[10px] uppercase text-slate-400 mb-1">Placa:</label><input type="text" id="osPlaca" required class="input-dark w-full rounded p-2 text-sm uppercase font-bold text-amber-400"></div>
+                                <div class="md:col-span-2"><label class="block text-[10px] uppercase text-slate-400 mb-1">Modelo / Moto:</label><input type="text" id="osModelo" required class="input-dark w-full rounded p-2 text-sm uppercase"></div>
+                                <div><label class="block text-[10px] uppercase text-slate-400 mb-1">KM Atual:</label><input type="number" id="osKm" class="input-dark w-full rounded p-2 text-sm font-mono"></div>
                             </div>
                         </div>
 
-                        <!-- Lançamento Isolado de Serviços e Seleção de Mecânico -->
                         <div class="panel-bg rounded-lg p-5 border-l-4 border-l-blue-500">
                             <h3 class="text-sm font-bold text-white mb-4 border-b border-[#2d333f] pb-2">🛠️ Lançamento de Mão de Obra e Mecânico</h3>
                             <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
@@ -110,11 +95,11 @@
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-[10px] uppercase text-amber-400 mb-1 font-bold">Comissão (%):</label>
-                                    <input type="number" id="osComissaoMecanico" value="40" min="0" max="100" class="input-dark w-full rounded p-2 text-xs font-bold text-amber-400 font-mono">
+                                    <input type="number" id="osComissaoMecanico" value="40" class="input-dark w-full rounded p-2 text-xs font-bold text-amber-400 font-mono">
                                 </div>
                                 <div class="md:col-span-4">
                                     <label class="block text-[10px] uppercase text-slate-400 mb-1">Valor do Serviço (R$):</label>
-                                    <input type="number" id="osValorServico" step="0.01" placeholder="Ex: 150.00" class="input-dark w-full rounded p-2 text-xs font-mono font-bold text-emerald-400">
+                                    <input type="number" id="osValorServico" step="0.01" class="input-dark w-full rounded p-2 text-xs font-mono font-bold text-emerald-400">
                                 </div>
                                 <div class="md:col-span-2">
                                     <button type="button" onclick="adicionarServicoNaOS()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded text-xs uppercase transition">+ Adicionar M.O.</button>
@@ -122,7 +107,6 @@
                             </div>
                         </div>
 
-                        <!-- Lançamento de Peças -->
                         <div class="panel-bg rounded-lg p-5">
                             <div class="flex justify-between items-center mb-4 border-b border-[#2d333f] pb-2">
                                 <h3 class="text-sm font-bold text-white uppercase">Peças e Peças de Reposição</h3>
@@ -130,46 +114,23 @@
                             </div>
 
                             <div class="grid grid-cols-12 gap-2 mb-3 items-end">
-                                <div class="col-span-2 sm:col-span-2">
-                                    <label class="block text-[9px] uppercase text-slate-400 mb-0.5">Qtd</label>
-                                    <input type="number" id="novaOsItemQtd" value="1" min="1" class="input-dark w-full rounded p-1.5 text-xs text-center font-bold">
-                                </div>
-                                <div class="col-span-10 sm:col-span-10">
-                                    <label class="block text-[9px] uppercase text-slate-400 mb-0.5">Descrição da Peça</label>
-                                    <input type="text" id="novaOsItemDesc" placeholder="Ex: Óleo 20w50, Pastilha de Freio..." class="input-dark w-full rounded p-1.5 text-xs uppercase">
-                                </div>
-                                <div class="col-span-6 sm:col-span-4">
-                                    <label class="block text-[9px] uppercase text-slate-400 mb-0.5">Custo Oficina (R$)</label>
-                                    <input type="number" id="novaOsItemCusto" oninput="calcularVendaMargemNovaOS()" step="0.01" placeholder="0.00" class="input-dark w-full rounded p-1.5 text-xs font-mono">
-                                </div>
-                                <div class="col-span-6 sm:col-span-4">
-                                    <label class="block text-[9px] uppercase text-amber-400 mb-0.5 font-bold">+ Margem Lucro (%)</label>
-                                    <input type="number" id="novaOsItemMargem" value="50" oninput="calcularVendaMargemNovaOS()" placeholder="50" class="input-dark w-full rounded p-1.5 text-xs font-bold text-amber-400 font-mono">
-                                </div>
-                                <div class="col-span-12 sm:col-span-4">
-                                    <label class="block text-[9px] uppercase text-emerald-400 mb-0.5 font-bold">Venda Cliente (R$)</label>
-                                    <input type="number" id="novaOsItemValor" step="0.01" placeholder="0.00" class="input-dark w-full rounded p-1.5 text-xs font-mono font-bold text-emerald-400">
-                                </div>
-                                <div class="col-span-12 mt-1">
-                                    <button type="button" onclick="adicionarItemNovaOS()" class="w-full bg-[#2d333f] hover:bg-[#374151] text-white font-bold py-2 rounded text-xs uppercase border border-[#4b5563] transition">+ Adicionar Peça</button>
-                                </div>
+                                <div class="col-span-2"><label class="block text-[9px] uppercase text-slate-400 mb-0.5">Qtd</label><input type="number" id="novaOsItemQtd" value="1" min="1" class="input-dark w-full rounded p-1.5 text-xs text-center font-bold"></div>
+                                <div class="col-span-10"><label class="block text-[9px] uppercase text-slate-400 mb-0.5">Descrição da Peça</label><input type="text" id="novaOsItemDesc" class="input-dark w-full rounded p-1.5 text-xs uppercase"></div>
+                                <div class="col-span-4"><label class="block text-[9px] uppercase text-slate-400 mb-0.5">Custo Oficina (R$)</label><input type="number" id="novaOsItemCusto" oninput="calcularVendaMargemNovaOS()" step="0.01" class="input-dark w-full rounded p-1.5 text-xs font-mono"></div>
+                                <div class="col-span-4"><label class="block text-[9px] uppercase text-amber-400 mb-0.5 font-bold">+ Margem Lucro (%)</label><input type="number" id="novaOsItemMargem" value="50" oninput="calcularVendaMargemNovaOS()" class="input-dark w-full rounded p-1.5 text-xs font-bold text-amber-400 font-mono"></div>
+                                <div class="col-span-4"><label class="block text-[9px] uppercase text-emerald-400 mb-0.5 font-bold">Venda Cliente (R$)</label><input type="number" id="novaOsItemValor" step="0.01" class="input-dark w-full rounded p-1.5 text-xs font-mono font-bold text-emerald-400"></div>
+                                <div class="col-span-12 mt-1"><button type="button" onclick="adicionarItemNovaOS()" class="w-full bg-[#2d333f] hover:bg-[#374151] text-white font-bold py-2 rounded text-xs uppercase transition">+ Adicionar Peça</button></div>
                             </div>
-
-                            <!-- Lista Unificada de Itens -->
-                            <div id="listaItensNovaOS" class="space-y-1 max-h-40 overflow-y-auto border-t border-[#2d333f] pt-2 text-xs">
-                                <div class="text-slate-500 italic text-center py-2">Nenhum item adicionado ainda.</div>
-                            </div>
+                            <div id="listaItensNovaOS" class="space-y-1 max-h-40 overflow-y-auto border-t border-[#2d333f] pt-2 text-xs"></div>
                         </div>
 
-                        <button type="submit" id="btnGerarOS" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded text-sm uppercase tracking-wider transition shadow-lg">
-                            Gerar Documento e Enviar ao Pátio ➜
-                        </button>
+                        <button type="submit" id="btnGerarOS" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded text-sm uppercase transition shadow-lg">Gerar Documento e Enviar ao Pátio ➜</button>
                     </form>
                 </div>
             </div>
         </section>
 
-        <!-- ABA 2: PÁTIO KANBAN -->
+        <!-- ABA 2: KANBAN -->
         <section id="aba-kanban" class="hidden h-[calc(100vh-180px)] flex flex-col">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold text-white tracking-tight">Pátio Digital</h2>
@@ -178,643 +139,338 @@
             <div id="secaoKanban" class="flex-1 flex gap-4 overflow-x-auto pb-4 kanban-scroll items-start"></div>
         </section>
 
-        <!-- ABA 4: FINANCEIRO (DRE) -->
-        <section id="aba-financeiro" class="hidden space-y-6">
-            <div class="panel-bg rounded-lg p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div><h2 class="text-xl font-bold text-white tracking-tight">📈 Fechamento de Caixa</h2></div>
-                <div class="flex flex-wrap items-center gap-3">
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs text-slate-400 uppercase font-bold">De:</span>
-                        <input type="date" id="dreDataInicio" onchange="renderFinanceiro()" class="input-dark px-3 py-1.5 rounded text-xs font-mono">
-                        <span class="text-xs text-slate-400 uppercase font-bold">Até:</span>
-                        <input type="date" id="dreDataFim" onchange="renderFinanceiro()" class="input-dark px-3 py-1.5 rounded text-xs font-mono">
-                    </div>
-                    <button onclick="exportarFinanceiroExcel()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded text-xs uppercase transition">⬇ EXPORTAR SEMANA (EXCEL)</button>
-                </div>
-            </div>
-
+        <!-- ABA: AGENDA -->
+        <section id="aba-agenda" class="hidden space-y-6">
+            <div class="panel-bg rounded-lg p-5"><h2 class="text-xl font-bold text-white">📅 Agenda de Serviços</h2></div>
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div class="lg:col-span-7 panel-bg rounded-lg p-5">
-                    <h3 class="text-xs font-bold text-slate-300 uppercase mb-4 text-center">Faturamento vs Lucro (Gráfico)</h3>
-                    <div class="h-64"><canvas id="chartFaturamentoLucro"></canvas></div>
+                <div class="lg:col-span-4 panel-bg rounded-lg p-5">
+                    <form id="formAgendamento" class="space-y-3">
+                        <div><label class="block text-[10px] uppercase text-slate-400 mb-1">Nome:</label><input type="text" id="agNome" required class="input-dark w-full rounded p-2 text-xs uppercase"></div>
+                        <div><label class="block text-[10px] uppercase text-slate-400 mb-1">WhatsApp:</label><input type="text" id="agTel" required class="input-dark w-full rounded p-2 text-xs font-mono"></div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div><label class="block text-[10px] uppercase text-slate-400 mb-1">Moto:</label><input type="text" id="agMoto" class="input-dark w-full rounded p-2 text-xs uppercase"></div>
+                            <div><label class="block text-[10px] uppercase text-slate-400 mb-1">Placa:</label><input type="text" id="agPlaca" class="input-dark w-full rounded p-2 text-xs uppercase font-bold text-amber-400"></div>
+                        </div>
+                        <div><label class="block text-[10px] uppercase text-slate-400 mb-1">Data/Hora:</label><input type="datetime-local" id="agDataHora" required class="input-dark w-full rounded p-2 text-xs font-mono"></div>
+                        <div><label class="block text-[10px] uppercase text-slate-400 mb-1">Serviço:</label><textarea id="agServico" rows="2" class="input-dark w-full rounded p-2 text-xs"></textarea></div>
+                        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded text-xs uppercase">+ Agendar</button>
+                    </form>
                 </div>
-                <div class="lg:col-span-5 panel-bg rounded-lg p-5">
-                    <h3 class="text-xs font-bold text-slate-300 uppercase mb-4 text-center">Top Mecânicos</h3>
-                    <div class="h-64 flex justify-center"><canvas id="chartTopMecanicos"></canvas></div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="panel-bg rounded-lg p-4 border-l-4 border-l-red-500">
-                    <span class="text-[10px] uppercase text-slate-400 font-bold mb-1 block">Faturamento Bruto</span>
-                    <span id="dreBruto" class="text-2xl font-bold text-white">R$ 0,00</span>
-                </div>
-                <div class="panel-bg rounded-lg p-4 border-l-4 border-l-slate-500">
-                    <span class="text-[10px] uppercase text-slate-400 font-bold mb-1 block">Custo Peças</span>
-                    <span id="dreCusto" class="text-2xl font-bold text-white">R$ 0,00</span>
-                </div>
-                <div class="panel-bg rounded-lg p-4 border-l-4 border-l-amber-500">
-                    <span class="text-[10px] uppercase text-slate-400 font-bold mb-1 block">Comissões Mecânicos</span>
-                    <span id="dreComissao" class="text-2xl font-bold text-amber-400">R$ 0,00</span>
-                </div>
-                <div class="panel-bg rounded-lg p-4 border-l-4 border-l-green-500">
-                    <span class="text-[10px] uppercase text-slate-400 font-bold mb-1 block">Lucro Real Oficina</span>
-                    <span id="dreLucro" class="text-2xl font-bold text-green-400">R$ 0,00</span>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div class="lg:col-span-7 panel-bg rounded-lg p-5">
-                    <h3 class="text-sm font-bold text-white mb-4 uppercase">Histórico de Vendas Efetivadas</h3>
+                <div class="lg:col-span-8 panel-bg rounded-lg p-5">
                     <div class="overflow-x-auto bg-[#1a1d24] rounded border border-[#2d333f]">
                         <table class="w-full text-left text-xs">
-                            <thead class="text-red-500 uppercase font-bold border-b border-[#2d333f]">
-                                <tr>
-                                    <th class="p-3">Data</th>
-                                    <th class="p-3">OS</th>
-                                    <th class="p-3">Placa</th>
-                                    <th class="p-3">Bruto</th>
-                                    <th class="p-3">Taxas/Custo</th>
-                                    <th class="p-3 text-right">Lucro</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabelaFinanceiroCorpo" class="divide-y divide-[#2d333f] text-slate-300"></tbody>
+                            <thead class="text-red-500 uppercase border-b border-[#2d333f]"><tr><th class="p-3">Data/Hora</th><th class="p-3">Cliente</th><th class="p-3">Veículo</th><th class="p-3 text-right">Ações</th></tr></thead>
+                            <tbody id="tabelaAgendaCorpo" class="divide-y divide-[#2d333f] text-slate-300"></tbody>
                         </table>
-                    </div>
-                </div>
-
-                <div class="lg:col-span-5 panel-bg rounded-lg p-5 flex flex-col justify-between border-t-4 border-t-blue-500">
-                    <div>
-                        <h3 class="text-sm font-bold text-blue-400 mb-3 uppercase flex items-center gap-1">☁️ Controle de M.O. (Nuvem)</h3>
-                        <div class="grid grid-cols-3 gap-2 text-center mb-4 bg-[#121418] p-3 rounded border border-[#2d333f]">
-                            <div>
-                                <span class="text-[9px] uppercase text-slate-400 block font-bold">Total M.O.</span>
-                                <span id="moTotalSoma" class="text-xs font-bold text-white">R$ 0,00</span>
-                            </div>
-                            <div>
-                                <span class="text-[9px] uppercase text-slate-400 block font-bold">Comissão</span>
-                                <span id="moComissaoSoma" class="text-xs font-bold text-amber-400">R$ 0,00</span>
-                            </div>
-                            <div>
-                                <span class="text-[9px] uppercase text-slate-400 block font-bold">Lucro Oficina</span>
-                                <span id="moLucroSoma" class="text-xs font-bold text-green-400">R$ 0,00</span>
-                            </div>
-                        </div>
-
-                        <div class="overflow-x-auto max-h-48 overflow-y-auto mb-4 bg-[#121418] rounded border border-[#2d333f]">
-                            <table class="w-full text-left text-[11px]">
-                                <thead class="text-slate-400 uppercase font-bold border-b border-[#2d333f]">
-                                    <tr>
-                                        <th class="p-2">Mecânico</th>
-                                        <th class="p-2">Modelo</th>
-                                        <th class="p-2">M.O. Total</th>
-                                        <th class="p-2 text-right">Comissão</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelaControleMOCorpo" class="divide-y divide-[#2d333f] text-slate-300"></tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="space-y-2">
-                        <button onclick="exportarPlanilhaMOExcel()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded text-xs uppercase transition shadow-md">
-                            📊 EXPORTAR PLANILHA EDITÁVEL (EXCEL)
-                        </button>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- ABA 5: RELATÓRIO DE PEÇAS -->
-        <section id="aba-pecas" class="hidden space-y-6">
-            <div class="panel-bg rounded-lg p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div><h2 class="text-xl font-bold text-white tracking-tight flex items-center gap-2">📦 Lucro sobre Peças</h2></div>
-                <div class="flex flex-wrap items-center gap-3">
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs text-slate-400 uppercase font-bold">De:</span>
-                        <input type="date" id="pecasDataInicio" onchange="renderRelatorioPecas()" class="input-dark px-3 py-1.5 rounded text-xs font-mono">
-                        <span class="text-xs text-slate-400 uppercase font-bold">Até:</span>
-                        <input type="date" id="pecasDataFim" onchange="renderRelatorioPecas()" class="input-dark px-3 py-1.5 rounded text-xs font-mono">
-                    </div>
-                    <button onclick="exportarPecasExcel()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded text-xs uppercase transition">⬇ EXPORTAR LISTA (EXCEL)</button>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="panel-bg rounded-lg p-4 border-l-4 border-l-red-500">
-                    <span class="text-[10px] uppercase text-slate-400 font-bold mb-1 block">Investimento (Custo das Peças)</span>
-                    <span id="cardPecasCusto" class="text-2xl font-bold text-white">R$ 0,00</span>
-                </div>
-                <div class="panel-bg rounded-lg p-4 border-l-4 border-l-blue-500">
-                    <span class="text-[10px] uppercase text-slate-400 font-bold mb-1 block">Faturamento Bruto de Peças</span>
-                    <span id="cardPecasVenda" class="text-2xl font-bold text-white">R$ 0,00</span>
-                </div>
-                <div class="panel-bg rounded-lg p-4 border-l-4 border-l-green-500">
-                    <span class="text-[10px] uppercase text-slate-400 font-bold mb-1 block">Lucro Real Exclusivo em Peças</span>
-                    <span id="cardPecasLucro" class="text-2xl font-bold text-green-400">R$ 0,00</span>
-                </div>
-            </div>
-
+        <!-- ABA: CLIENTES (RESTAURADA) -->
+        <section id="aba-clientes" class="hidden space-y-4">
             <div class="panel-bg rounded-lg p-5">
-                <div class="overflow-x-auto bg-[#1a1d24] rounded border border-[#2d333f]">
+                <div class="flex justify-between items-center mb-6 border-b border-[#2d333f] pb-4">
+                    <h2 class="text-xl font-bold text-white tracking-tight">👥 Cadastro de Clientes e CRM</h2>
+                    <div class="flex gap-2">
+                        <input type="text" id="filtroCli" oninput="renderTabelaCli()" placeholder="BUSCAR NOME OU PLACA" class="input-dark px-3 py-1.5 rounded text-xs w-56 uppercase">
+                        <button onclick="exportarClientesExcel()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-1.5 rounded text-xs uppercase">📊 EXPORTAR</button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs">
-                        <thead class="text-red-500 uppercase font-bold border-b border-[#2d333f]">
-                            <tr>
-                                <th class="p-3">Data</th>
-                                <th class="p-3">OS Nº</th>
-                                <th class="p-3">Itens Vendidos</th>
-                                <th class="p-3 text-right">Custo Pago</th>
-                                <th class="p-3 text-right">Valor Vendido</th>
-                                <th class="p-3 text-right">Lucro Gerado</th>
-                            </tr>
+                        <thead class="bg-[#1a1d24] text-red-500 uppercase font-bold border-y border-[#2d333f]">
+                            <tr><th class="p-3">Cliente</th><th class="p-3">Telefone</th><th class="p-3">Veículos</th><th class="p-3 text-right">Ações</th></tr>
                         </thead>
-                        <tbody id="tabelaPecasCorpo" class="divide-y divide-[#2d333f] text-slate-300"></tbody>
+                        <tbody id="tabelaClientesCorpo" class="divide-y divide-[#2d333f] text-slate-300"></tbody>
                     </table>
                 </div>
             </div>
         </section>
 
-        <!-- ABA 6: BACKUP -->
+        <!-- ABA: QR CODE -->
+        <section id="aba-qrcode" class="hidden space-y-6">
+            <div class="panel-bg rounded-lg p-5"><h2 class="text-xl font-bold text-white">📱 QR Code de Autoatendimento</h2></div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-5 panel-bg rounded-lg p-5">
+                    <label class="block text-[10px] uppercase text-slate-400 mb-1">URL de Rastreio:</label>
+                    <input type="text" id="inputUrlRastreio" oninput="atualizarQRCodeManual()" class="input-dark w-full rounded p-2 text-xs font-mono">
+                    <button onclick="imprimirPlacaBalcao()" class="mt-4 bg-red-600 text-white px-4 py-2 rounded text-xs font-bold uppercase w-full">🖨️ Imprimir Placa A4</button>
+                </div>
+                <div class="lg:col-span-7 flex justify-center">
+                    <div id="placaDisplayBalcao" class="bg-white text-slate-900 rounded-xl p-8 border-4 border-red-600 text-center">
+                        <h2 class="text-2xl font-black text-slate-900 mb-4">MOTOFLOW PRO</h2>
+                        <div id="containerQRCode" class="flex justify-center"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA: FINANCEIRO DRE -->
+        <section id="aba-financeiro" class="hidden space-y-6">
+            <div class="panel-bg rounded-lg p-5 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-white">📈 Fechamento de Caixa</h2>
+                <div class="flex gap-2">
+                    <input type="date" id="dreDataInicio" onchange="renderFinanceiro()" class="input-dark px-3 py-1.5 rounded text-xs font-mono">
+                    <input type="date" id="dreDataFim" onchange="renderFinanceiro()" class="input-dark px-3 py-1.5 rounded text-xs font-mono">
+                    <button onclick="exportarFinanceiroExcel()" class="bg-blue-600 text-white font-bold px-4 py-2 rounded text-xs uppercase">EXPORTAR</button>
+                </div>
+            </div>
+            <!-- Quadros -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="panel-bg rounded-lg p-4 border-l-4 border-l-red-500"><span class="text-[10px] text-slate-400 block">Faturamento Bruto</span><span id="dreBruto" class="text-2xl font-bold text-white">R$ 0,00</span></div>
+                <div class="panel-bg rounded-lg p-4 border-l-4 border-l-slate-500"><span class="text-[10px] text-slate-400 block">Custo Peças</span><span id="dreCusto" class="text-2xl font-bold text-white">R$ 0,00</span></div>
+                <div class="panel-bg rounded-lg p-4 border-l-4 border-l-amber-500"><span class="text-[10px] text-slate-400 block">Comissões</span><span id="dreComissao" class="text-2xl font-bold text-amber-400">R$ 0,00</span></div>
+                <div class="panel-bg rounded-lg p-4 border-l-4 border-l-green-500"><span class="text-[10px] text-slate-400 block">Lucro Real Oficina</span><span id="dreLucro" class="text-2xl font-bold text-green-400">R$ 0,00</span></div>
+            </div>
+            <!-- Gráficos -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 panel-bg rounded-lg p-5 h-64"><canvas id="chartFaturamentoLucro"></canvas></div>
+                <div class="lg:col-span-5 panel-bg rounded-lg p-5 h-64"><canvas id="chartTopMecanicos"></canvas></div>
+            </div>
+            <!-- Tabelas -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 panel-bg rounded-lg p-5">
+                    <div class="overflow-x-auto bg-[#1a1d24] rounded"><table class="w-full text-left text-xs"><tbody id="tabelaFinanceiroCorpo" class="text-slate-300"></tbody></table></div>
+                </div>
+                <div class="lg:col-span-5 panel-bg rounded-lg p-5 border-t-4 border-t-blue-500">
+                    <h3 class="text-sm font-bold text-blue-400 mb-3">☁️ Controle M.O.</h3>
+                    <div class="overflow-x-auto bg-[#121418] rounded"><table class="w-full text-left text-[11px]"><tbody id="tabelaControleMOCorpo" class="text-slate-300"></tbody></table></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA: PEÇAS -->
+        <section id="aba-pecas" class="hidden space-y-6">
+            <div class="panel-bg rounded-lg p-5 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-white">📦 Lucro sobre Peças</h2>
+                <div class="flex gap-2">
+                    <input type="date" id="pecasDataInicio" onchange="renderRelatorioPecas()" class="input-dark px-3 py-1.5 rounded text-xs font-mono">
+                    <input type="date" id="pecasDataFim" onchange="renderRelatorioPecas()" class="input-dark px-3 py-1.5 rounded text-xs font-mono">
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="panel-bg rounded-lg p-4 border-l-4 border-l-red-500"><span class="text-[10px] text-slate-400 block">Custo</span><span id="cardPecasCusto" class="text-2xl font-bold">R$ 0,00</span></div>
+                <div class="panel-bg rounded-lg p-4 border-l-4 border-l-blue-500"><span class="text-[10px] text-slate-400 block">Faturamento</span><span id="cardPecasVenda" class="text-2xl font-bold">R$ 0,00</span></div>
+                <div class="panel-bg rounded-lg p-4 border-l-4 border-l-green-500"><span class="text-[10px] text-slate-400 block">Lucro</span><span id="cardPecasLucro" class="text-2xl font-bold text-green-400">R$ 0,00</span></div>
+            </div>
+            <div class="panel-bg rounded-lg p-5">
+                <div class="overflow-x-auto bg-[#1a1d24] rounded"><table class="w-full text-left text-xs"><tbody id="tabelaPecasCorpo" class="text-slate-300"></tbody></table></div>
+            </div>
+        </section>
+        
+        <!-- ABA: BACKUP -->
         <section id="aba-backup" class="hidden space-y-6">
             <div class="panel-bg rounded-xl p-5 flex justify-between items-center">
-                <h2 class="text-xl font-bold text-white tracking-tight">🔒 Cópia de Segurança (Backup)</h2>
+                <h2 class="text-xl font-bold text-white">🔒 Cópia de Segurança</h2>
+                <button onclick="baixarBackupManual()" class="bg-blue-600 text-white font-bold py-2 px-4 rounded text-xs">Baixar Backup .JSON</button>
             </div>
-            <button onclick="baixarBackupManual()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-xs uppercase shadow-md">
-                ⬇ Descarregar Backup Agora (.JSON)
-            </button>
         </section>
     </main>
 
-    <!-- SCRIPT PRINCIPAL -->
+    <!-- MODAL: HISTÓRICO DO CLIENTE -->
+    <div id="modalHistoricoCliente" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+        <div class="bg-[#1f232b] border border-[#2d333f] rounded-lg w-full max-w-3xl shadow-2xl overflow-hidden">
+            <div class="flex justify-between p-4 bg-[#1a1d24]"><h3 class="text-white font-bold uppercase" id="histCliNome"></h3><button onclick="document.getElementById('modalHistoricoCliente').classList.add('hidden')" class="text-red-500 font-bold">X</button></div>
+            <div class="p-4 overflow-y-auto max-h-96"><table class="w-full text-xs text-left"><tbody id="histCliTabelaCorpo" class="text-slate-300"></tbody></table></div>
+        </div>
+    </div>
+
+    <!-- SCRIPT GERAL -->
     <script>
         const API = '/api/os';
-        let ordensCache = [];
-        let mecanicosCache = [];
-        let itensNovaOSCache = [];
-        let chartFatLucro = null;
-        let chartMecanicos = null;
+        let ordensCache = [], mecanicosCache = [], agendaCache = [], itensNovaOSCache = [];
+        let chartFatLucro = null, chartMecanicos = null;
 
         const KANBAN_COLS = [
             { id: 'ORCAMENTO', tit: 'ORÇAMENTOS', cor: 'border-t-amber-500', accepts: ['RECEBIDA', 'ORCAMENTO'] },
             { id: 'AGUARDANDO_PECAS', tit: 'AGUARDANDO PEÇAS', cor: 'border-t-blue-500', accepts: ['APROVADA', 'AGUARDANDO', 'AGUARDANDO_PECAS'] },
             { id: 'EM_MANUTENCAO', tit: 'EM SERVIÇO', cor: 'border-t-red-500', accepts: ['EM_MANUTENCAO', 'TESTE_RODAGEM', 'EM_SERVICO'] },
-            { id: 'PRONTA', tit: 'PRONTO / PÁTIO', cor: 'border-t-green-500', accepts: ['PRONTA'] },
+            { id: 'PRONTA', tit: 'PRONTO', cor: 'border-t-green-500', accepts: ['PRONTA'] },
             { id: 'FINALIZADA', tit: 'ENTREGUES', cor: 'border-t-slate-500', accepts: ['FINALIZADA'] }
         ];
 
         function fazerLogout() { localStorage.clear(); window.location.href = 'login.html'; }
 
         function configurarDatasAutomaticas() {
-            const hoje = new Date();
-            const diaSemana = hoje.getDay();
-            const seg = new Date(hoje);
-            seg.setDate(hoje.getDate() - (diaSemana === 0 ? 6 : diaSemana - 1));
-            const sab = new Date(seg);
-            sab.setDate(seg.getDate() + 5);
-
+            const h = new Date(); const seg = new Date(h);
+            seg.setDate(h.getDate() - (h.getDay() === 0 ? 6 : h.getDay() - 1));
+            const sab = new Date(seg); sab.setDate(seg.getDate() + 5);
             const fmt = d => d.toISOString().split('T')[0];
             
             if(document.getElementById('dreDataInicio')) {
-                document.getElementById('dreDataInicio').value = fmt(seg);
-                document.getElementById('dreDataFim').value = fmt(sab);
-                document.getElementById('pecasDataInicio').value = fmt(seg);
-                document.getElementById('pecasDataFim').value = fmt(sab);
-            }
-        }
-
-        function calcularVendaMargemNovaOS() {
-            const custo = parseFloat(document.getElementById('novaOsItemCusto').value) || 0;
-            const margem = parseFloat(document.getElementById('novaOsItemMargem').value) || 0;
-            if (custo > 0) {
-                const vendaCalculada = custo * (1 + (margem / 100));
-                document.getElementById('novaOsItemValor').value = vendaCalculada.toFixed(2);
+                document.getElementById('dreDataInicio').value = fmt(seg); document.getElementById('dreDataFim').value = fmt(sab);
+                document.getElementById('pecasDataInicio').value = fmt(seg); document.getElementById('pecasDataFim').value = fmt(sab);
             }
         }
 
         async function carregarDados() {
             try {
-                const resMec = await fetch('/api/mecanicos', { headers: { 'Authorization': 'Bearer ' + tokenVal } });
-                if (resMec.ok) { mecanicosCache = await resMec.json(); preencherSelectsMecanicos(); }
+                const resM = await fetch('/api/mecanicos', { headers: { 'Authorization': 'Bearer ' + tokenVal } });
+                if(resM.ok) { mecanicosCache = await resM.json(); preencherSelectsMecanicos(); }
 
-                const res = await fetch(API, { headers: { 'Authorization': 'Bearer ' + tokenVal } });
-                if (res.ok) {
-                    ordensCache = await res.json();
-                    renderizarKanban();
-                    renderFinanceiro();
-                    renderRelatorioPecas();
-                }
-            } catch (e) { console.error(e); }
+                const resO = await fetch(API, { headers: { 'Authorization': 'Bearer ' + tokenVal } });
+                if(resO.ok) { ordensCache = await resO.json(); renderizarKanban(); renderFinanceiro(); renderRelatorioPecas(); renderTabelaCli(); }
+
+                const resA = await fetch('/api/agendamentos', { headers: { 'Authorization': 'Bearer ' + tokenVal } });
+                if(resA.ok) { agendaCache = await resA.json(); renderAgenda(); }
+            } catch (e) {}
         }
 
         function preencherSelectsMecanicos() {
-            const selOS = document.getElementById('osMecanicoSelect');
-            if (!selOS) return;
-            selOS.innerHTML = '<option value="">-- Selecione o Mecânico --</option>';
-            mecanicosCache.forEach(m => {
-                selOS.innerHTML += `<option value="${m.id}">${m.nome}</option>`;
-            });
+            const sel = document.getElementById('osMecanicoSelect');
+            if (!sel) return;
+            sel.innerHTML = '<option value="">-- Selecione o Mecânico --</option>';
+            mecanicosCache.forEach(m => sel.innerHTML += `<option value="${m.id}">${m.nome}</option>`);
+        }
+        function atualizarComissaoMecanicoInput() {
+            const mId = document.getElementById('osMecanicoSelect').value;
+            const mec = mecanicosCache.find(m => m.id == mId);
+            if (mec) document.getElementById('osComissaoMecanico').value = mec.percentualComissao || 40;
         }
 
-        function atualizarComissaoMecanicoInput() {
-            const mecId = document.getElementById('osMecanicoSelect').value;
-            const mec = mecanicosCache.find(m => m.id == mecId);
-            if (mec && mec.percentualComissao !== undefined) {
-                document.getElementById('osComissaoMecanico').value = mec.percentualComissao;
-            }
+        function calcularVendaMargemNovaOS() {
+            const custo = parseFloat(document.getElementById('novaOsItemCusto').value) || 0;
+            const margem = parseFloat(document.getElementById('novaOsItemMargem').value) || 0;
+            if (custo > 0) document.getElementById('novaOsItemValor').value = (custo * (1 + (margem / 100))).toFixed(2);
         }
 
         function adicionarServicoNaOS() {
-            const mecId = document.getElementById('osMecanicoSelect').value;
+            const mId = document.getElementById('osMecanicoSelect').value;
             const val = parseFloat(document.getElementById('osValorServico').value);
-            const mec = mecanicosCache.find(m => m.id == mecId);
-
-            if (!mecId || isNaN(val) || val <= 0) {
-                alert("Selecione o mecânico e preencha o valor da Mão de Obra.");
-                return;
-            }
-
-            const descFormatada = `MÃO DE OBRA - ${mec.nome.toUpperCase()}`;
-            itensNovaOSCache.push({
-                descricao: descFormatada,
-                valorUnitario: val,
-                valorCusto: 0,
-                quantidade: 1,
-                tipo: 'SERVICO'
-            });
-
-            document.getElementById('osValorServico').value = '';
-            renderItensNovaOS();
+            const mec = mecanicosCache.find(m => m.id == mId);
+            if (!mId || isNaN(val)) return alert("Preencha o mecânico e valor.");
+            itensNovaOSCache.push({ descricao: `MÃO DE OBRA - ${mec.nome.toUpperCase()}`, valorUnitario: val, valorCusto: 0, quantidade: 1, tipo: 'SERVICO' });
+            document.getElementById('osValorServico').value = ''; renderItensNovaOS();
         }
 
         function adicionarItemNovaOS() {
-            const desc = document.getElementById('novaOsItemDesc').value.trim();
+            const desc = document.getElementById('novaOsItemDesc').value;
             const val = parseFloat(document.getElementById('novaOsItemValor').value);
-            const custo = parseFloat(document.getElementById('novaOsItemCusto').value) || (val * 0.60);
+            const cst = parseFloat(document.getElementById('novaOsItemCusto').value) || (val*0.6);
             const qtd = parseInt(document.getElementById('novaOsItemQtd').value) || 1;
-
-            if (!desc || isNaN(val) || val <= 0) {
-                alert("Preencha a descrição e o valor da peça."); return;
-            }
-
-            itensNovaOSCache.push({ descricao: desc, valorUnitario: val, valorCusto: custo, quantidade: qtd, tipo: 'PECA' });
-            document.getElementById('novaOsItemDesc').value = '';
-            document.getElementById('novaOsItemValor').value = '';
-            document.getElementById('novaOsItemCusto').value = '';
-            renderItensNovaOS();
+            if (!desc || isNaN(val)) return alert("Preencha descrição e valor.");
+            itensNovaOSCache.push({ descricao: desc, valorUnitario: val, valorCusto: cst, quantidade: qtd, tipo: 'PECA' });
+            document.getElementById('novaOsItemDesc').value = ''; document.getElementById('novaOsItemValor').value = ''; renderItensNovaOS();
         }
 
         function renderItensNovaOS() {
-            const container = document.getElementById('listaItensNovaOS');
-            container.innerHTML = '';
-            let total = 0;
-
-            if (itensNovaOSCache.length === 0) {
-                container.innerHTML = '<div class="text-slate-500 italic text-center py-2">Nenhum item adicionado ainda.</div>';
-                document.getElementById('txtTotalNovaOS').innerText = 'Total: R$ 0,00';
-                return;
-            }
-
-            itensNovaOSCache.forEach((item, idx) => {
-                const sub = item.quantidade * item.valorUnitario;
-                total += sub;
-                container.innerHTML += `
-                    <div class="flex justify-between items-center py-1 border-b border-[#2d333f] text-xs">
-                        <span class="text-slate-300 font-bold uppercase">${item.quantidade}x ${item.descricao}</span>
-                        <div class="flex items-center gap-2">
-                            <span class="text-emerald-400 font-mono font-bold">R$ ${sub.toFixed(2)}</span>
-                            <button type="button" onclick="itensNovaOSCache.splice(${idx},1); renderItensNovaOS();" class="text-red-400 font-bold">X</button>
-                        </div>
-                    </div>`;
-            });
-            document.getElementById('txtTotalNovaOS').innerText = `Total: R$ ${total.toFixed(2)}`;
+            const cont = document.getElementById('listaItensNovaOS'); cont.innerHTML = ''; let t = 0;
+            if (itensNovaOSCache.length === 0) { document.getElementById('txtTotalNovaOS').innerText = 'Total: R$ 0,00'; return; }
+            itensNovaOSCache.forEach((i, x) => { t += i.quantidade * i.valorUnitario; cont.innerHTML += `<div class="flex justify-between border-b border-[#2d333f] py-1"><span>${i.quantidade}x ${i.descricao}</span><div><span class="text-emerald-400">R$ ${(i.quantidade*i.valorUnitario).toFixed(2)}</span> <button onclick="itensNovaOSCache.splice(${x},1); renderItensNovaOS()" class="text-red-500 font-bold ml-2">X</button></div></div>`; });
+            document.getElementById('txtTotalNovaOS').innerText = `Total: R$ ${t.toFixed(2)}`;
         }
 
         document.getElementById('formOS').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('btnGerarOS');
-            btn.innerHTML = "A GERAR..."; btn.disabled = true;
-            
-            const mecId = document.getElementById('osMecanicoSelect').value;
-            const comissaoLivre = parseFloat(document.getElementById('osComissaoMecanico').value) || 40;
-
-            const payload = {
-                cliente: { nome: document.getElementById('osCliente').value, telefoneWhatsapp: document.getElementById('osTel').value },
-                moto: { placa: document.getElementById('osPlaca').value, modelo: document.getElementById('osModelo').value, kmAtual: parseInt(document.getElementById('osKm').value) || 0 },
-                capaceteDeixado: false, bauChaveDeixada: false, estadoRelacao: "REGULAR", avariasPrevia: "Sem avarias visíveis",
-                nivelCombustivel: "1/2", relatoCliente: "Serviço solicitado",
-                percentualComissaoMecanico: comissaoLivre
-            };
-
+            const payload = { cliente: { nome: document.getElementById('osCliente').value, telefoneWhatsapp: document.getElementById('osTel').value }, moto: { placa: document.getElementById('osPlaca').value, modelo: document.getElementById('osModelo').value }, percentualComissaoMecanico: parseFloat(document.getElementById('osComissaoMecanico').value) || 40 };
             try {
-                const res = await fetch(API, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenVal },
-                    body: JSON.stringify(payload)
-                });
-                if (res.ok) {
-                    const osSalva = await res.json();
-                    
-                    if (mecId) {
-                        await fetch(`${API}/${osSalva.id}/mecanico?mecanicoId=${mecId}&comissao=${comissaoLivre}`, { 
-                            method: 'PATCH', 
-                            headers: { 'Authorization': 'Bearer ' + tokenVal } 
-                        });
-                    }
-
-                    for (const item of itensNovaOSCache) {
-                        await fetch(`${API}/${osSalva.id}/itens`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenVal },
-                            body: JSON.stringify(item)
-                        });
-                    }
-
-                    alert(`OS #${osSalva.codigoRastreio} gerada com sucesso!`);
-                    document.getElementById('formOS').reset();
-                    itensNovaOSCache = [];
-                    renderItensNovaOS();
-                    carregarDados();
-                    navegarPara('kanban');
-                } else alert("Erro ao gerar OS.");
-            } catch (err) { alert('Falha de conexão.'); }
-            btn.innerHTML = "Gerar Documento e Enviar ao Pátio ➜"; btn.disabled = false;
+                const res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenVal }, body: JSON.stringify(payload) });
+                if(res.ok) {
+                    const osS = await res.json();
+                    const mId = document.getElementById('osMecanicoSelect').value;
+                    if(mId) await fetch(`${API}/${osS.id}/mecanico?mecanicoId=${mId}`, { method: 'PATCH', headers: { 'Authorization': 'Bearer ' + tokenVal } });
+                    for(const it of itensNovaOSCache) await fetch(`${API}/${osS.id}/itens`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenVal }, body: JSON.stringify(it) });
+                    alert(`OS #${osS.codigoRastreio} gerada!`); document.getElementById('formOS').reset(); itensNovaOSCache = []; renderItensNovaOS(); carregarDados(); navegarPara('kanban');
+                }
+            } catch(e){}
         });
 
-        // KANBAN COMPLETO E FUNCIONAL
         function renderizarKanban() {
-            const container = document.getElementById('secaoKanban');
-            if (!container) return;
-            const termoBusca = (document.getElementById('filtroKanbanPlaca')?.value || '').trim().toUpperCase();
-            container.innerHTML = '';
-
-            KANBAN_COLS.forEach(col => {
-                const ordens = ordensCache.filter(o => {
-                    const matchStatus = col.accepts.includes(o.status);
-                    const matchPlaca = termoBusca === '' || (o.moto && o.moto.placa.toUpperCase().includes(termoBusca));
-                    return matchStatus && matchPlaca;
-                });
-
-                const colDiv = document.createElement('div');
-                colDiv.className = `w-[280px] min-w-[280px] flex flex-col h-full`;
-                colDiv.ondragover = e => { e.preventDefault(); colDiv.classList.add('col-drag-over'); };
-                colDiv.ondragleave = () => colDiv.classList.remove('col-drag-over');
-                
-                colDiv.ondrop = async e => {
-                    e.preventDefault(); 
-                    colDiv.classList.remove('col-drag-over');
-                    const id = e.dataTransfer.getData('text');
-                    if (id) {
-                        await fetch(`${API}/${id}/status?novoStatus=${col.id}`, { method: 'PATCH', headers: { 'Authorization': 'Bearer ' + tokenVal } });
-                        carregarDados();
-                    }
-                };
-
-                colDiv.innerHTML = `
-                    <div class="text-center text-[10px] font-bold text-slate-300 uppercase tracking-widest border-t-2 ${col.cor} pt-2 pb-3 mb-2 mx-1">${col.tit}</div>
-                    <div class="flex-1 overflow-y-auto space-y-3 no-scrollbar p-1" id="cards-${col.id}">
-                        ${ordens.length === 0 ? `<div class="bg-[#1f232b] h-20 rounded-lg opacity-40 border border-[#2d333f] flex items-center justify-center text-xs text-slate-500">Vazio</div>` : ''}
-                    </div>
-                `;
-                const cardCont = colDiv.querySelector(`#cards-${col.id}`);
-                ordens.forEach(o => cardCont.appendChild(criarCardKanban(o)));
-                container.appendChild(colDiv);
+            const cont = document.getElementById('secaoKanban'); if(!cont) return; cont.innerHTML = '';
+            KANBAN_COLS.forEach(c => {
+                const ord = ordensCache.filter(o => c.accepts.includes(o.status));
+                const col = document.createElement('div'); col.className = `w-[280px] min-w-[280px] flex flex-col h-full`;
+                col.ondragover = e => e.preventDefault(); col.ondrop = async e => { e.preventDefault(); const id = e.dataTransfer.getData('text'); if(id) { await fetch(`${API}/${id}/status?novoStatus=${c.id}`, { method:'PATCH', headers:{'Authorization':'Bearer '+tokenVal}}); carregarDados(); }};
+                col.innerHTML = `<div class="text-[10px] font-bold text-center border-t-2 ${c.cor} py-2 mb-2 mx-1">${c.tit}</div><div class="flex-1 space-y-2 p-1" id="cards-${c.id}"></div>`;
+                const cd = col.querySelector(`#cards-${c.id}`); ord.forEach(o => cd.appendChild(criarCard(o))); cont.appendChild(col);
             });
         }
-
-        function criarCardKanban(os) {
-            const div = document.createElement('div');
-            div.draggable = true;
-            div.ondragstart = e => e.dataTransfer.setData('text', os.id);
-            const nCli = os.cliente ? os.cliente.nome.split(' ')[0] : 'N/D';
-            const mecNome = os.mecanicoResponsavel ? os.mecanicoResponsavel.nome : 'Sem Mecânico';
-            
-            div.className = "bg-[#1f232b] border border-[#2d333f] rounded-lg p-3 shadow-md hover:border-slate-500 cursor-grab active:cursor-grabbing transition";
-            div.innerHTML = `
-                <div class="mb-2">
-                    <h4 class="text-xs font-bold text-white uppercase">${os.moto ? os.moto.modelo : 'N/D'} - ${os.moto ? os.moto.placa : ''}</h4>
-                    <p class="text-[10px] text-slate-400 mt-0.5">Cliente: <span class="text-slate-300 uppercase">${nCli}</span></p>
-                    <p class="text-[10px] text-slate-400">Mecânico: <span class="text-blue-400 font-bold uppercase">${mecNome}</span></p>
-                </div>
-                <div class="bg-[#121418] border border-[#2d333f] rounded text-[10px] text-slate-300 font-bold p-1.5 text-center mb-2 uppercase">
-                    ⚙ ${os.status.replace(/_/g, ' ')}
-                </div>
-                <div class="grid grid-cols-2 gap-1">
-                    <button onclick="imprimirOSDireto(${os.id})" class="bg-[#10b981] hover:bg-[#059669] text-white text-[9px] font-bold py-1 rounded transition uppercase">IMPRIMIR OS</button>
-                    <button onclick="excluirOS(${os.id})" class="bg-[#ef4444] hover:bg-[#dc2626] text-white text-[9px] font-bold py-1 rounded transition uppercase">DEL</button>
-                </div>
-            `;
-            return div;
+        function criarCard(o) {
+            const d = document.createElement('div'); d.draggable = true; d.ondragstart = e => e.dataTransfer.setData('text', o.id);
+            d.className = "bg-[#1f232b] border border-[#2d333f] rounded-lg p-3";
+            d.innerHTML = `<div class="mb-2"><h4 class="text-xs font-bold text-white uppercase">${o.moto?o.moto.modelo:''} - ${o.moto?o.moto.placa:''}</h4></div><div class="bg-[#121418] p-1.5 text-center text-[10px] font-bold mb-2">⚙ ${o.status}</div><div class="flex gap-1"><button onclick="imprimirOSDireto(${o.id})" class="bg-emerald-600 text-[9px] text-white px-2 py-1 rounded">DOC</button><button onclick="excluirOS(${o.id})" class="bg-red-600 text-[9px] text-white px-2 py-1 rounded">DEL</button></div>`;
+            return d;
         }
-
-        async function excluirOS(id) {
-            if (!confirm('Deseja realmente excluir esta Ordem de Serviço?')) return;
-            try {
-                const res = await fetch(`${API}/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + tokenVal } });
-                if (res.ok) carregarDados();
-                else alert('Erro ao excluir OS.');
-            } catch (e) { alert('Erro de conexão.'); }
-        }
-
-        function imprimirOSDireto(osId) {
-            const os = ordensCache.find(o => o.id === osId);
-            if (!os) return;
-            const win = window.open('', '_blank');
-            win.document.write(gerarHTMLComprovanteOS(os));
-            win.document.close();
-        }
-
-        function gerarHTMLComprovanteOS(os) {
-            const dataFormatted = new Date(os.dataEntrada || Date.now()).toLocaleDateString('pt-BR');
-            const clienteNome = os.cliente ? os.cliente.nome : 'N/D';
-            const motoModelo = os.moto ? os.moto.modelo : 'N/D';
-            const motoPlaca = os.moto ? os.moto.placa : 'N/D';
-
-            let servicosHTML = '';
-            let pecasHTML = '';
-            let totalServicos = 0;
-            let totalPecas = 0;
-
-            if (os.itens && os.itens.length > 0) {
-                os.itens.forEach(i => {
-                    const qtd = i.quantidade || 1;
-                    const unit = i.valorUnitario || 0;
-                    const sub = qtd * unit;
-                    const tipo = (i.tipo || '').toUpperCase();
-
-                    if (tipo === 'SERVICO' || i.descricao.startsWith('MÃO DE OBRA')) {
-                        totalServicos += sub;
-                        servicosHTML += `<tr><td style="padding:4px; font-weight:bold;">${i.descricao}</td><td style="padding:4px; text-align:center;">${qtd}</td><td style="padding:4px; text-align:center;">un</td><td style="padding:4px; text-align:right;">R$ ${unit.toFixed(2)}</td><td style="padding:4px; text-align:right; font-weight:bold;">R$ ${sub.toFixed(2)}</td></tr>`;
-                    } else {
-                        totalPecas += sub;
-                        pecasHTML += `<tr><td style="padding:4px;">${i.descricao}</td><td style="padding:4px; text-align:center;">${qtd}</td><td style="padding:4px; text-align:center;">un</td><td style="padding:4px; text-align:right;">R$ ${unit.toFixed(2)}</td><td style="padding:4px; text-align:right; font-weight:bold;">R$ ${sub.toFixed(2)}</td></tr>`;
-                    }
-                });
-            }
-
-            return `<!DOCTYPE html><html><head><title>OS #${os.codigoRastreio}</title><style>body { font-family: Arial, sans-serif; padding: 20px; } .sheet { max-width: 800px; margin: 0 auto; border: 1px solid #000; padding: 20px; } table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 10px; } th, td { border-bottom: 1px solid #ccc; } th { background: #eee; }</style></head><body><div class="sheet"><h2>MOTOFLOW PRO - OS #${os.codigoRastreio}</h2><p>CLIENTE: ${clienteNome} | VEÍCULO: ${motoModelo} (${motoPlaca}) | DATA: ${dataFormatted}</p>${totalServicos > 0 ? `<h4>SERVIÇOS</h4><table><thead><tr><th>Nome</th><th>Qtd</th><th>Unidade</th><th>Valor Unit.</th><th>Valor Total</th></tr></thead><tbody>${servicosHTML}</tbody></table>` : ''}${totalPecas > 0 ? `<h4>PEÇAS</h4><table><thead><tr><th>Nome</th><th>Qtd</th><th>Unidade</th><th>Valor Unit.</th><th>Valor Total</th></tr></thead><tbody>${pecasHTML}</tbody></table>` : ''}<h3 style="text-align:right;">Total Geral: R$ ${(totalServicos + totalPecas).toFixed(2)}</h3></div><script>window.onload = () => window.print();<\/script></body></html>`;
+        async function excluirOS(id) { if(confirm('Excluir OS?')) { await fetch(`${API}/${id}`,{method:'DELETE',headers:{'Authorization':'Bearer '+tokenVal}}); carregarDados(); } }
+        function imprimirOSDireto(id) {
+            const o = ordensCache.find(x => x.id === id); if(!o) return;
+            const win = window.open('','_blank'); win.document.write(`<html><body style="font-family:Arial;padding:20px;"><h2>OS #${o.codigoRastreio}</h2></body><script>window.print()<\/script></html>`); win.document.close();
         }
 
         function renderFinanceiro() {
-            const dtIni = document.getElementById('dreDataInicio')?.value;
-            const dtFim = document.getElementById('dreDataFim')?.value;
-            if(!dtIni || !dtFim) return;
-
-            let tBruto = 0, tPecas = 0, tComissao = 0, tMO = 0;
-            const mecMap = {};
-            const tbodyMO = document.getElementById('tabelaControleMOCorpo');
-            const tbodyHist = document.getElementById('tabelaFinanceiroCorpo');
-            if(tbodyMO) tbodyMO.innerHTML = ''; 
-            if(tbodyHist) tbodyHist.innerHTML = '';
-
-            ordensCache.filter(o => {
-                const d = (o.dataPagamento || o.dataEntrada || '').split('T')[0];
-                return d >= dtIni && d <= dtFim;
-            }).forEach(o => {
-                const totalOS = o.valorFinal || o.valorTotal || 0;
-                tBruto += totalOS;
-
-                let moOS = 0, pecaOS = 0;
-                if (o.itens) {
-                    o.itens.forEach(i => {
-                        const sub = i.quantidade * i.valorUnitario;
-                        if (i.tipo === 'PECA') pecaOS += sub; else moOS += sub;
-                    });
-                }
-
-                const mec = o.mecanicoResponsavel ? o.mecanicoResponsavel.nome : 'MECÂNICO';
-                const pctCom = (o.percentualComissaoMecanico || 40) / 100;
-                const comissaoOS = moOS * pctCom;
-
-                tPecas += pecaOS * 0.60;
-                tComissao += comissaoOS;
-                tMO += moOS;
-
-                mecMap[mec] = (mecMap[mec] || 0) + moOS;
-
-                if(tbodyMO) {
-                    tbodyMO.innerHTML += `<tr><td class="p-2 font-bold">${mec}</td><td class="p-2">${o.moto ? o.moto.modelo : ''}</td><td class="p-2">R$ ${moOS.toFixed(2)}</td><td class="p-2 text-right text-amber-400">R$ ${comissaoOS.toFixed(2)}</td></tr>`;
-                }
-
-                if(tbodyHist) {
-                    tbodyHist.innerHTML += `<tr><td class="p-3">${new Date(o.dataEntrada).toLocaleDateString('pt-BR')}</td><td class="p-3 font-bold text-amber-400">${o.codigoRastreio}</td><td class="p-3">${o.moto ? o.moto.placa : ''}</td><td class="p-3">R$ ${totalOS.toFixed(2)}</td><td class="p-3">R$ ${(pecaOS*0.6).toFixed(2)}</td><td class="p-3 text-right text-green-400 font-bold">R$ ${(totalOS - (pecaOS*0.6) - comissaoOS).toFixed(2)}</td></tr>`;
-                }
+            const di = document.getElementById('dreDataInicio')?.value, df = document.getElementById('dreDataFim')?.value; if(!di||!df) return;
+            let tb=0, tp=0, tc=0, tm=0; const mc={}; const th=document.getElementById('tabelaFinanceiroCorpo'), tmoc=document.getElementById('tabelaControleMOCorpo');
+            if(th) th.innerHTML=''; if(tmoc) tmoc.innerHTML='';
+            ordensCache.filter(o => { const d=(o.dataEntrada||'').split('T')[0]; return d>=di && d<=df; }).forEach(o => {
+                const tt=o.valorTotal||0; tb+=tt; let mOS=0, pOS=0;
+                if(o.itens) o.itens.forEach(i=>{ const s=i.quantidade*i.valorUnitario; if(i.tipo==='PECA') pOS+=s; else mOS+=s; });
+                const mn=o.mecanicoResponsavel?o.mecanicoResponsavel.nome:'N/D', pc=(o.percentualComissaoMecanico||40)/100, cOS=mOS*pc;
+                tp+=pOS*0.6; tc+=cOS; tm+=mOS; mc[mn]=(mc[mn]||0)+mOS;
+                if(th) th.innerHTML+=`<tr><td class="p-3">${new Date(o.dataEntrada).toLocaleDateString()}</td><td class="p-3 text-amber-400 font-bold">${o.codigoRastreio}</td><td class="p-3">${o.moto?o.moto.placa:''}</td><td class="p-3">R$ ${tt.toFixed(2)}</td><td class="p-3">R$ ${(pOS*0.6).toFixed(2)}</td><td class="p-3 text-green-400 font-bold">R$ ${(tt-(pOS*0.6)-cOS).toFixed(2)}</td></tr>`;
+                if(tmoc) tmoc.innerHTML+=`<tr><td class="p-2 font-bold">${mn}</td><td class="p-2">${o.moto?o.moto.modelo:''}</td><td class="p-2">R$ ${mOS.toFixed(2)}</td><td class="p-2 text-amber-400">R$ ${cOS.toFixed(2)}</td></tr>`;
             });
-
             if(document.getElementById('dreBruto')) {
-                document.getElementById('dreBruto').innerText = `R$ ${tBruto.toFixed(2)}`;
-                document.getElementById('dreCusto').innerText = `R$ ${tPecas.toFixed(2)}`;
-                document.getElementById('dreComissao').innerText = `R$ ${tComissao.toFixed(2)}`;
-                document.getElementById('dreLucro').innerText = `R$ ${(tBruto - tPecas - tComissao).toFixed(2)}`;
-
-                document.getElementById('moTotalSoma').innerText = `R$ ${tMO.toFixed(2)}`;
-                document.getElementById('moComissaoSoma').innerText = `R$ ${tComissao.toFixed(2)}`;
-                document.getElementById('moLucroSoma').innerText = `R$ ${(tMO - tComissao).toFixed(2)}`;
+                document.getElementById('dreBruto').innerText=`R$ ${tb.toFixed(2)}`; document.getElementById('dreCusto').innerText=`R$ ${tp.toFixed(2)}`; document.getElementById('dreComissao').innerText=`R$ ${tc.toFixed(2)}`; document.getElementById('dreLucro').innerText=`R$ ${(tb-tp-tc).toFixed(2)}`;
             }
-
-            renderCharts(tBruto, tBruto - tPecas - tComissao, mecMap);
-        }
-
-        function renderCharts(bruto, lucro, mecMap) {
-            const el1 = document.getElementById('chartFaturamentoLucro');
-            const el2 = document.getElementById('chartTopMecanicos');
-            if(!el1 || !el2) return;
-
-            if (chartFatLucro) chartFatLucro.destroy();
-            if (chartMecanicos) chartMecanicos.destroy();
-
-            const ctx1 = el1.getContext('2d');
-            chartFatLucro = new Chart(ctx1, {
-                type: 'bar',
-                data: { labels: ['Semana Atual'], datasets: [{ label: 'Bruto', data: [bruto], backgroundColor: '#3b82f6' }, { label: 'Lucro', data: [lucro], backgroundColor: '#22c55e' }] },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-
-            const ctx2 = el2.getContext('2d');
-            chartMecanicos = new Chart(ctx2, {
-                type: 'doughnut',
-                data: { labels: Object.keys(mecMap), datasets: [{ data: Object.values(mecMap), backgroundColor: ['#ef4444', '#3b82f6', '#eab308', '#22c55e', '#a855f7'] }] },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
+            if(chartFatLucro) chartFatLucro.destroy(); if(chartMecanicos) chartMecanicos.destroy();
+            if(document.getElementById('chartFaturamentoLucro')) chartFatLucro = new Chart(document.getElementById('chartFaturamentoLucro'),{type:'bar',data:{labels:['Resumo'],datasets:[{label:'Bruto',data:[tb],backgroundColor:'#3b82f6'},{label:'Lucro',data:[tb-tp-tc],backgroundColor:'#22c55e'}]},options:{responsive:true,maintainAspectRatio:false}});
+            if(document.getElementById('chartTopMecanicos')) chartMecanicos = new Chart(document.getElementById('chartTopMecanicos'),{type:'doughnut',data:{labels:Object.keys(mc),datasets:[{data:Object.values(mc),backgroundColor:['#ef4444','#3b82f6','#eab308','#22c55e']}]},options:{responsive:true,maintainAspectRatio:false}});
         }
 
         function renderRelatorioPecas() {
-            const dtIni = document.getElementById('pecasDataInicio')?.value;
-            const dtFim = document.getElementById('pecasDataFim')?.value;
-            const tbody = document.getElementById('tabelaPecasCorpo');
-            if(!tbody || !dtIni || !dtFim) return;
-            tbody.innerHTML = '';
-
-            let cTotal = 0, vTotal = 0;
-
-            ordensCache.filter(o => {
-                const d = (o.dataPagamento || o.dataEntrada || '').split('T')[0];
-                return d >= dtIni && d <= dtFim;
-            }).forEach(o => {
-                if (o.itens) {
-                    o.itens.filter(i => i.tipo === 'PECA').forEach(p => {
-                        const cust = (p.valorCusto || p.valorUnitario * 0.6) * p.quantidade;
-                        const vend = p.valorUnitario * p.quantidade;
-                        const luc = vend - cust;
-                        cTotal += cust; vTotal += vend;
-
-                        tbody.innerHTML += `<tr><td class="p-3">${new Date(o.dataEntrada).toLocaleDateString('pt-BR')}</td><td class="p-3 font-bold text-amber-400">${o.codigoRastreio}</td><td class="p-3 uppercase font-bold">${p.descricao}</td><td class="p-3 text-right">R$ ${cust.toFixed(2)}</td><td class="p-3 text-right text-blue-400">R$ ${vend.toFixed(2)}</td><td class="p-3 text-right text-green-400 font-bold">R$ ${luc.toFixed(2)}</td></tr>`;
-                    });
-                }
+            const di=document.getElementById('pecasDataInicio')?.value, df=document.getElementById('pecasDataFim')?.value, tb=document.getElementById('tabelaPecasCorpo');
+            if(!di||!df||!tb) return; tb.innerHTML=''; let ct=0, vt=0;
+            ordensCache.filter(o=>{const d=(o.dataEntrada||'').split('T')[0]; return d>=di&&d<=df;}).forEach(o=>{
+                if(o.itens) o.itens.filter(i=>i.tipo==='PECA').forEach(p=>{
+                    const c=p.quantidade*(p.valorCusto||p.valorUnitario*0.6), v=p.quantidade*p.valorUnitario; ct+=c; vt+=v;
+                    tb.innerHTML+=`<tr><td class="p-3">${new Date(o.dataEntrada).toLocaleDateString()}</td><td class="p-3 text-amber-400 font-bold">${o.codigoRastreio}</td><td class="p-3 uppercase">${p.descricao}</td><td class="p-3 text-right">R$ ${c.toFixed(2)}</td><td class="p-3 text-right text-blue-400">R$ ${v.toFixed(2)}</td><td class="p-3 text-right text-green-400 font-bold">R$ ${(v-c).toFixed(2)}</td></tr>`;
+                });
             });
-
-            if(document.getElementById('cardPecasCusto')) {
-                document.getElementById('cardPecasCusto').innerText = `R$ ${cTotal.toFixed(2)}`;
-                document.getElementById('cardPecasVenda').innerText = `R$ ${vTotal.toFixed(2)}`;
-                document.getElementById('cardPecasLucro').innerText = `R$ ${(vTotal - cTotal).toFixed(2)}`;
-            }
+            if(document.getElementById('cardPecasCusto')){ document.getElementById('cardPecasCusto').innerText=`R$ ${ct.toFixed(2)}`; document.getElementById('cardPecasVenda').innerText=`R$ ${vt.toFixed(2)}`; document.getElementById('cardPecasLucro').innerText=`R$ ${(vt-ct).toFixed(2)}`; }
         }
 
-        function exportarFinanceiroExcel() {
-            const ws = XLSX.utils.json_to_sheet(ordensCache.map(o => ({ 'OS': o.codigoRastreio, 'Data': o.dataEntrada, 'Valor Total': o.valorTotal })));
-            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Financeiro");
-            XLSX.writeFile(wb, `Financeiro_${new Date().toISOString().slice(0, 10)}.xlsx`);
+        function renderTabelaCli() {
+            const tb=document.getElementById('tabelaClientesCorpo'), f=(document.getElementById('filtroCli')?.value||'').toLowerCase();
+            if(!tb) return; tb.innerHTML=''; const m=new Map();
+            ordensCache.forEach(o=>{ if(o.cliente){ const k=o.cliente.telefoneWhatsapp; if(!m.has(k)) m.set(k,{n:o.cliente.nome,t:k,mt:[o.moto?o.moto.modelo:'']}); else if(o.moto&&!m.get(k).mt.includes(o.moto.modelo)) m.get(k).mt.push(o.moto.modelo); }});
+            m.forEach(c=>{ if(c.n.toLowerCase().includes(f)) tb.innerHTML+=`<tr><td class="p-3 font-bold uppercase text-white">${c.n}</td><td class="p-3 font-mono">${c.t}</td><td class="p-3 uppercase">${c.mt.join(', ')}</td><td class="p-3 text-right"><button onclick="abrirHistoricoCliente('${c.t}')" class="bg-blue-600 text-white px-2 py-1 rounded text-xs">Histórico</button></td></tr>`; });
+        }
+        function abrirHistoricoCliente(t) {
+            const osC = ordensCache.filter(o=>o.cliente&&o.cliente.telefoneWhatsapp===t); if(osC.length===0) return;
+            document.getElementById('histCliNome').innerText = osC[0].cliente.nome;
+            const tb = document.getElementById('histCliTabelaCorpo'); tb.innerHTML='';
+            osC.forEach(o => tb.innerHTML+=`<tr><td class="p-2">${new Date(o.dataEntrada).toLocaleDateString()}</td><td class="p-2 text-amber-400 font-bold">${o.codigoRastreio}</td><td class="p-2">${o.moto?o.moto.modelo:''}</td><td class="p-2">R$ ${(o.valorTotal||0).toFixed(2)}</td></tr>`);
+            document.getElementById('modalHistoricoCliente').classList.remove('hidden');
         }
 
-        function exportarPlanilhaMOExcel() {
-            const ws = XLSX.utils.json_to_sheet(ordensCache.map(o => ({ 'OS': o.codigoRastreio, 'Mecânico': o.mecanicoResponsavel ? o.mecanicoResponsavel.nome : 'N/D', 'Total': o.valorTotal })));
-            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "MaoDeObra");
-            XLSX.writeFile(wb, `Controle_MO_${new Date().toISOString().slice(0,10)}.xlsx`);
+        document.getElementById('formAgendamento').addEventListener('submit', async e=>{
+            e.preventDefault(); const p={clienteNome:document.getElementById('agNome').value, telefoneWhatsapp:document.getElementById('agTel').value, motoModelo:document.getElementById('agMoto').value, dataHora:document.getElementById('agDataHora').value};
+            await fetch('/api/agendamentos',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tokenVal},body:JSON.stringify(p)});
+            document.getElementById('formAgendamento').reset(); carregarDados();
+        });
+        function renderAgenda() {
+            const tb=document.getElementById('tabelaAgendaCorpo'); if(!tb) return; tb.innerHTML='';
+            agendaCache.forEach(a => tb.innerHTML+=`<tr><td class="p-3">${new Date(a.dataHora).toLocaleString()}</td><td class="p-3 font-bold uppercase">${a.clienteNome}</td><td class="p-3 uppercase">${a.motoModelo}</td><td class="p-3 text-right"><button onclick="fetch('/api/agendamentos/${a.id}',{method:'DELETE',headers:{'Authorization':'Bearer '+tokenVal}}).then(()=>carregarDados())" class="bg-red-600 text-white px-2 py-1 rounded text-xs">X</button></td></tr>`);
         }
 
-        function exportarPecasExcel() {
-            const ws = XLSX.utils.json_to_sheet(ordensCache.map(o => ({ 'OS': o.codigoRastreio, 'Placa': o.moto ? o.moto.placa : '' })));
-            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Pecas");
-            XLSX.writeFile(wb, `Pecas_${new Date().toISOString().slice(0,10)}.xlsx`);
-        }
+        function exportarClientesExcel() { const ws=XLSX.utils.json_to_sheet(ordensCache.map(o=>({Nome:o.cliente?.nome,Tel:o.cliente?.telefoneWhatsapp,Moto:o.moto?.modelo}))); const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,"Clientes"); XLSX.writeFile(wb,"Clientes.xlsx"); }
+        function exportarFinanceiroExcel() { const ws=XLSX.utils.json_to_sheet(ordensCache.map(o=>({OS:o.codigoRastreio,Data:o.dataEntrada,Valor:o.valorTotal}))); const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,"Fin"); XLSX.writeFile(wb,"Financeiro.xlsx"); }
+        function exportarPecasExcel() { const ws=XLSX.utils.json_to_sheet(ordensCache.map(o=>({OS:o.codigoRastreio,Placa:o.moto?.placa}))); const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,"Pecas"); XLSX.writeFile(wb,"Pecas.xlsx"); }
+        async function baixarBackupManual() { const r=await fetch('/api/backup/download',{headers:{'Authorization':'Bearer '+tokenVal}}); const b=await r.blob(); const a=document.createElement('a'); a.href=window.URL.createObjectURL(b); a.download="backup.json"; a.click(); }
+        function atualizarQRCodeManual() { const u=document.getElementById('inputUrlRastreio').value; document.getElementById('containerQRCode').innerHTML=''; new QRCode(document.getElementById('containerQRCode'),{text:u||window.location.origin,width:180,height:180}); }
 
-        async function baixarBackupManual() {
-            try {
-                const res = await fetch('/api/backup/download', { headers: { 'Authorization': 'Bearer ' + tokenVal } });
-                const blob = await res.blob();
-                const a = document.createElement('a'); a.href = window.URL.createObjectURL(blob);
-                a.download = `backup_${new Date().toISOString().slice(0, 10)}.json`; a.click();
-            } catch (e) { alert('Erro ao descarregar backup'); }
-        }
-
-        function navegarPara(aba) {
-            ['os', 'kanban', 'financeiro', 'pecas', 'backup'].forEach(n => {
-                const el = document.getElementById(`aba-${n}`);
-                const btn = document.getElementById(`nav-${n}`);
-                if (el) el.classList.add('hidden');
-                if (btn) btn.classList.remove('tab-active');
+        function navegarPara(a) {
+            ['os','kanban','agenda','clientes','qrcode','financeiro','pecas','backup'].forEach(n => {
+                const e=document.getElementById(`aba-${n}`), b=document.getElementById(`nav-${n}`);
+                if(e) e.classList.add('hidden'); if(b) b.classList.remove('tab-active');
             });
-            const alvo = document.getElementById(`aba-${aba}`);
-            const btnAlvo = document.getElementById(`nav-${aba}`);
-            if (alvo) alvo.classList.remove('hidden');
-            if (btnAlvo) btnAlvo.classList.add('tab-active');
-            if (aba === 'kanban') renderizarKanban();
+            const al=document.getElementById(`aba-${a}`), ba=document.getElementById(`nav-${a}`);
+            if(al) al.classList.remove('hidden'); if(ba) ba.classList.add('tab-active');
+            if(a==='qrcode') atualizarQRCodeManual();
         }
 
-        window.onload = () => {
-            configurarDatasAutomaticas();
-            carregarDados();
-            navegarPara('kanban');
-        };
+        window.onload = () => { configurarDatasAutomaticas(); carregarDados(); navegarPara('os'); };
     </script>
 </body>
 </html>
