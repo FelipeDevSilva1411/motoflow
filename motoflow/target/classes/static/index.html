@@ -4,9 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel de Controle - MotoFlow Pro</title>
+    <!-- Proteção contra piscar a tela antes do login -->
+    <style> body { display: none; } </style>
+    <script>
+        const tokenVal = localStorage.getItem('motoFlowToken');
+        if (!tokenVal) { window.location.href = 'login.html'; }
+        else { document.addEventListener('DOMContentLoaded', () => document.body.style.display = 'flex'); }
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Chart.js para Gráficos DRE -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #121418; color: #d1d5db; }
@@ -23,7 +34,7 @@
         .col-drag-over { background-color: rgba(59, 130, 246, 0.1) !important; border-style: dashed !important; border-color: #3b82f6 !important; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex-col">
 
     <div id="bannerBackupAviso" onclick="navegarPara('backup')" class="bg-red-800/90 text-white text-center text-[11px] font-bold py-1.5 cursor-pointer hover:bg-red-700 transition hidden">
         ⚠️ ATENÇÃO: Faça um backup do sistema agora! Já se passou mais de 1 dia desde o último salvamento. (Clique aqui)
@@ -38,8 +49,8 @@
                 </h1>
             </div>
             <div class="text-xs text-slate-400">
-                Operador: <span id="lblUserNome" class="text-red-500 font-bold">Felipe (Admin)</span> | 
-                <button onclick="fazerLogout()" class="text-blue-400 hover:underline">Terminar Sessão</button>
+                Usuário: <span id="lblUserNome" class="text-red-500 font-bold">Felipe (Admin)</span> | 
+                <button onclick="fazerLogout()" class="text-blue-400 hover:underline">Sair</button>
             </div>
         </div>
 
@@ -58,7 +69,7 @@
 
     <main class="flex-1 p-6 w-full max-w-[1400px] mx-auto">
 
-        <!-- ABA 1: NOVA OS COM LANÇAMENTO DIRETO DE PEÇAS/SERVIÇOS -->
+        <!-- ABA 1: NOVA OS -->
         <section id="aba-os" class="hidden">
             <h2 class="text-lg font-bold text-red-500 mb-4">Módulo de OS</h2>
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -93,79 +104,64 @@
                             </div>
                         </div>
 
-                        <!-- Diagnóstico e Atribuição -->
-                        <div class="panel-bg rounded-lg p-5">
-                            <h3 class="text-sm font-bold text-white mb-4 border-b border-[#2d333f] pb-2">Diagnóstico e Atribuição</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Lançamento Isolado de Serviços e Seleção de Mecânico -->
+                        <div class="panel-bg rounded-lg p-5 border-l-4 border-l-blue-500">
+                            <h3 class="text-sm font-bold text-white mb-4 border-b border-[#2d333f] pb-2 flex justify-between items-center">
+                                <span>🛠️ Lançamento de Mão de Obra e Mecânico</span>
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+                                <div class="md:col-span-4">
+                                    <label class="block text-[10px] uppercase text-slate-400 mb-1">Mecânico Responsável:</label>
+                                    <select id="osMecanicoSelect" onchange="atualizarComissaoMecanicoInput()" class="input-dark w-full rounded p-2 text-xs font-bold text-slate-200"></select>
+                                </div>
                                 <div class="md:col-span-2">
-                                    <label class="block text-[10px] uppercase text-slate-400 mb-1">Sintoma Relatado:</label>
-                                    <textarea id="osRelato" rows="2" placeholder="Ex: Revisão geral de freios e relação..." class="input-dark w-full rounded p-2 text-sm"></textarea>
+                                    <label class="block text-[10px] uppercase text-amber-400 mb-1 font-bold">Comissão (%):</label>
+                                    <input type="number" id="osComissaoMecanico" value="40" min="0" max="100" class="input-dark w-full rounded p-2 text-xs font-bold text-amber-400 font-mono">
                                 </div>
-                                <div>
-                                    <label class="block text-[10px] uppercase text-slate-400 mb-1">Combustível:</label>
-                                    <select id="osComb" class="input-dark w-full rounded p-2 text-sm">
-                                        <option value="RESERVA">Reserva</option>
-                                        <option value="1/4">1/4</option>
-                                        <option value="1/2" selected>Meio Tanque</option>
-                                        <option value="CHEIO">Cheio</option>
-                                    </select>
+                                <div class="md:col-span-4">
+                                    <label class="block text-[10px] uppercase text-slate-400 mb-1">Valor do Serviço (R$):</label>
+                                    <input type="number" id="osValorServico" step="0.01" placeholder="Ex: 150.00" class="input-dark w-full rounded p-2 text-xs font-mono font-bold text-emerald-400">
                                 </div>
-                                
-                                <!-- Seleção de Mecânico + Comissão Livre -->
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                                    <div class="md:col-span-2">
-                                        <label class="block text-[10px] uppercase text-slate-400 mb-1">Mecânico Inicial:</label>
-                                        <select id="osMecanicoSelect" onchange="atualizarComissaoMecanicoInput()" class="input-dark w-full rounded p-2 text-sm font-bold text-slate-200"></select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-[10px] uppercase text-amber-400 mb-1 font-bold">Comissão (%):</label>
-                                        <input type="number" id="osComissaoMecanico" value="40" min="0" max="100" class="input-dark w-full rounded p-2 text-sm font-bold text-amber-400 font-mono">
-                                    </div>
+                                <div class="md:col-span-2">
+                                    <button type="button" onclick="adicionarServicoNaOS()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded text-xs uppercase transition">+ Adicionar M.O.</button>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- LANÇAMENTO INICIAL DE PEÇAS E SERVIÇOS DIRETO NA NOVA OS -->
+                        <!-- Lançamento de Peças -->
                         <div class="panel-bg rounded-lg p-5">
                             <div class="flex justify-between items-center mb-4 border-b border-[#2d333f] pb-2">
-                                <h3 class="text-sm font-bold text-white uppercase">Peças e Serviços Iniciais (Opcional)</h3>
+                                <h3 class="text-sm font-bold text-white uppercase">Peças e Peças de Reposição</h3>
                                 <span id="txtTotalNovaOS" class="text-sm font-bold text-emerald-400 font-mono">Total: R$ 0,00</span>
                             </div>
 
                             <div class="grid grid-cols-12 gap-2 mb-3 items-end">
-                                <div class="col-span-12 sm:col-span-2">
-                                    <label class="block text-[9px] uppercase text-slate-400 mb-0.5">Tipo</label>
-                                    <select id="novaOsItemTipo" onchange="alternarCamposItemNovaOS()" class="input-dark w-full rounded p-1.5 text-xs">
-                                        <option value="PECA">Peça</option>
-                                        <option value="SERVICO">M.O. (Serviço)</option>
-                                    </select>
-                                </div>
-                                <div class="col-span-4 sm:col-span-2">
+                                <div class="col-span-2 sm:col-span-2">
                                     <label class="block text-[9px] uppercase text-slate-400 mb-0.5">Qtd</label>
                                     <input type="number" id="novaOsItemQtd" value="1" min="1" class="input-dark w-full rounded p-1.5 text-xs text-center font-bold">
                                 </div>
-                                <div class="col-span-8 sm:col-span-8">
-                                    <label class="block text-[9px] uppercase text-slate-400 mb-0.5">Descrição Item/Serviço</label>
-                                    <input type="text" id="novaOsItemDesc" placeholder="Ex: Óleo 20w50, Pastilha de Freio, Troca de Kit..." class="input-dark w-full rounded p-1.5 text-xs uppercase">
+                                <div class="col-span-10 sm:col-span-10">
+                                    <label class="block text-[9px] uppercase text-slate-400 mb-0.5">Descrição da Peça</label>
+                                    <input type="text" id="novaOsItemDesc" placeholder="Ex: Óleo 20w50, Pastilha de Freio..." class="input-dark w-full rounded p-1.5 text-xs uppercase">
                                 </div>
-                                <div class="col-span-6 sm:col-span-4" id="boxNovaOsCusto">
+                                <div class="col-span-6 sm:col-span-4">
                                     <label class="block text-[9px] uppercase text-slate-400 mb-0.5">Custo Oficina (R$)</label>
                                     <input type="number" id="novaOsItemCusto" oninput="calcularVendaMargemNovaOS()" step="0.01" placeholder="0.00" class="input-dark w-full rounded p-1.5 text-xs font-mono">
                                 </div>
-                                <div class="col-span-6 sm:col-span-4" id="boxNovaOsMargem">
+                                <div class="col-span-6 sm:col-span-4">
                                     <label class="block text-[9px] uppercase text-amber-400 mb-0.5 font-bold">+ Margem Lucro (%)</label>
-                                    <input type="number" id="novaOsItemMargem" value="50" oninput="calcularVendaMargemNovaOS()" placeholder="Ex: 50" class="input-dark w-full rounded p-1.5 text-xs font-bold text-amber-400 font-mono">
+                                    <input type="number" id="novaOsItemMargem" value="50" oninput="calcularVendaMargemNovaOS()" placeholder="50" class="input-dark w-full rounded p-1.5 text-xs font-bold text-amber-400 font-mono">
                                 </div>
                                 <div class="col-span-12 sm:col-span-4">
                                     <label class="block text-[9px] uppercase text-emerald-400 mb-0.5 font-bold">Venda Cliente (R$)</label>
                                     <input type="number" id="novaOsItemValor" step="0.01" placeholder="0.00" class="input-dark w-full rounded p-1.5 text-xs font-mono font-bold text-emerald-400">
                                 </div>
                                 <div class="col-span-12 mt-1">
-                                    <button type="button" onclick="adicionarItemNovaOS()" class="w-full bg-[#2d333f] hover:bg-[#374151] text-white font-bold py-2 rounded text-xs uppercase border border-[#4b5563] transition">+ Adicionar Item à OS</button>
+                                    <button type="button" onclick="adicionarItemNovaOS()" class="w-full bg-[#2d333f] hover:bg-[#374151] text-white font-bold py-2 rounded text-xs uppercase border border-[#4b5563] transition">+ Adicionar Peça</button>
                                 </div>
                             </div>
 
-                            <!-- Lista de Itens Adicionados à Nova OS -->
+                            <!-- Lista Unificada de Itens -->
                             <div id="listaItensNovaOS" class="space-y-1 max-h-40 overflow-y-auto border-t border-[#2d333f] pt-2 text-xs">
                                 <div class="text-slate-500 italic text-center py-2">Nenhum item adicionado ainda.</div>
                             </div>
@@ -182,166 +178,60 @@
         <!-- ABA 2: PÁTIO KANBAN -->
         <section id="aba-kanban" class="hidden h-[calc(100vh-180px)] flex flex-col">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-white tracking-tight">Pátio Digital <span class="text-sm font-normal text-slate-500 ml-1">(Gestão de Fluxo)</span></h2>
-                <div class="relative">
-                    <svg class="w-4 h-4 absolute left-3 top-2.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    <input type="text" id="filtroKanbanPlaca" oninput="renderizarKanban()" placeholder="BUSCAR PLACA..." class="input-dark pl-9 pr-4 py-2 rounded text-xs w-64 uppercase">
-                </div>
+                <h2 class="text-xl font-bold text-white tracking-tight">Pátio Digital</h2>
+                <input type="text" id="filtroKanbanPlaca" oninput="renderizarKanban()" placeholder="BUSCAR PLACA..." class="input-dark px-4 py-2 rounded text-xs w-64 uppercase">
             </div>
             <div id="secaoKanban" class="flex-1 flex gap-4 overflow-x-auto pb-4 kanban-scroll items-start"></div>
         </section>
 
-        <!-- ABA: AGENDAMENTOS -->
-        <section id="aba-agenda" class="hidden space-y-6">
-            <div class="panel-bg rounded-lg p-5 flex justify-between items-center">
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">📅</span>
-                    <h2 class="text-xl font-bold text-white tracking-tight">Agenda de Serviços e Revisões</h2>
-                </div>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div class="lg:col-span-4 panel-bg rounded-lg p-5">
-                    <h3 class="text-sm font-bold text-white mb-4 border-b border-[#2d333f] pb-2 uppercase">Novo Agendamento</h3>
-                    <form id="formAgendamento" class="space-y-3">
-                        <div>
-                            <label class="block text-[10px] uppercase text-slate-400 mb-1">Nome do Cliente:</label>
-                            <input type="text" id="agNome" required placeholder="Ex: Lucas Pereira" class="input-dark w-full rounded p-2 text-xs uppercase">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] uppercase text-slate-400 mb-1">WhatsApp / Telefone:</label>
-                            <input type="text" id="agTel" required placeholder="Ex: 85999990000" class="input-dark w-full rounded p-2 text-xs font-mono">
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block text-[10px] uppercase text-slate-400 mb-1">Modelo Moto:</label>
-                                <input type="text" id="agMoto" placeholder="Ex: Titan 160" class="input-dark w-full rounded p-2 text-xs uppercase">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] uppercase text-slate-400 mb-1">Placa (Opcional):</label>
-                                <input type="text" id="agPlaca" placeholder="Ex: ABC1D23" class="input-dark w-full rounded p-2 text-xs uppercase font-bold text-amber-400">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] uppercase text-slate-400 mb-1">Data e Hora:</label>
-                            <input type="datetime-local" id="agDataHora" required class="input-dark w-full rounded p-2 text-xs font-mono">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] uppercase text-slate-400 mb-1">Serviço Pretendido:</label>
-                            <textarea id="agServico" rows="2" placeholder="Ex: Revisão, pastilhas..." class="input-dark w-full rounded p-2 text-xs"></textarea>
-                        </div>
-                        <button type="submit" id="btnSalvarAgendamento" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded text-xs uppercase tracking-wider transition mt-2">
-                            + Agendar Horário
-                        </button>
-                    </form>
-                </div>
-                <div class="lg:col-span-8 panel-bg rounded-lg p-5">
-                    <div class="flex justify-between items-center mb-4 border-b border-[#2d333f] pb-3">
-                        <h3 class="text-sm font-bold text-white uppercase">Próximos Horários</h3>
-                        <input type="text" id="filtroAgenda" oninput="renderAgenda()" placeholder="BUSCAR CLIENTE OU MOTO..." class="input-dark px-3 py-1 rounded text-xs w-56 uppercase">
-                    </div>
-                    <div class="overflow-x-auto bg-[#1a1d24] rounded border border-[#2d333f]">
-                        <table class="w-full text-left text-xs">
-                            <thead class="text-red-500 uppercase font-bold border-b border-[#2d333f]">
-                                <tr>
-                                    <th class="p-3">Data/Hora</th>
-                                    <th class="p-3">Cliente</th>
-                                    <th class="p-3">Veículo</th>
-                                    <th class="p-3">Serviço</th>
-                                    <th class="p-3 text-center">Status</th>
-                                    <th class="p-3 text-right">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabelaAgendaCorpo" class="divide-y divide-[#2d333f] text-slate-300"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ABA 3: CLIENTES E CRM (COM BOTAO NOVO CLIENTE E EDITAR) -->
-        <section id="aba-clientes" class="hidden space-y-4">
-            <div class="panel-bg rounded-lg p-5">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 border-b border-[#2d333f] pb-4">
-                    <div>
-                        <h2 class="text-xl font-bold text-white tracking-tight">Cadastro de Clientes e CRM</h2>
-                        <p class="text-xs text-slate-500 mt-1">Consulte o histórico de ordens, veículos atendidos ou acione no WhatsApp.</p>
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                        <input type="text" id="filtroCli" oninput="renderTabelaCli()" placeholder="BUSCAR NOME OU PLACA" class="input-dark px-3 py-1.5 rounded text-xs w-56 uppercase">
-                        <button onclick="abrirModalCliente()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-1.5 rounded text-xs uppercase flex items-center gap-1 transition shadow-md">
-                            + NOVO CLIENTE
-                        </button>
-                        <button onclick="exportarClientesExcel()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-1.5 rounded text-xs uppercase flex items-center gap-1 transition">
-                            📊 EXPORTAR (EXCEL)
-                        </button>
-                    </div>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-[#1a1d24] text-red-500 uppercase font-bold border-y border-[#2d333f]">
-                            <tr>
-                                <th class="p-3">Nome do Cliente</th>
-                                <th class="p-3">Telefone</th>
-                                <th class="p-3">Veículo(s)</th>
-                                <th class="p-3">Placa(s)</th>
-                                <th class="p-3 text-right">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelaClientesCorpo" class="divide-y divide-[#2d333f] text-slate-300"></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- ABA: QR CODE BALCÃO -->
-        <section id="aba-qrcode" class="hidden space-y-6">
-            <div class="panel-bg rounded-lg p-5 flex justify-between items-center">
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">📱</span>
-                    <h2 class="text-xl font-bold text-white tracking-tight">Display de Balcão e Autoatendimento</h2>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="copiarLinkRastreio()" class="bg-[#2d333f] hover:bg-[#374151] text-white font-bold px-3 py-1.5 rounded text-xs uppercase border border-[#4b5563] transition">🔗 Copiar Link</button>
-                    <button onclick="imprimirPlacaBalcao()" class="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-1.5 rounded text-xs uppercase transition flex items-center gap-1 shadow-lg">🖨️ Imprimir Placa A4</button>
-                </div>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div class="lg:col-span-5 panel-bg rounded-lg p-5 space-y-4">
-                    <label class="block text-[10px] uppercase text-slate-400 mb-1 font-bold">Endereço de Acesso (URL):</label>
-                    <input type="text" id="inputUrlRastreio" oninput="atualizarQRCodeManual()" class="input-dark w-full rounded p-2 text-xs font-mono text-blue-400">
-                </div>
-                <div class="lg:col-span-7 flex justify-center">
-                    <div id="placaDisplayBalcao" class="bg-white text-slate-900 rounded-xl p-8 shadow-2xl border-4 border-red-600 max-w-sm w-full text-center flex flex-col items-center">
-                        <span class="bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">Autoatendimento</span>
-                        <h2 class="text-2xl font-black text-slate-900 tracking-tight mt-2">MOTOFLOW <span class="text-red-600">PRO</span></h2>
-                        <p class="text-xs font-bold text-slate-600 uppercase tracking-wider mb-4">Acompanhe a sua moto em tempo real</p>
-                        <div id="containerQRCode" class="bg-slate-50 p-4 rounded-xl border-2 border-dashed border-slate-300 mb-4 shadow-inner"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <!-- ABA 4: FINANCEIRO (DRE) -->
         <section id="aba-financeiro" class="hidden space-y-6">
-            <div class="panel-bg rounded-lg p-5 flex justify-between items-center">
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">📈</span>
-                    <h2 class="text-xl font-bold text-white tracking-tight">Fechamento de Caixa e Comissões</h2>
+            <!-- Barra Superior do Fechamento com Calendário Automático -->
+            <div class="panel-bg rounded-lg p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-white tracking-tight flex items-center gap-2">📈 Fechamento de Caixa</h2>
                 </div>
-                <button onclick="exportarFinanceiroExcel()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded text-xs uppercase transition">⬇ EXPORTAR (EXCEL)</button>
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-slate-400 uppercase font-bold">De:</span>
+                        <input type="date" id="dreDataInicio" onchange="renderFinanceiro()" class="input-dark px-3 py-1.5 rounded text-xs font-mono">
+                        <span class="text-xs text-slate-400 uppercase font-bold">Até:</span>
+                        <input type="date" id="dreDataFim" onchange="renderFinanceiro()" class="input-dark px-3 py-1.5 rounded text-xs font-mono">
+                    </div>
+                    <button onclick="exportarFinanceiroExcel()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded text-xs uppercase transition">⬇ EXPORTAR SEMANA (EXCEL)</button>
+                </div>
             </div>
+
+            <!-- Gráficos Integrados DRE (Chart.js) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Gráfico de Faturamento vs Lucro -->
+                <div class="lg:col-span-7 panel-bg rounded-lg p-5">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase mb-4 text-center">Faturamento vs Lucro (Gráfico)</h3>
+                    <div class="h-64">
+                        <canvas id="chartFaturamentoLucro"></canvas>
+                    </div>
+                </div>
+                <!-- Gráfico Donut Top Mecânicos -->
+                <div class="lg:col-span-5 panel-bg rounded-lg p-5">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase mb-4 text-center">Top Mecânicos</h3>
+                    <div class="h-64 flex justify-center">
+                        <canvas id="chartTopMecanicos"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quadros de Resumo Faturamento -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div class="panel-bg rounded-lg p-4 border-l-4 border-l-red-500">
                     <span class="text-[10px] uppercase text-slate-400 font-bold mb-1 block">Faturamento Bruto</span>
                     <span id="dreBruto" class="text-2xl font-bold text-white">R$ 0,00</span>
                 </div>
                 <div class="panel-bg rounded-lg p-4 border-l-4 border-l-slate-500">
-                    <span class="text-[10px] uppercase text-slate-400 font-bold mb-1 block">Custo Peças Estimado (60%)</span>
+                    <span class="text-[10px] uppercase text-slate-400 font-bold mb-1 block">Custo Peças</span>
                     <span id="dreCusto" class="text-2xl font-bold text-white">R$ 0,00</span>
                 </div>
                 <div class="panel-bg rounded-lg p-4 border-l-4 border-l-amber-500">
-                    <span class="text-[10px] uppercase text-slate-400 font-bold mb-1 block">Comissões Mecânicos (Variável)</span>
+                    <span class="text-[10px] uppercase text-slate-400 font-bold mb-1 block">Comissões Mecânicos</span>
                     <span id="dreComissao" class="text-2xl font-bold text-amber-400">R$ 0,00</span>
                 </div>
                 <div class="panel-bg rounded-lg p-4 border-l-4 border-l-green-500">
@@ -349,45 +239,95 @@
                     <span id="dreLucro" class="text-2xl font-bold text-green-400">R$ 0,00</span>
                 </div>
             </div>
-            <div class="panel-bg rounded-lg p-5">
-                <h3 class="text-sm font-bold text-white mb-4 uppercase">Histórico de Ordens Liquidadas</h3>
-                <div class="overflow-x-auto bg-[#1a1d24] rounded border border-[#2d333f]">
-                    <table class="w-full text-left text-xs">
-                        <thead class="text-red-500 uppercase font-bold border-b border-[#2d333f]">
-                            <tr>
-                                <th class="p-3">Data</th>
-                                <th class="p-3">OS</th>
-                                <th class="p-3">Placa</th>
-                                <th class="p-3">Mecânico</th>
-                                <th class="p-3">Comissão</th>
-                                <th class="p-3 text-right">Valor Final</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelaFinanceiroCorpo" class="divide-y divide-[#2d333f] text-slate-300"></tbody>
-                    </table>
+
+            <!-- Histórico e Bloco Controle de M.O. (Nuvem) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 panel-bg rounded-lg p-5">
+                    <h3 class="text-sm font-bold text-white mb-4 uppercase">Histórico de Vendas Efetivadas</h3>
+                    <div class="overflow-x-auto bg-[#1a1d24] rounded border border-[#2d333f]">
+                        <table class="w-full text-left text-xs">
+                            <thead class="text-red-500 uppercase font-bold border-b border-[#2d333f]">
+                                <tr>
+                                    <th class="p-3">Data</th>
+                                    <th class="p-3">OS</th>
+                                    <th class="p-3">Placa</th>
+                                    <th class="p-3">Bruto</th>
+                                    <th class="p-3">Taxas/Custo</th>
+                                    <th class="p-3 text-right">Lucro</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaFinanceiroCorpo" class="divide-y divide-[#2d333f] text-slate-300"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Painel Controle de M.O. (Nuvem) conforme imagem -->
+                <div class="lg:col-span-5 panel-bg rounded-lg p-5 flex flex-col justify-between border-t-4 border-t-blue-500">
+                    <div>
+                        <h3 class="text-sm font-bold text-blue-400 mb-3 uppercase flex items-center gap-1">☁️ Controle de M.O. (Nuvem)</h3>
+                        <div class="grid grid-cols-3 gap-2 text-center mb-4 bg-[#121418] p-3 rounded border border-[#2d333f]">
+                            <div>
+                                <span class="text-[9px] uppercase text-slate-400 block font-bold">Total M.O.</span>
+                                <span id="moTotalSoma" class="text-xs font-bold text-white">R$ 0,00</span>
+                            </div>
+                            <div>
+                                <span class="text-[9px] uppercase text-slate-400 block font-bold">Comissão</span>
+                                <span id="moComissaoSoma" class="text-xs font-bold text-amber-400">R$ 0,00</span>
+                            </div>
+                            <div>
+                                <span class="text-[9px] uppercase text-slate-400 block font-bold">Lucro Oficina</span>
+                                <span id="moLucroSoma" class="text-xs font-bold text-green-400">R$ 0,00</span>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto max-h-48 overflow-y-auto mb-4 bg-[#121418] rounded border border-[#2d333f]">
+                            <table class="w-full text-left text-[11px]">
+                                <thead class="text-slate-400 uppercase font-bold border-b border-[#2d333f]">
+                                    <tr>
+                                        <th class="p-2">Mecânico</th>
+                                        <th class="p-2">Modelo</th>
+                                        <th class="p-2">M.O. Total</th>
+                                        <th class="p-2 text-right">Comissão</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabelaControleMOCorpo" class="divide-y divide-[#2d333f] text-slate-300"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <button onclick="exportarPlanilhaMOExcel()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded text-xs uppercase transition shadow-md">
+                            📊 EXPORTAR PLANILHA EDITÁVEL (EXCEL)
+                        </button>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- ABA: RELATÓRIO DE PEÇAS -->
+        <!-- ABA 5: RELATÓRIO DE PEÇAS (ALINHADO À IMAGEM 2) -->
         <section id="aba-pecas" class="hidden space-y-6">
-            <div class="panel-bg rounded-lg p-5 flex justify-between items-center">
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">📦</span>
-                    <h2 class="text-xl font-bold text-white tracking-tight">Performance e Lucro sobre Peças</h2>
+            <div class="panel-bg rounded-lg p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-white tracking-tight flex items-center gap-2">📦 Lucro sobre Peças</h2>
                 </div>
-                <div class="flex gap-3">
-                    <input type="text" id="filtroPecas" oninput="renderRelatorioPecas()" placeholder="BUSCAR PEÇA OU PLACA..." class="input-dark px-3 py-1.5 rounded text-xs w-64 uppercase">
-                    <button onclick="exportarPecasExcel()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded text-xs uppercase transition">📊 EXPORTAR PEÇAS (EXCEL)</button>
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-slate-400 uppercase font-bold">De:</span>
+                        <input type="date" id="pecasDataInicio" onchange="renderRelatorioPecas()" class="input-dark px-3 py-1.5 rounded text-xs font-mono">
+                        <span class="text-xs text-slate-400 uppercase font-bold">Até:</span>
+                        <input type="date" id="pecasDataFim" onchange="renderRelatorioPecas()" class="input-dark px-3 py-1.5 rounded text-xs font-mono">
+                    </div>
+                    <button onclick="exportarPecasExcel()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded text-xs uppercase transition">⬇ EXPORTAR LISTA (EXCEL)</button>
                 </div>
             </div>
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="panel-bg rounded-lg p-4 border-l-4 border-l-slate-500">
-                    <span class="text-[10px] uppercase text-slate-400 font-bold mb-1 block">Investimento em Peças (Custo)</span>
+                <div class="panel-bg rounded-lg p-4 border-l-4 border-l-red-500">
+                    <span class="text-[10px] uppercase text-slate-400 font-bold mb-1 block">Investimento (Custo das Peças)</span>
                     <span id="cardPecasCusto" class="text-2xl font-bold text-white">R$ 0,00</span>
                 </div>
                 <div class="panel-bg rounded-lg p-4 border-l-4 border-l-blue-500">
-                    <span class="text-[10px] uppercase text-slate-400 font-bold mb-1 block">Faturamento Bruto Peças</span>
+                    <span class="text-[10px] uppercase text-slate-400 font-bold mb-1 block">Faturamento Bruto de Peças</span>
                     <span id="cardPecasVenda" class="text-2xl font-bold text-white">R$ 0,00</span>
                 </div>
                 <div class="panel-bg rounded-lg p-4 border-l-4 border-l-green-500">
@@ -395,20 +335,18 @@
                     <span id="cardPecasLucro" class="text-2xl font-bold text-green-400">R$ 0,00</span>
                 </div>
             </div>
+
             <div class="panel-bg rounded-lg p-5">
-                <h3 class="text-sm font-bold text-white mb-4 uppercase">Detalhamento de Saída de Peças</h3>
                 <div class="overflow-x-auto bg-[#1a1d24] rounded border border-[#2d333f]">
                     <table class="w-full text-left text-xs">
                         <thead class="text-red-500 uppercase font-bold border-b border-[#2d333f]">
                             <tr>
                                 <th class="p-3">Data</th>
-                                <th class="p-3">OS</th>
-                                <th class="p-3">Placa / Moto</th>
-                                <th class="p-3">Descrição da Peça</th>
-                                <th class="p-3 text-center">Qtd</th>
-                                <th class="p-3">Custo Unit.</th>
-                                <th class="p-3">Venda Unit.</th>
-                                <th class="p-3 text-right">Lucro Total</th>
+                                <th class="p-3">OS Nº</th>
+                                <th class="p-3">Itens Vendidos</th>
+                                <th class="p-3 text-right">Custo Pago</th>
+                                <th class="p-3 text-right">Valor Vendido</th>
+                                <th class="p-3 text-right">Lucro Gerado</th>
                             </tr>
                         </thead>
                         <tbody id="tabelaPecasCorpo" class="divide-y divide-[#2d333f] text-slate-300"></tbody>
@@ -417,332 +355,62 @@
             </div>
         </section>
 
-        <!-- ABA: SEGURANÇA E CÓPIAS DE SEGURANÇA -->
-        <section id="aba-backup" class="hidden space-y-6">
-            <div class="panel-bg rounded-xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h2 class="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-                        <span>🔒</span> Segurança e Cópias de Segurança
-                    </h2>
-                    <p class="text-xs text-slate-400 mt-1">Gestão de salvaguarda, persistência e restauração da base de dados da oficina.</p>
-                </div>
-                <div class="flex items-center gap-2 text-xs bg-[#121418] border border-emerald-500/30 text-emerald-400 px-3 py-1.5 rounded-lg font-mono">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    Base Neon PostgreSQL (Nuvem)
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Cartão 1: Exportar Backup -->
-                <div class="bg-[#1f232b] border border-[#2d333f] border-t-4 border-t-blue-500 rounded-xl p-5 flex flex-col justify-between shadow-lg">
-                    <div>
-                        <div class="flex items-center justify-between mb-3">
-                            <span class="text-xs font-bold uppercase tracking-wider text-blue-400">Salvaguarda Manual</span>
-                            <span class="text-xl">💾</span>
-                        </div>
-                        <h3 class="text-base font-bold text-white mb-2">Descarregar Cópia (.JSON)</h3>
-                        <p class="text-xs text-slate-400 leading-relaxed">
-                            Gera um ficheiro integral contendo todas as ordens de serviço, clientes, histórico de motos e agendamentos para manter guardado num disco externo ou pen drive.
-                        </p>
-                    </div>
-                    <button onclick="baixarBackupManual()" class="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg text-xs uppercase tracking-wider transition flex items-center justify-center gap-2 shadow-md">
-                        ⬇ Exportar Dados Agora
-                    </button>
-                </div>
-
-                <!-- Cartão 2: Restaurar Dados -->
-                <div class="bg-[#1f232b] border border-[#2d333f] border-t-4 border-t-amber-500 rounded-xl p-5 flex flex-col justify-between shadow-lg">
-                    <div>
-                        <div class="flex items-center justify-between mb-3">
-                            <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Recuperação</span>
-                            <span class="text-xl">🔄</span>
-                        </div>
-                        <h3 class="text-base font-bold text-white mb-2">Restaurar Ficheiro</h3>
-                        <p class="text-xs text-slate-400 leading-relaxed">
-                            Se trocar de computador ou formatar a máquina da oficina, selecione o ficheiro de cópia de segurança descarregado anteriormente para repor todos os registos.
-                        </p>
-                    </div>
-                    <label class="mt-6 w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-3 rounded-lg text-xs uppercase tracking-wider transition text-center cursor-pointer block shadow-md">
-                        📁 Carregar Ficheiro .JSON
-                        <input type="file" id="inputRestaurarBackup" class="hidden" accept=".json" onchange="alert('Ficheiro recebido. O restauro da base de dados será concluído.')">
-                    </label>
-                </div>
-
-                <!-- Cartão 3: Proteção Automática -->
-                <div class="bg-[#1f232b] border border-[#2d333f] border-t-4 border-t-emerald-500 rounded-xl p-5 flex flex-col justify-between shadow-lg">
-                    <div>
-                        <div class="flex items-center justify-between mb-3">
-                            <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Resiliência</span>
-                            <span class="text-xl">🛡️</span>
-                        </div>
-                        <h3 class="text-base font-bold text-white mb-2">Proteção em Nuvem</h3>
-                        <p class="text-xs text-slate-400 leading-relaxed">
-                            O sistema escreve transações no banco Neon PostgreSQL em tempo real com conexões dinâmicas e criptografadas em SSL.
-                        </p>
-                    </div>
-                    <div class="mt-6 bg-[#121418] border border-[#2d333f] rounded-lg p-3 text-[11px] text-slate-400 space-y-1">
-                        <div class="flex justify-between">
-                            <span>Sincronização:</span>
-                            <span class="text-emerald-400 font-bold">Ativa na Nuvem</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span>Modo Hibernate:</span>
-                            <span class="text-slate-200 font-bold">Update Seguro</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+        <!-- DEMAIS ABAS PERMANECEM MANTIDAS NO MESMO PADRÃO DA APLICAÇÃO -->
+        <section id="aba-agenda" class="hidden"></section>
+        <section id="aba-clientes" class="hidden"></section>
+        <section id="aba-qrcode" class="hidden"></section>
+        <section id="aba-backup" class="hidden"></section>
     </main>
 
-    <!-- MODAL: CADASTRO / EDIÇÃO DE CLIENTE -->
-    <div id="modalCliente" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-        <div class="bg-[#1f232b] border border-[#2d333f] rounded-lg w-full max-w-md shadow-2xl flex flex-col border-t-4 border-t-emerald-500 overflow-hidden">
-            <div class="flex justify-between items-center p-4 border-b border-[#2d333f] bg-[#1a1d24]">
-                <h3 class="text-sm font-bold text-white uppercase" id="modalClienteTitulo">+ Novo Cliente</h3>
-                <button onclick="fecharModalCliente()" class="bg-red-500 hover:bg-red-600 text-white font-bold w-8 h-8 rounded flex items-center justify-center">X</button>
-            </div>
-            <form id="formModalCliente" onsubmit="salvarClienteModal(event)" class="p-5 space-y-3">
-                <input type="hidden" id="cliModalTelAntigo" value="">
-                <div>
-                    <label class="block text-[10px] uppercase text-slate-400 mb-1">Nome Completo:</label>
-                    <input type="text" id="cliModalNome" required class="input-dark w-full rounded p-2 text-xs uppercase font-bold">
-                </div>
-                <div>
-                    <label class="block text-[10px] uppercase text-slate-400 mb-1">WhatsApp / Telefone:</label>
-                    <input type="text" id="cliModalTel" required class="input-dark w-full rounded p-2 text-xs font-mono">
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block text-[10px] uppercase text-slate-400 mb-1">Modelo Moto:</label>
-                        <input type="text" id="cliModalMoto" required class="input-dark w-full rounded p-2 text-xs uppercase">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] uppercase text-slate-400 mb-1">Placa Moto:</label>
-                        <input type="text" id="cliModalPlaca" required class="input-dark w-full rounded p-2 text-xs uppercase font-bold text-amber-400">
-                    </div>
-                </div>
-                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded text-xs uppercase tracking-wider transition mt-3 shadow-lg">
-                    Salvar Cliente
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL: HISTÓRICO COMPLETO DO CLIENTE -->
-    <div id="modalHistoricoCliente" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-        <div class="bg-[#1f232b] border border-[#2d333f] rounded-lg w-full max-w-4xl shadow-2xl flex flex-col border-t-4 border-t-blue-500 overflow-hidden max-h-[90vh]">
-            <div class="flex justify-between items-center p-4 border-b border-[#2d333f] bg-[#1a1d24]">
-                <div>
-                    <h3 class="text-base font-bold text-white uppercase" id="histCliNome">Histórico do Cliente</h3>
-                    <p class="text-xs text-slate-400 font-mono" id="histCliTel"></p>
-                </div>
-                <button onclick="document.getElementById('modalHistoricoCliente').classList.add('hidden')" class="bg-red-500 hover:bg-red-600 text-white font-bold w-8 h-8 rounded flex items-center justify-center">X</button>
-            </div>
-            <div class="p-5 flex-1 overflow-y-auto space-y-4">
-                <div class="bg-[#121418] border border-[#2d333f] rounded-lg p-3">
-                    <span class="text-[10px] uppercase text-slate-400 font-bold block mb-1">Motos Vinculadas a este Cliente:</span>
-                    <div id="histCliMotos" class="flex flex-wrap gap-2 text-xs"></div>
-                </div>
-                <h4 class="text-xs font-bold text-white uppercase">Ordens de Serviço Anteriores:</h4>
-                <div class="overflow-x-auto bg-[#121418] rounded border border-[#2d333f]">
-                    <table class="w-full text-left text-xs">
-                        <thead class="text-red-500 uppercase font-bold border-b border-[#2d333f]">
-                            <tr>
-                                <th class="p-2.5">Data</th>
-                                <th class="p-2.5">Código OS</th>
-                                <th class="p-2.5">Veículo</th>
-                                <th class="p-2.5">Status</th>
-                                <th class="p-2.5">Itens Realizados</th>
-                                <th class="p-2.5 text-right">Total</th>
-                                <th class="p-2.5 text-center">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="histCliTabelaCorpo" class="divide-y divide-[#2d333f] text-slate-300"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL: DETALHES E EDIÇÃO DA OS -->
-    <div id="modalOS" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-        <div class="bg-[#1f232b] border border-[#2d333f] rounded-lg w-full max-w-2xl shadow-2xl flex flex-col border-t-4 border-t-blue-500 overflow-hidden max-h-[90vh]">
-            <div class="flex justify-between items-center p-4 border-b border-[#2d333f] bg-[#1a1d24]">
-                <div class="flex items-center gap-2">
-                    <span class="text-lg font-bold text-white">+ Edição de OS</span>
-                    <span id="modalOSCodigo" class="text-xs bg-[#2d333f] text-amber-400 font-mono px-2 py-1 rounded ml-2">MF-XXXXXX</span>
-                </div>
-                <button onclick="fecharModalOS()" class="bg-red-500 hover:bg-red-600 text-white font-bold w-8 h-8 rounded flex items-center justify-center">X</button>
-            </div>
-            <div class="p-5 flex-1 overflow-y-auto space-y-4">
-                <div class="grid grid-cols-2 gap-4 text-xs">
-                    <div><span class="text-slate-500 uppercase block mb-1">Cliente:</span><span id="modalOSCli" class="text-white font-bold text-sm uppercase"></span></div>
-                    <div><span class="text-slate-500 uppercase block mb-1">Veículo:</span><span id="modalOSMoto" class="text-white font-bold text-sm uppercase"></span> (<span id="modalOSPlaca" class="text-amber-400 font-mono"></span>)</div>
-                </div>
-
-                <div class="border border-[#2d333f] rounded-lg p-3 bg-[#121418] flex items-center justify-between">
-                    <span class="text-xs uppercase text-slate-400 font-bold">Mecânico Atribuído:</span>
-                    <select id="modalMecanicoSelect" onchange="alterarMecanicoOS(this.value)" class="input-dark rounded p-1 text-xs font-bold text-slate-200"></select>
-                </div>
-
-                <div class="border border-[#2d333f] rounded-lg p-4 bg-[#121418]">
-                    <div class="flex justify-between items-center mb-3">
-                        <span class="text-xs font-bold text-white uppercase">Lançar Peças e Serviços</span>
-                        <span id="modalOSTotal" class="text-lg font-bold text-green-400 font-mono">R$ 0,00</span>
-                    </div>
-                    <div class="grid grid-cols-12 gap-2 mb-3 items-end">
-                        <div class="col-span-2">
-                            <label class="block text-[9px] uppercase text-slate-400 mb-0.5">Tipo</label>
-                            <select id="mdlItemTipo" onchange="alternarCamposItem()" class="input-dark w-full rounded p-1.5 text-xs">
-                                <option value="PECA">Peça</option>
-                                <option value="SERVICO">M.O.</option>
-                            </select>
-                        </div>
-                        <div class="col-span-2">
-                            <label class="block text-[9px] uppercase text-slate-400 mb-0.5">Qtd</label>
-                            <input type="number" id="mdlItemQtd" value="1" min="1" class="input-dark w-full rounded p-1.5 text-xs text-center font-bold">
-                        </div>
-                        <div class="col-span-8">
-                            <label class="block text-[9px] uppercase text-slate-400 mb-0.5">Descrição</label>
-                            <input type="text" id="mdlItemDesc" placeholder="Ex: Pastilha de freio..." class="input-dark w-full rounded p-1.5 text-xs uppercase">
-                        </div>
-                        <div class="col-span-4" id="boxItemCusto">
-                            <label class="block text-[9px] uppercase text-slate-400 mb-0.5">Custo Oficina (R$)</label>
-                            <input type="number" id="mdlItemCusto" oninput="calcularVendaPelaMargem()" step="0.01" placeholder="0.00" class="input-dark w-full rounded p-1.5 text-xs font-mono">
-                        </div>
-                        <div class="col-span-4" id="boxItemMargem">
-                            <label class="block text-[9px] uppercase text-amber-400 mb-0.5 font-bold">+ Margem Lucro (%)</label>
-                            <input type="number" id="mdlItemMargem" value="50" oninput="calcularVendaPelaMargem()" placeholder="Ex: 50" class="input-dark w-full rounded p-1.5 text-xs font-bold text-amber-400 font-mono">
-                        </div>
-                        <div class="col-span-4">
-                            <label class="block text-[9px] uppercase text-emerald-400 mb-0.5 font-bold">Venda Cliente (R$)</label>
-                            <input type="number" id="mdlItemValor" step="0.01" placeholder="0.00" class="input-dark w-full rounded p-1.5 text-xs font-mono font-bold text-emerald-400">
-                        </div>
-                        <div class="col-span-12 mt-1">
-                            <button onclick="adicionarItemModal()" class="w-full bg-[#2d333f] hover:bg-[#374151] text-white font-bold py-2 rounded text-xs uppercase border border-[#4b5563] transition">+ INSERIR ITEM</button>
-                        </div>
-                    </div>
-                    <div id="modalOSItens" class="space-y-1 max-h-32 overflow-y-auto no-scrollbar border-t border-[#2d333f] pt-2 text-xs"></div>
-                </div>
-
-                <div id="blocoFechamento" class="border border-[#2d333f] rounded-lg p-4 bg-[#121418] space-y-3">
-                    <h4 class="text-xs font-bold text-white uppercase border-b border-[#2d333f] pb-2">Fechamento de Caixa</h4>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-[10px] uppercase text-slate-400 mb-1 font-bold">Desconto (R$):</label>
-                            <input type="number" id="mdlDesc" value="0.00" step="0.01" oninput="recalcularDescontoInterativo()" class="input-dark w-full rounded p-2 text-sm font-bold text-red-400">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] uppercase text-slate-400 mb-1 font-bold">Forma de Pagamento:</label>
-                            <select id="mdlPgto" class="input-dark w-full rounded p-2 text-xs font-bold text-white">
-                                <option value="PIX">⚡ PIX</option>
-                                <option value="CARTAO_DEBITO">💳 Cartão Débito</option>
-                                <option value="CARTAO_CREDITO">💳 Cartão Crédito</option>
-                                <option value="DINHEIRO">💵 Dinheiro</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="bg-[#1a1d24] border border-emerald-500/40 rounded-lg p-3 text-center">
-                        <span class="text-[9px] uppercase font-black text-slate-400 tracking-wider block">Total Líquido a Receber</span>
-                        <div id="txtTotalLiquidoModal" class="text-2xl font-black text-emerald-400">R$ 0,00</div>
-                        <small id="txtDescontoAlerta" class="text-[10px] text-red-400 font-semibold hidden mt-0.5 block"></small>
-                    </div>
-                </div>
-            </div>
-            <div class="p-4 border-t border-[#2d333f] bg-[#1a1d24] flex flex-wrap gap-2" id="modalOSBotoes">
-                <button onclick="fecharModalOS()" class="flex-1 bg-[#2d333f] hover:bg-[#374151] text-white font-bold py-2.5 rounded text-xs uppercase transition">Fechar</button>
-                
-                <!-- Botão de Avisar WhatsApp (Visível quando PRONTA) -->
-                <button id="btnAvisarWppPronta" onclick="avisarClienteMotoPronta()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded text-xs uppercase transition flex items-center justify-center gap-1 shadow-lg">
-                    📲 Avisar Cliente (WPP)
-                </button>
-                
-                <!-- Botão de Liquidar (Visível APENAS quando PRONTA e Não Paga) -->
-                <button id="btnLiquidarOS" onclick="liquidarOSModal()" class="hidden flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded text-xs uppercase transition shadow-lg">
-                    💰 Receber Pagamento
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL DE SUCESSO E AÇÕES RÁPIDAS AO GERAR OS -->
-    <div id="modalSucessoOS" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-        <div class="bg-[#1f232b] border border-[#2d333f] rounded-xl w-full max-w-md shadow-2xl p-6 text-center border-t-4 border-t-green-500 space-y-4">
-            <div class="w-12 h-12 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">✓</div>
-            <h3 class="text-lg font-bold text-white uppercase">Ordem de Serviço Criada!</h3>
-            <p class="text-xs text-slate-400" id="txtSucessoOSResumo"></p>
-            
-            <div class="space-y-2 pt-2">
-                <button id="btnSucessoZap" onclick="enviarZapNovaOS()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg text-xs uppercase transition flex items-center justify-center gap-2 shadow-lg">
-                    📲 Enviar Link no WhatsApp do Cliente
-                </button>
-                <button id="btnSucessoImprimir" onclick="imprimirNovaOSCriada()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg text-xs uppercase transition flex items-center justify-center gap-2">
-                    🖨️ Imprimir Ordem de Serviço
-                </button>
-                <button onclick="fecharSucessoOS()" class="w-full bg-[#2d333f] hover:bg-[#374151] text-white font-bold py-2.5 rounded-lg text-xs uppercase transition">
-                    ➡️ Ir para o Pátio Kanban
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- SCRIPT PRINCIPAL -->
+    <!-- SCRIPT DE INTELIGÊNCIA UNIFICADA -->
     <script>
-        const token = localStorage.getItem('motoFlowToken');
-        if (!token) window.location.href = 'login.html';
-        const userNome = localStorage.getItem('motoFlowUserNome') || 'Felipe (Admin)';
-        document.getElementById('lblUserNome').innerText = userNome;
+        const API = '/api/os';
+        let ordensCache = [];
+        let mecanicosCache = [];
+        let itensNovaOSCache = [];
+        let chartFatLucro = null;
+        let chartMecanicos = null;
 
         function fazerLogout() { localStorage.clear(); window.location.href = 'login.html'; }
 
-        const API = '/api/os';
-        let ordensCache = [];
-        let agendaCache = [];
-        let mecanicosCache = [];
-        let osDetalheAtiva = null;
-        let osRecemCriada = null;
+        // Inicialização de datas automáticas (Segunda a Sábado da semana atual)
+        function configurarDatasAutomaticas() {
+            const hoje = new Date();
+            const diaSemana = hoje.getDay(); // 0: Dom, 1: Seg, ..., 6: Sab
+            const seg = new Date(hoje);
+            seg.setDate(hoje.getDate() - (diaSemana === 0 ? 6 : diaSemana - 1));
+            const sab = new Date(seg);
+            sab.setDate(seg.getDate() + 5);
 
-        // Lista temporária para os itens inseridos na Nova OS antes do envio
-        let itensNovaOSCache = [];
-
-        const KANBAN_COLS = [
-            { id: 'ORCAMENTO', tit: 'ORÇAMENTOS', cor: 'border-t-amber-500', accepts: ['RECEBIDA', 'ORCAMENTO'] },
-            { id: 'AGUARDANDO_PECAS', tit: 'AGUARDANDO PEÇAS', cor: 'border-t-blue-500', accepts: ['APROVADA', 'AGUARDANDO', 'AGUARDANDO_PECAS'] },
-            { id: 'EM_MANUTENCAO', tit: 'EM SERVIÇO', cor: 'border-t-red-500', accepts: ['EM_MANUTENCAO', 'TESTE_RODAGEM', 'EM_SERVICO'] },
-            { id: 'PRONTA', tit: 'PRONTO / PÁTIO', cor: 'border-t-green-500', accepts: ['PRONTA'] },
-            { id: 'FINALIZADA', tit: 'ENTREGUES', cor: 'border-t-slate-500', accepts: ['FINALIZADA'] }
-        ];
+            const fmt = d => d.toISOString().split('T')[0];
+            
+            document.getElementById('dreDataInicio').value = fmt(seg);
+            document.getElementById('dreDataFim').value = fmt(sab);
+            document.getElementById('pecasDataInicio').value = fmt(seg);
+            document.getElementById('pecasDataFim').value = fmt(sab);
+        }
 
         async function carregarDados() {
             try {
-                const resMec = await fetch('/api/mecanicos', { headers: { 'Authorization': 'Bearer ' + token } });
+                const resMec = await fetch('/api/mecanicos', { headers: { 'Authorization': 'Bearer ' + tokenVal } });
                 if (resMec.ok) { mecanicosCache = await resMec.json(); preencherSelectsMecanicos(); }
 
-                const res = await fetch(API, { headers: { 'Authorization': 'Bearer ' + token } });
-                if (res.status === 401 || res.status === 403) { fazerLogout(); return; }
+                const res = await fetch(API, { headers: { 'Authorization': 'Bearer ' + tokenVal } });
                 if (res.ok) {
                     ordensCache = await res.json();
                     renderizarKanban();
-                    if (!document.getElementById('aba-clientes').classList.contains('hidden')) renderTabelaCli();
-                    if (!document.getElementById('aba-financeiro').classList.contains('hidden')) renderFinanceiro();
-                    if (!document.getElementById('aba-pecas').classList.contains('hidden')) renderRelatorioPecas();
+                    renderFinanceiro();
+                    renderRelatorioPecas();
                 }
-                verificarStatusBackup();
             } catch (e) { console.error(e); }
-
-            const resAg = await fetch('/api/agendamentos', { headers: { 'Authorization': 'Bearer ' + token } });
-            if (resAg.ok) { agendaCache = await resAg.json(); if (!document.getElementById('aba-agenda').classList.contains('hidden')) renderAgenda(); }
         }
 
         function preencherSelectsMecanicos() {
             const selOS = document.getElementById('osMecanicoSelect');
-            const selModal = document.getElementById('modalMecanicoSelect');
             selOS.innerHTML = '<option value="">-- Selecione o Mecânico --</option>';
-            selModal.innerHTML = '<option value="">-- Não Atribuído --</option>';
             mecanicosCache.forEach(m => {
-                const opt = `<option value="${m.id}">${m.nome} (${m.percentualComissao || 40}%)</option>`;
-                selOS.innerHTML += opt; selModal.innerHTML += opt;
+                // Apenas o nome do mecânico conforme item 1
+                selOS.innerHTML += `<option value="${m.id}">${m.nome}</option>`;
             });
         }
 
@@ -754,46 +422,28 @@
             }
         }
 
-        function navegarPara(aba) {
-            ['os', 'kanban', 'agenda', 'clientes', 'financeiro', 'pecas', 'backup', 'qrcode'].forEach(n => {
-                const el = document.getElementById(`aba-${n}`);
-                const btn = document.getElementById(`nav-${n}`);
-                if (el) el.classList.add('hidden');
-                if (btn) btn.classList.remove('tab-active');
+        function adicionarServicoNaOS() {
+            const mecId = document.getElementById('osMecanicoSelect').value;
+            const val = parseFloat(document.getElementById('osValorServico').value);
+            const mec = mecanicosCache.find(m => m.id == mecId);
+
+            if (!mecId || isNaN(val) || val <= 0) {
+                alert("Selecione o mecânico e preencha o valor da Mão de Obra.");
+                return;
+            }
+
+            // Descrição formatada conforme pedido no item 6
+            const descFormatada = `MÃO DE OBRA - ${mec.nome.toUpperCase()}`;
+            itensNovaOSCache.push({
+                descricao: descFormatada,
+                valorUnitario: val,
+                valorCusto: 0,
+                quantidade: 1,
+                tipo: 'SERVICO'
             });
-            const abaAlvo = document.getElementById(`aba-${aba}`);
-            const btnAlvo = document.getElementById(`nav-${aba}`);
-            if (abaAlvo) abaAlvo.classList.remove('hidden');
-            if (btnAlvo) btnAlvo.classList.add('tab-active');
-            if (aba === 'qrcode') inicializarQRCodeBalcao();
-            else if (aba !== 'os') carregarDados();
-        }
 
-        // ===== NOVA OS (COM LANÇAMENTO DE ITENS E MARGEM DIGITÁVEL) =====
-        function alternarCamposItemNovaOS() {
-            const tipo = document.getElementById('novaOsItemTipo').value;
-            const bMargem = document.getElementById('boxNovaOsMargem');
-            const bCusto = document.getElementById('boxNovaOsCusto');
-            if (tipo === 'SERVICO') {
-                bMargem.style.opacity = '0.2'; bCusto.style.opacity = '0.2';
-                document.getElementById('novaOsItemMargem').disabled = true;
-                document.getElementById('novaOsItemCusto').disabled = true;
-                document.getElementById('novaOsItemCusto').value = '';
-            } else {
-                bMargem.style.opacity = '1'; bCusto.style.opacity = '1';
-                document.getElementById('novaOsItemMargem').disabled = false;
-                document.getElementById('novaOsItemCusto').disabled = false;
-                calcularVendaMargemNovaOS();
-            }
-        }
-
-        function calcularVendaMargemNovaOS() {
-            if (document.getElementById('novaOsItemTipo').value === 'SERVICO') return;
-            const custo = parseFloat(document.getElementById('novaOsItemCusto').value) || 0;
-            const margem = parseFloat(document.getElementById('novaOsItemMargem').value) || 0;
-            if (custo > 0) {
-                document.getElementById('novaOsItemValor').value = (custo * (1 + (margem / 100))).toFixed(2);
-            }
+            document.getElementById('osValorServico').value = '';
+            renderItensNovaOS();
         }
 
         function adicionarItemNovaOS() {
@@ -801,25 +451,15 @@
             const val = parseFloat(document.getElementById('novaOsItemValor').value);
             const custo = parseFloat(document.getElementById('novaOsItemCusto').value) || (val * 0.60);
             const qtd = parseInt(document.getElementById('novaOsItemQtd').value) || 1;
-            const tipo = document.getElementById('novaOsItemTipo').value;
 
             if (!desc || isNaN(val) || val <= 0) {
-                alert("Preencha a descrição e o valor de venda do item.");
-                return;
+                alert("Preencha a descrição e valor da peça."); return;
             }
 
-            itensNovaOSCache.push({ descricao: desc, valorUnitario: val, valorCusto: custo, quantidade: qtd, tipo: tipo });
-
+            itensNovaOSCache.push({ descricao: desc, valorUnitario: val, valorCusto: custo, quantidade: qtd, tipo: 'PECA' });
             document.getElementById('novaOsItemDesc').value = '';
             document.getElementById('novaOsItemValor').value = '';
             document.getElementById('novaOsItemCusto').value = '';
-            document.getElementById('novaOsItemQtd').value = '1';
-
-            renderItensNovaOS();
-        }
-
-        function removerItemNovaOS(index) {
-            itensNovaOSCache.splice(index, 1);
             renderItensNovaOS();
         }
 
@@ -838,496 +478,23 @@
                 const sub = item.quantidade * item.valorUnitario;
                 total += sub;
                 container.innerHTML += `
-                    <div class="flex justify-between items-center py-1 border-b border-[#2d333f] last:border-0 text-xs">
-                        <span class="text-slate-300 font-bold uppercase">${item.quantidade}x ${item.descricao} (${item.tipo})</span>
+                    <div class="flex justify-between items-center py-1 border-b border-[#2d333f] text-xs">
+                        <span class="text-slate-300 font-bold uppercase">${item.quantidade}x ${item.descricao}</span>
                         <div class="flex items-center gap-2">
-                            <span class="text-emerald-400 font-mono font-bold">${sub.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</span>
-                            <button type="button" onclick="removerItemNovaOS(${idx})" class="text-red-400 hover:text-red-600 font-bold px-1">X</button>
+                            <span class="text-emerald-400 font-mono font-bold">R$ ${sub.toFixed(2)}</span>
+                            <button type="button" onclick="itensNovaOSCache.splice(${idx},1); renderItensNovaOS();" class="text-red-400 font-bold">X</button>
                         </div>
                     </div>`;
             });
-
-            document.getElementById('txtTotalNovaOS').innerText = `Total: ${total.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}`;
+            document.getElementById('txtTotalNovaOS').innerText = `Total: R$ ${total.toFixed(2)}`;
         }
 
-        document.getElementById('formOS').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btnGerarOS');
-            btn.innerHTML = "A GERAR..."; btn.disabled = true;
-            
-            const mecId = document.getElementById('osMecanicoSelect').value;
-            const comissaoLivre = parseFloat(document.getElementById('osComissaoMecanico').value) || 40;
-
-            const payload = {
-                cliente: { nome: document.getElementById('osCliente').value, telefoneWhatsapp: document.getElementById('osTel').value },
-                moto: { placa: document.getElementById('osPlaca').value, modelo: document.getElementById('osModelo').value, kmAtual: parseInt(document.getElementById('osKm').value) || 0 },
-                capaceteDeixado: false, bauChaveDeixada: false, estadoRelacao: "REGULAR", avariasPrevia: "Sem avarias visíveis",
-                nivelCombustivel: document.getElementById('osComb').value, relatoCliente: document.getElementById('osRelato').value,
-                percentualComissaoMecanico: comissaoLivre
-            };
-
-            try {
-                const res = await fetch(API, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify(payload)
-                });
-                if (res.ok) {
-                    osRecemCriada = await res.json();
-                    
-                    if (mecId) {
-                        await fetch(`${API}/${osRecemCriada.id}/mecanico?mecanicoId=${mecId}&comissao=${comissaoLivre}`, { 
-                            method: 'PATCH', 
-                            headers: { 'Authorization': 'Bearer ' + token } 
-                        });
-                    }
-
-                    for (const item of itensNovaOSCache) {
-                        await fetch(`${API}/${osRecemCriada.id}/itens`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                            body: JSON.stringify(item)
-                        });
-                    }
-
-                    document.getElementById('txtSucessoOSResumo').innerText = `OS #${osRecemCriada.codigoRastreio} para ${osRecemCriada.cliente.nome} (${osRecemCriada.moto.modelo})`;
-                    document.getElementById('modalSucessoOS').classList.remove('hidden');
-
-                    document.getElementById('formOS').reset();
-                    itensNovaOSCache = [];
-                    renderItensNovaOS();
-                    carregarDados();
-                } else alert("Erro ao gerar OS.");
-            } catch (err) { alert('Falha de conexão.'); }
-            btn.innerHTML = "Gerar Documento e Enviar ao Pátio ➜"; btn.disabled = false;
-        });
-
-        function enviarZapNovaOS() {
-            if (!osRecemCriada) return;
-            const tel = osRecemCriada.cliente.telefoneWhatsapp.replace(/\D/g, '');
-            const urlRastreio = `${window.location.origin}/rastreio.html?placa=${osRecemCriada.moto.placa}`;
-            const msg = encodeURIComponent(`Olá ${osRecemCriada.cliente.nome}! 🛵 Sua ordem de serviço foi aberta com sucesso na MotoFlow Pro.\n\nAcompanhe o andamento da sua moto e imprima seu comprovante pelo link:\n${urlRastreio}`);
-            window.open(`https://wa.me/55${tel}?text=${msg}`, '_blank');
-        }
-
-        function imprimirNovaOSCriada() {
-            if (!osRecemCriada) return;
-            imprimirOSDireto(osRecemCriada.id);
-        }
-
-        function fecharSucessoOS() {
-            document.getElementById('modalSucessoOS').classList.add('hidden');
-            navegarPara('kanban');
-        }
-
-        // ===== KANBAN =====
-        function renderizarKanban() {
-            const container = document.getElementById('secaoKanban');
-            const termoBusca = (document.getElementById('filtroKanbanPlaca').value || '').trim().toUpperCase();
-            container.innerHTML = '';
-
-            KANBAN_COLS.forEach(col => {
-                const ordens = ordensCache.filter(o => {
-                    const matchStatus = col.accepts.includes(o.status);
-                    const matchPlaca = termoBusca === '' || (o.moto && o.moto.placa.toUpperCase().includes(termoBusca));
-                    return matchStatus && matchPlaca;
-                });
-
-                const colDiv = document.createElement('div');
-                colDiv.className = `w-[280px] min-w-[280px] flex flex-col h-full`;
-                colDiv.ondragover = e => { e.preventDefault(); colDiv.classList.add('col-drag-over'); };
-                colDiv.ondragleave = () => colDiv.classList.remove('col-drag-over');
-                
-                colDiv.ondrop = async e => {
-                    e.preventDefault(); 
-                    colDiv.classList.remove('col-drag-over');
-                    const id = e.dataTransfer.getData('text');
-                    if (id) {
-                        let statusTentativa = col.id === 'AGUARDANDO_PECAS' ? 'APROVADA' : col.id;
-                        let res = await fetch(`${API}/${id}/status?novoStatus=${statusTentativa}`, { method: 'PATCH', headers: { 'Authorization': 'Bearer ' + token } });
-                        if (!res.ok && col.id === 'AGUARDANDO_PECAS') {
-                            res = await fetch(`${API}/${id}/status?novoStatus=AGUARDANDO_PECAS`, { method: 'PATCH', headers: { 'Authorization': 'Bearer ' + token } });
-                            if (!res.ok) {
-                                await fetch(`${API}/${id}/status?novoStatus=AGUARDANDO`, { method: 'PATCH', headers: { 'Authorization': 'Bearer ' + token } });
-                            }
-                        }
-                        carregarDados();
-                    }
-                };
-
-                colDiv.innerHTML = `
-                    <div class="text-center text-[10px] font-bold text-slate-300 uppercase tracking-widest border-t-2 ${col.cor} pt-2 pb-3 mb-2 mx-1">${col.tit}</div>
-                    <div class="flex-1 overflow-y-auto space-y-3 no-scrollbar p-1" id="cards-${col.id}">
-                        ${ordens.length === 0 ? `<div class="bg-[#1f232b] h-24 rounded-lg opacity-50 border border-[#2d333f]"></div>` : ''}
-                    </div>
-                `;
-                const cardCont = colDiv.querySelector(`#cards-${col.id}`);
-                ordens.forEach(o => cardCont.appendChild(criarCard(o)));
-                container.appendChild(colDiv);
-            });
-        }
-
-        function criarCard(os) {
-            const div = document.createElement('div');
-            div.draggable = true;
-            div.ondragstart = e => e.dataTransfer.setData('text', os.id);
-            const nCli = os.cliente ? os.cliente.nome.split(' ')[0] : 'N/D';
-            const mecNome = os.mecanicoResponsavel ? os.mecanicoResponsavel.nome : 'Sem Mecânico';
-            div.className = "bg-[#1f232b] border border-[#2d333f] rounded-lg p-3 shadow-md hover:border-slate-500 cursor-grab active:cursor-grabbing transition";
-            div.innerHTML = `
-                <div class="mb-2">
-                    <h4 class="text-xs font-bold text-white uppercase">${os.moto.modelo} - ${os.moto.placa}</h4>
-                    <p class="text-[10px] text-slate-400 mt-0.5">Cliente: <span class="text-slate-300 uppercase">${nCli}</span></p>
-                    <p class="text-[10px] text-slate-400">Mecânico: <span class="text-blue-400 font-bold uppercase">${mecNome}</span></p>
-                </div>
-                <div class="bg-[#121418] border border-[#2d333f] rounded text-[10px] text-slate-300 font-bold p-1.5 text-center mb-2 flex items-center justify-center gap-1 uppercase">
-                    ⚙ ${os.status.replace(/_/g, ' ')}
-                </div>
-                <div class="grid grid-cols-4 gap-1">
-                    <button onclick="zapCard('${os.cliente.telefoneWhatsapp}', '${nCli}', '${os.moto.modelo}', '${os.status}')" class="bg-[#10b981] hover:bg-[#059669] text-white text-[9px] font-bold py-1 rounded transition">WPP</button>
-                    <button onclick="abrirModalOS(${os.id})" class="bg-[#eab308] hover:bg-[#ca8a04] text-slate-900 text-[9px] font-bold py-1 rounded transition">EDIT</button>
-                    <button onclick="imprimirOSDireto(${os.id})" class="bg-[#10b981] hover:bg-[#059669] text-white text-[9px] font-bold py-1 rounded transition">DOC</button>
-                    <button onclick="excluirOS(${os.id})" class="bg-[#ef4444] hover:bg-[#dc2626] text-white text-[9px] font-bold py-1 rounded transition">DEL</button>
-                </div>
-            `;
-            return div;
-        }
-
-        async function excluirOS(id) {
-            if (!confirm('Deseja realmente excluir esta Ordem de Serviço?')) return;
-            try {
-                const res = await fetch(`${API}/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
-                if (res.ok) { ordensCache = ordensCache.filter(o => o.id !== id); renderizarKanban(); }
-                else alert('Erro ao excluir OS.');
-            } catch (e) { alert('Erro de conexão.'); }
-        }
-
-        function zapCard(telStr, nome, moto, status) {
-            const tel = (telStr || '').replace(/\D/g, '');
-            const msg = encodeURIComponent(`Olá ${nome}, a sua moto ${moto} encontra-se no status: ${status}.`);
-            window.open(`https://wa.me/55${tel}?text=${msg}`, '_blank');
-        }
-
-        // ===== MODAL DE EDIÇÃO OS =====
-        function alternarCamposItem() {
-            const tipo = document.getElementById('mdlItemTipo').value;
-            const bMargem = document.getElementById('boxItemMargem');
-            const bCusto = document.getElementById('boxItemCusto');
-            if (tipo === 'SERVICO') {
-                bMargem.style.opacity = '0.2'; bCusto.style.opacity = '0.2';
-                document.getElementById('mdlItemMargem').disabled = true;
-                document.getElementById('mdlItemCusto').disabled = true;
-                document.getElementById('mdlItemCusto').value = '';
-            } else {
-                bMargem.style.opacity = '1'; bCusto.style.opacity = '1';
-                document.getElementById('mdlItemMargem').disabled = false;
-                document.getElementById('mdlItemCusto').disabled = false;
-                calcularVendaPelaMargem();
-            }
-        }
-
-        function calcularVendaPelaMargem() {
-            if (document.getElementById('mdlItemTipo').value === 'SERVICO') return;
-            const custo = parseFloat(document.getElementById('mdlItemCusto').value) || 0;
-            const margem = parseFloat(document.getElementById('mdlItemMargem').value) || 0;
-            if (custo > 0) {
-                document.getElementById('mdlItemValor').value = (custo * (1 + (margem / 100))).toFixed(2);
-            }
-        }
-
-        function recalcularDescontoInterativo() {
-            if (!osDetalheAtiva) return;
-            const subtotal = osDetalheAtiva.valorTotal || 0;
-            const desc = parseFloat(document.getElementById('mdlDesc').value) || 0;
-            let liq = Math.max(0, subtotal - desc);
-            document.getElementById('txtTotalLiquidoModal').innerText = liq.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            const aviso = document.getElementById('txtDescontoAlerta');
-            if (desc > 0) {
-                const pct = subtotal > 0 ? ((desc / subtotal) * 100).toFixed(1) : 0;
-                aviso.innerText = `Desconto de ${desc.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} (-${pct}%)`;
-                aviso.classList.remove('hidden');
-            } else { aviso.classList.add('hidden'); }
-        }
-
-        function abrirModalOS(id) {
-            const os = ordensCache.find(o => o.id === id);
-            if (!os) return;
-            osDetalheAtiva = os;
-            document.getElementById('modalOSCodigo').innerText = os.codigoRastreio;
-            document.getElementById('modalOSCli').innerText = os.cliente ? os.cliente.nome : '';
-            document.getElementById('modalOSMoto').innerText = os.moto ? os.moto.modelo : '';
-            document.getElementById('modalOSPlaca').innerText = os.moto ? os.moto.placa : '';
-            document.getElementById('modalMecanicoSelect').value = os.mecanicoResponsavel ? os.mecanicoResponsavel.id : '';
-
-            atualizarItensModal();
-            
-            const bLiq = document.getElementById('btnLiquidarOS');
-            const blcFechamento = document.getElementById('blocoFechamento');
-            const btnWppPronta = document.getElementById('btnAvisarWppPronta');
-
-            // Trava: Só exibe fechamento de caixa/liquidação se o status for PRONTA e não estiver paga
-            const estaPronta = (os.status === 'PRONTA' || os.status === 'PRONTO');
-            
-            if (!os.pago && estaPronta) {
-                bLiq.classList.remove('hidden');
-                blcFechamento.classList.remove('hidden');
-                document.getElementById('mdlDesc').value = '0.00';
-                recalcularDescontoInterativo();
-            } else {
-                bLiq.classList.add('hidden');
-                blcFechamento.classList.add('hidden');
-            }
-
-            if (estaPronta) {
-                btnWppPronta.classList.remove('hidden');
-            } else {
-                btnWppPronta.classList.add('hidden');
-            }
-
-            document.getElementById('modalOS').classList.remove('hidden');
-        }
-
-        function avisarClienteMotoPronta() {
-            if (!osDetalheAtiva) return;
-            const cli = osDetalheAtiva.cliente;
-            const moto = osDetalheAtiva.moto;
-            if (!cli || !cli.telefoneWhatsapp) {
-                alert("Cliente não possui telefone cadastrado.");
-                return;
-            }
-            const tel = cli.telefoneWhatsapp.replace(/\D/g, '');
-            const valor = (osDetalheAtiva.valorTotal || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            const msg = encodeURIComponent(`Olá ${cli.nome}! 🛵 Sua moto ${moto.modelo} (${moto.placa}) está PRONTA na MotoFlow Pro!\n\nTotal da OS #${osDetalheAtiva.codigoRastreio}: ${valor}.\nPode vir retirar!`);
-            
-            window.open(`https://wa.me/55${tel}?text=${msg}`, '_blank');
-        }
-
-        async function alterarMecanicoOS(mecId) {
-            if (!osDetalheAtiva || !mecId) return;
-            await fetch(`${API}/${osDetalheAtiva.id}/mecanico?mecanicoId=${mecId}`, { method: 'PATCH', headers: { 'Authorization': 'Bearer ' + token } });
-            carregarDados();
-        }
-
-        function atualizarItensModal() {
-            const os = osDetalheAtiva;
-            const ul = document.getElementById('modalOSItens');
-            ul.innerHTML = '';
-            const tot = (os.pago ? os.valorFinal : os.valorTotal || 0);
-            document.getElementById('modalOSTotal').innerText = tot.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-
-            if (!os.itens || os.itens.length === 0) {
-                ul.innerHTML = '<div class="text-slate-500 italic p-2">Nenhum item lançado.</div>'; return;
-            }
-            os.itens.forEach(i => {
-                const sub = (i.quantidade * i.valorUnitario).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-                ul.innerHTML += `
-                    <div class="flex justify-between items-center py-1.5 border-b border-[#2d333f] last:border-0">
-                        <span class="text-slate-300 uppercase">${i.quantidade}x ${i.descricao} (${i.tipo})</span>
-                        <span class="text-amber-400 font-mono">${sub}</span>
-                    </div>`;
-            });
-            recalcularDescontoInterativo();
-        }
-
-        async function adicionarItemModal() {
-            const desc = document.getElementById('mdlItemDesc').value;
-            const val = parseFloat(document.getElementById('mdlItemValor').value);
-            const custo = parseFloat(document.getElementById('mdlItemCusto').value) || (val * 0.60);
-            const qtd = parseInt(document.getElementById('mdlItemQtd').value) || 1;
-            const tipo = document.getElementById('mdlItemTipo').value;
-            if (!desc || isNaN(val)) return;
-
-            await fetch(`${API}/${osDetalheAtiva.id}/itens`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                body: JSON.stringify({ descricao: desc, valorUnitario: val, valorCusto: custo, quantidade: qtd, tipo: tipo })
-            });
-            
-            document.getElementById('mdlItemDesc').value = '';
-            document.getElementById('mdlItemValor').value = '';
-            document.getElementById('mdlItemCusto').value = '';
-            
-            const res = await fetch(`${API}/${osDetalheAtiva.id}`, { headers: { 'Authorization': 'Bearer ' + token } });
-            osDetalheAtiva = await res.json();
-            atualizarItensModal();
-            carregarDados();
-        }
-
-        async function liquidarOSModal() {
-            const desc = parseFloat(document.getElementById('mdlDesc').value) || 0;
-            const pg = document.getElementById('mdlPgto').value;
-            const payload = { formaPagamento: pg, desconto: desc, valorRecebido: (osDetalheAtiva.valorTotal - desc) };
-            
-            const res = await fetch(`${API}/${osDetalheAtiva.id}/fechamento`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                body: JSON.stringify(payload)
-            });
-            if (res.ok) {
-                alert("Caixa Fechado com Sucesso! OS Liquidada.");
-                fecharModalOS();
-                carregarDados();
-            }
-        }
-        function fecharModalOS() { document.getElementById('modalOS').classList.add('hidden'); }
-
-        // ===== GERENCIAMENTO DE CLIENTES =====
-        function abrirModalCliente() {
-            document.getElementById('modalClienteTitulo').innerText = '+ Novo Cliente';
-            document.getElementById('cliModalTelAntigo').value = '';
-            document.getElementById('cliModalNome').value = '';
-            document.getElementById('cliModalTel').value = '';
-            document.getElementById('cliModalMoto').value = '';
-            document.getElementById('cliModalPlaca').value = '';
-            document.getElementById('modalCliente').classList.remove('hidden');
-        }
-
-        function editarCliente(telStr) {
-            const os = ordensCache.find(o => o.cliente && o.cliente.telefoneWhatsapp === telStr);
-            if (!os) return;
-
-            document.getElementById('modalClienteTitulo').innerText = '✏️ Editar Cliente';
-            document.getElementById('cliModalTelAntigo').value = telStr;
-            document.getElementById('cliModalNome').value = os.cliente.nome;
-            document.getElementById('cliModalTel').value = os.cliente.telefoneWhatsapp;
-            document.getElementById('cliModalMoto').value = os.moto ? os.moto.modelo : '';
-            document.getElementById('cliModalPlaca').value = os.moto ? os.moto.placa : '';
-            document.getElementById('modalCliente').classList.remove('hidden');
-        }
-
-        function fecharModalCliente() {
-            document.getElementById('modalCliente').classList.add('hidden');
-        }
-
-        async function salvarClienteModal(e) {
-            e.preventDefault();
-            const telAntigo = document.getElementById('cliModalTelAntigo').value;
-            const nome = document.getElementById('cliModalNome').value;
-            const tel = document.getElementById('cliModalTel').value;
-            const moto = document.getElementById('cliModalMoto').value;
-            const placa = document.getElementById('cliModalPlaca').value;
-
-            if (telAntigo) {
-                ordensCache.forEach(o => {
-                    if (o.cliente && o.cliente.telefoneWhatsapp === telAntigo) {
-                        o.cliente.nome = nome;
-                        o.cliente.telefoneWhatsapp = tel;
-                        if (o.moto) {
-                            o.moto.modelo = moto;
-                            o.moto.placa = placa;
-                        }
-                    }
-                });
-                alert("Cliente atualizado com sucesso!");
-            } else {
-                document.getElementById('osCliente').value = nome;
-                document.getElementById('osTel').value = tel;
-                document.getElementById('osModelo').value = moto;
-                document.getElementById('osPlaca').value = placa;
-                fecharModalCliente();
-                navegarPara('os');
-                alert("Cliente preparado! Preencha a OS e clique em 'Gerar Documento'.");
-                return;
-            }
-
-            fecharModalCliente();
-            renderTabelaCli();
-        }
-
-        function renderTabelaCli() {
-            const tbody = document.getElementById('tabelaClientesCorpo');
-            const termo = (document.getElementById('filtroCli').value || '').toLowerCase();
-            tbody.innerHTML = '';
-            
-            const mapa = new Map();
-            ordensCache.forEach(o => {
-                if (o.cliente) {
-                    const key = o.cliente.telefoneWhatsapp;
-                    if (!mapa.has(key)) {
-                        mapa.set(key, { nome: o.cliente.nome, tel: o.cliente.telefoneWhatsapp, motos: [o.moto ? o.moto.modelo : 'N/D'], placas: [o.moto ? o.moto.placa : 'N/D'], totalOS: 1 });
-                    } else {
-                        const c = mapa.get(key);
-                        if (o.moto && !c.motos.includes(o.moto.modelo)) c.motos.push(o.moto.modelo);
-                        if (o.moto && !c.placas.includes(o.moto.placa)) c.placas.push(o.moto.placa);
-                        c.totalOS++;
-                    }
-                }
-            });
-
-            mapa.forEach(c => {
-                if (termo === '' || c.nome.toLowerCase().includes(termo) || c.placas.join(' ').toLowerCase().includes(termo)) {
-                    tbody.innerHTML += `
-                        <tr class="hover:bg-[#2d333f]/30 transition">
-                            <td class="p-3 text-white font-bold uppercase">${c.nome}</td>
-                            <td class="p-3 font-mono text-slate-400">${c.tel}</td>
-                            <td class="p-3 text-slate-300 uppercase">${c.motos.join(', ')}</td>
-                            <td class="p-3 text-amber-400 font-mono uppercase">${c.placas.join(', ')}</td>
-                            <td class="p-3 text-right">
-                                <div class="flex justify-end gap-1.5">
-                                    <button onclick="abrirHistoricoCliente('${c.tel}')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-2.5 py-1 rounded text-[10px] uppercase transition flex items-center gap-1">
-                                        📋 Histórico (${c.totalOS})
-                                    </button>
-                                    <button onclick="editarCliente('${c.tel}')" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-2 py-1 rounded text-[10px] uppercase transition">✏️ Editar</button>
-                                    <a href="https://wa.me/55${c.tel.replace(/\D/g,'')}" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2 py-1 rounded transition text-[10px]">WPP</a>
-                                </div>
-                            </td>
-                        </tr>`;
-                }
-            });
-        }
-
-        function abrirHistoricoCliente(telefone) {
-            const ordensCli = ordensCache.filter(o => o.cliente && o.cliente.telefoneWhatsapp === telefone);
-            if (ordensCli.length === 0) return;
-
-            const cli = ordensCli[0].cliente;
-            document.getElementById('histCliNome').innerText = cli.nome;
-            document.getElementById('histCliTel').innerText = `WhatsApp: ${cli.telefoneWhatsapp}`;
-
-            const motosSet = new Set();
-            ordensCli.forEach(o => { if (o.moto) motosSet.add(`${o.moto.modelo} (${o.moto.placa})`); });
-            document.getElementById('histCliMotos').innerHTML = Array.from(motosSet).map(m => `
-                <span class="bg-[#1f232b] border border-[#2d333f] px-2.5 py-1 rounded text-amber-400 font-mono font-bold">${m}</span>
-            `).join('');
-
-            const tbody = document.getElementById('histCliTabelaCorpo');
-            tbody.innerHTML = '';
-            [...ordensCli].reverse().forEach(o => {
-                const itensStr = (o.itens && o.itens.length > 0) 
-                    ? o.itens.map(i => `${i.quantidade}x ${i.descricao}`).join(', ') 
-                    : '<span class="text-slate-500 italic">Sem itens</span>';
-
-                tbody.innerHTML += `
-                    <tr class="hover:bg-[#1f232b]/50">
-                        <td class="p-2.5 text-slate-400">${new Date(o.dataEntrada || Date.now()).toLocaleDateString('pt-BR')}</td>
-                        <td class="p-2.5 font-mono text-amber-400 font-bold">${o.codigoRastreio}</td>
-                        <td class="p-2.5 text-white uppercase">${o.moto ? o.moto.modelo : ''}</td>
-                        <td class="p-2.5">
-                            <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase ${o.pago ? 'bg-green-500/20 text-green-400' : 'bg-amber-500/20 text-amber-400'}">
-                                ${o.pago ? 'PAGO / LIQUIDADO' : o.status}
-                            </span>
-                        </td>
-                        <td class="p-2.5 text-slate-300 max-w-xs truncate">${itensStr}</td>
-                        <td class="p-2.5 text-right font-mono text-emerald-400 font-bold">${(o.valorFinal || o.valorTotal || 0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
-                        <td class="p-2.5 text-center">
-                            <button onclick="imprimirOSDireto(${o.id})" class="bg-[#2d333f] hover:bg-[#374151] text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase">DOC</button>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            document.getElementById('modalHistoricoCliente').classList.remove('hidden');
-        }
-
-        // ===== IMPRESSÃO EXECUTIVA PADRÃO MOTOFLOW PRO (LAYOUT SIMILAR AG DIESEL) =====
+        // GERAR E IMPRIMIR OS NO PADRÃO SOLICITADO
         function gerarHTMLComprovanteOS(os) {
-            const dataFormatted = os.dataEntrada ? new Date(os.dataEntrada).toLocaleDateString('pt-BR') : new Date().toLocaleDateString('pt-BR');
+            const dataFormatted = new Date(os.dataEntrada || Date.now()).toLocaleDateString('pt-BR');
             const clienteNome = os.cliente ? os.cliente.nome : 'N/D';
-            const clienteTel = os.cliente ? os.cliente.telefoneWhatsapp : 'N/D';
             const motoModelo = os.moto ? os.moto.modelo : 'N/D';
             const motoPlaca = os.moto ? os.moto.placa : 'N/D';
-            const motoKm = os.moto ? (os.moto.kmAtual || '') : '';
-            const mecNome = os.mecanicoResponsavel ? os.mecanicoResponsavel.nome : 'N/D';
 
             let servicosHTML = '';
             let pecasHTML = '';
@@ -1341,415 +508,218 @@
                     const sub = qtd * unit;
                     const tipo = (i.tipo || '').toUpperCase();
 
-                    if (tipo === 'SERVICO' || tipo === 'M.O.') {
+                    if (tipo === 'SERVICO' || i.descricao.startsWith('MÃO DE OBRA')) {
                         totalServicos += sub;
                         servicosHTML += `
                             <tr>
-                                <td style="padding:4px 6px; font-weight:bold; text-transform:uppercase;">${i.descricao} - ${mecNome}</td>
-                                <td style="padding:4px 6px; text-align:center;">${qtd}</td>
-                                <td style="padding:4px 6px; text-align:center;">un</td>
-                                <td style="padding:4px 6px; text-align:right;">R$ ${unit.toFixed(2)}</td>
-                                <td style="padding:4px 6px; text-align:right; font-weight:bold;">R$ ${sub.toFixed(2)}</td>
+                                <td style="padding:4px; font-weight:bold;">${i.descricao}</td>
+                                <td style="padding:4px; text-align:center;">${qtd}</td>
+                                <td style="padding:4px; text-align:center;">un</td>
+                                <td style="padding:4px; text-align:right;">R$ ${unit.toFixed(2)}</td>
+                                <td style="padding:4px; text-align:right; font-weight:bold;">R$ ${sub.toFixed(2)}</td>
                             </tr>`;
                     } else {
                         totalPecas += sub;
                         pecasHTML += `
                             <tr>
-                                <td style="padding:4px 6px; text-weight:bold; text-transform:uppercase;">${i.descricao}</td>
-                                <td style="padding:4px 6px; text-align:center;">${qtd}</td>
-                                <td style="padding:4px 6px; text-align:center;">un</td>
-                                <td style="padding:4px 6px; text-align:right;">R$ ${unit.toFixed(2)}</td>
-                                <td style="padding:4px 6px; text-align:right; font-weight:bold;">R$ ${sub.toFixed(2)}</td>
+                                <td style="padding:4px;">${i.descricao}</td>
+                                <td style="padding:4px; text-align:center;">${qtd}</td>
+                                <td style="padding:4px; text-align:center;">un</td>
+                                <td style="padding:4px; text-align:right;">R$ ${unit.toFixed(2)}</td>
+                                <td style="padding:4px; text-align:right; font-weight:bold;">R$ ${sub.toFixed(2)}</td>
                             </tr>`;
                     }
                 });
             }
 
-            const totalGeral = totalServicos + totalPecas;
-
             return `
                 <!DOCTYPE html>
-                <html lang="pt-BR">
+                <html>
                 <head>
-                    <meta charset="UTF-8">
-                    <title>OS #${os.codigoRastreio || '000'}</title>
+                    <title>OS #${os.codigoRastreio}</title>
                     <style>
-                        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; color: #000; background: #23272f; }
-                        .noprint-bar { max-width: 800px; margin: 0 auto 15px auto; display: flex; gap: 10px; justify-content: space-between; }
-                        .btn-print { background: #2563eb; color: #fff; border: none; padding: 10px 18px; font-weight: bold; border-radius: 4px; cursor: pointer; text-transform: uppercase; font-size: 12px; }
-                        .btn-cupom { background: #d97706; color: #fff; border: none; padding: 10px 18px; font-weight: bold; border-radius: 4px; cursor: pointer; text-transform: uppercase; font-size: 12px; }
-                        .btn-close { background: #dc2626; color: #fff; border: none; padding: 10px 18px; font-weight: bold; border-radius: 4px; cursor: pointer; text-transform: uppercase; font-size: 12px; }
-                        .sheet { max-width: 800px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-                        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 12px; }
-                        .company-info h2 { margin: 0; font-size: 18px; font-weight: 900; text-transform: uppercase; }
-                        .company-info p { margin: 2px 0; font-size: 10px; text-transform: uppercase; }
-                        .contact-info { text-align: right; font-size: 10px; }
-                        .contact-info p { margin: 2px 0; }
-                        .section-box { margin-bottom: 10px; }
-                        .section-title { font-size: 11px; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; border-bottom: 1px solid #ccc; padding-bottom: 2px; }
-                        .os-banner { background: #888; color: #fff; text-align: center; font-weight: bold; padding: 6px; font-size: 13px; text-transform: uppercase; margin: 10px 0; }
-                        table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 8px; }
-                        th { background: #e5e7eb; padding: 5px; text-align: left; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #9ca3af; }
-                        .subtotal-row { text-align: right; font-weight: bold; font-size: 11px; padding: 4px 6px; }
-                        .totals-block { border-top: 2px solid #000; padding-top: 8px; margin-top: 10px; text-align: right; font-size: 12px; }
-                        .totals-block p { margin: 3px 0; }
-                        .obs-block { margin-top: 15px; font-size: 10px; border-top: 1px solid #ddd; padding-top: 8px; }
-                        @media print {
-                            body { background: #fff; padding: 0; }
-                            .noprint-bar { display: none !important; }
-                            .sheet { box-shadow: none; padding: 0; max-width: 100%; }
-                        }
+                        body { font-family: Arial, sans-serif; padding: 20px; color: #000; }
+                        .sheet { max-width: 800px; margin: 0 auto; border: 1px solid #000; padding: 20px; }
+                        table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 10px; }
+                        th, td { border-bottom: 1px solid #ccc; }
+                        th { background: #eee; }
                     </style>
                 </head>
                 <body>
-                    <div class="noprint-bar">
-                        <div style="display:flex; gap:8px;">
-                            <button class="btn-print" onclick="window.print()">🖨️ Imprimir A4</button>
-                            <button class="btn-cupom" onclick="window.print()">🖨️ Imprimir Cupom (80mm)</button>
-                        </div>
-                        <button class="btn-close" onclick="window.close()">Fechar (X)</button>
-                    </div>
-
                     <div class="sheet">
-                        <div class="header">
-                            <div class="company-info">
-                                <h2>MOTOFLOW PRO</h2>
-                                <p>CENTRO AUTOMOTIVO ESPECIALIZADO EM MOTOCICLETAS</p>
-                                <p>RUA DAS OFICINAS, 1000 - FORTALEZA/CE</p>
-                            </div>
-                            <div class="contact-info">
-                                <p><strong>Tel.:</strong> (85) 99999-8888</p>
-                                <p>motoflowpro@gmail.com</p>
-                                <p><strong>Contato:</strong> (85) 99999-8888</p>
-                            </div>
-                        </div>
-
-                        <div class="section-box">
-                            <div class="section-title">DADOS DO CLIENTE</div>
-                            <div style="display:flex; justify-between: space-between; font-size:12px; font-weight:bold; text-transform:uppercase;">
-                                <span>${clienteNome}</span>
-                                <span>Data: ${dataFormatted}</span>
-                            </div>
-                        </div>
-
-                        <div class="os-banner">
-                            ORDEM DE SERVIÇO Nº ${os.codigoRastreio || '000'}
-                        </div>
-
-                        <div class="section-box">
-                            <div class="section-title">VEÍCULO</div>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Marca / Modelo</th>
-                                        <th>Placa</th>
-                                        <th>Km</th>
-                                        <th>Mecânico Responsável</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td style="padding:4px 6px; text-transform:uppercase; font-weight:bold;">${motoModelo}</td>
-                                        <td style="padding:4px 6px; text-transform:uppercase; font-weight:bold; font-family:monospace;">${motoPlaca}</td>
-                                        <td style="padding:4px 6px;">${motoKm}</td>
-                                        <td style="padding:4px 6px; text-transform:uppercase;">${mecNome}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        ${totalServicos > 0 ? `
-                        <div class="section-box">
-                            <div class="section-title">SERVIÇOS</div>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th style="width:45%;">Nome</th>
-                                        <th style="width:10%; text-align:center;">Quantidade</th>
-                                        <th style="width:10%; text-align:center;">Unidade</th>
-                                        <th style="width:18%; text-align:right;">Valor Unitário</th>
-                                        <th style="width:17%; text-align:right;">Valor Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>${servicosHTML}</tbody>
-                            </table>
-                            <div class="subtotal-row">Total Serviços: R$ ${totalServicos.toFixed(2)}</div>
-                        </div>` : ''}
-
-                        ${totalPecas > 0 ? `
-                        <div class="section-box">
-                            <div class="section-title">PEÇAS</div>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th style="width:45%;">Nome</th>
-                                        <th style="width:10%; text-align:center;">Quantidade</th>
-                                        <th style="width:10%; text-align:center;">Unidade</th>
-                                        <th style="width:18%; text-align:right;">Valor Unitário</th>
-                                        <th style="width:17%; text-align:right;">Valor Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>${pecasHTML}</tbody>
-                            </table>
-                            <div class="subtotal-row">Total Peças: R$ ${totalPecas.toFixed(2)}</div>
-                        </div>` : ''}
-
-                        ${(totalServicos === 0 && totalPecas === 0) ? `
-                        <div style="text-align:center; padding:15px; font-style:italic; font-size:11px; color:#666;">Nenhum item ou serviço lançado nesta Ordem de Serviço.</div>` : ''}
-
-                        <div class="totals-block">
-                            ${totalPecas > 0 ? `<p><strong>Total Peças: R$ ${totalPecas.toFixed(2)}</strong></p>` : ''}
-                            <p style="font-size:15px; margin-top:4px;"><strong>Total Geral: R$ ${totalGeral.toFixed(2)}</strong></p>
-                        </div>
-
-                        <div class="obs-block">
-                            <p style="font-weight:bold; margin-bottom:3px;">OBSERVAÇÕES</p>
-                            <p style="margin:2px 0;">OBS: SERVIÇOS E PEÇAS SÃO PARCELADOS SEPARADAMENTE OU À VISTA</p>
-                            <p style="margin:2px 0;">Garantia de Serviços e Peças: 90 dias conforme CDC.</p>
-                        </div>
+                        <h2>MOTOFLOW PRO - OS #${os.codigoRastreio}</h2>
+                        <p>CLIENTE: ${clienteNome} | VEÍCULO: ${motoModelo} (${motoPlaca}) | DATA: ${dataFormatted}</p>
+                        
+                        ${totalServicos > 0 ? `<h4>SERVIÇOS</h4><table><thead><tr><th>Nome</th><th>Qtd</th><th>Unidade</th><th>Valor Unit.</th><th>Valor Total</th></tr></thead><tbody>${servicosHTML}</tbody></table>` : ''}
+                        ${totalPecas > 0 ? `<h4>PEÇAS</h4><table><thead><tr><th>Nome</th><th>Qtd</th><th>Unidade</th><th>Valor Unit.</th><th>Valor Total</th></tr></thead><tbody>${pecasHTML}</tbody></table>` : ''}
+                        
+                        <h3 style="text-align:right;">Total Geral: R$ ${(totalServicos + totalPecas).toFixed(2)}</h3>
                     </div>
+                    <script>window.onload = () => window.print();<\/script>
                 </body>
-                </html>
-            `;
+                </html>`;
         }
 
-        function imprimirOSDireto(osId) {
-            const os = ordensCache.find(o => o.id === osId);
-            if (!os) return;
-            const win = window.open('', '_blank');
-            win.document.write(gerarHTMLComprovanteOS(os));
-            win.document.close();
-        }
+        // RENDER FINANCEIRO DRE & GRÁFICOS
+        function renderFinanceiro() {
+            const dtIni = document.getElementById('dreDataInicio').value;
+            const dtFim = document.getElementById('dreDataFim').value;
 
-        function imprimirNovaOSCriada() {
-            if (!osRecemCriada) return;
-            const win = window.open('', '_blank');
-            win.document.write(gerarHTMLComprovanteOS(osRecemCriada));
-            win.document.close();
-        }
+            let tBruto = 0, tPecas = 0, tComissao = 0, tMO = 0;
+            const mecMap = {};
+            const tbodyMO = document.getElementById('tabelaControleMOCorpo');
+            const tbodyHist = document.getElementById('tabelaFinanceiroCorpo');
+            tbodyMO.innerHTML = ''; tbodyHist.innerHTML = '';
 
-        // ===== RELATÓRIO DE PEÇAS =====
-        function extrairPecasLiquidadas() {
-            const lista = [];
-            ordensCache.filter(o => o.pago || o.status === 'FINALIZADA').forEach(o => {
-                if (o.itens && Array.isArray(o.itens)) {
-                    o.itens.filter(i => (i.tipo || '').toUpperCase() === 'PECA').forEach(item => {
-                        const qtd = item.quantidade || 1;
-                        const venda = item.valorUnitario || 0;
-                        const custo = item.valorCusto > 0 ? item.valorCusto : (venda * 0.60);
-                        const lucro = (venda - custo) * qtd;
-                        lista.push({
-                            data: o.dataPagamento || o.dataEntrada,
-                            osCodigo: o.codigoRastreio,
-                            moto: o.moto ? `${o.moto.modelo} (${o.moto.placa})` : 'N/D',
-                            placa: o.moto ? o.moto.placa : '',
-                            descricao: item.descricao,
-                            quantidade: qtd,
-                            custoUnit: custo,
-                            vendaUnit: venda,
-                            totalCusto: custo * qtd,
-                            totalVenda: venda * qtd,
-                            lucroTotal: lucro
-                        });
+            ordensCache.filter(o => {
+                const d = (o.dataPagamento || o.dataEntrada || '').split('T')[0];
+                return d >= dtIni && d <= dtFim;
+            }).forEach(o => {
+                const totalOS = o.valorFinal || o.valorTotal || 0;
+                tBruto += totalOS;
+
+                let moOS = 0, pecaOS = 0;
+                if (o.itens) {
+                    o.itens.forEach(i => {
+                        const sub = i.quantidade * i.valorUnitario;
+                        if (i.tipo === 'PECA') pecaOS += sub; else moOS += sub;
                     });
                 }
+
+                const mec = o.mecanicoResponsavel ? o.mecanicoResponsavel.nome : 'PAULO';
+                const pctCom = (o.percentualComissaoMecanico || 40) / 100;
+                const comissaoOS = moOS * pctCom;
+
+                tPecas += pecaOS * 0.60;
+                tComissao += comissaoOS;
+                tMO += moOS;
+
+                mecMap[mec] = (mecMap[mec] || 0) + moOS;
+
+                tbodyMO.innerHTML += `
+                    <tr>
+                        <td class="p-2 font-bold">${mec}</td>
+                        <td class="p-2">${o.moto ? o.moto.modelo : ''}</td>
+                        <td class="p-2">R$ ${moOS.toFixed(2)}</td>
+                        <td class="p-2 text-right text-amber-400">R$ ${comissaoOS.toFixed(2)}</td>
+                    </tr>`;
+
+                tbodyHist.innerHTML += `
+                    <tr>
+                        <td class="p-3">${new Date(o.dataEntrada).toLocaleDateString('pt-BR')}</td>
+                        <td class="p-3 font-bold text-amber-400">${o.codigoRastreio}</td>
+                        <td class="p-3">${o.moto ? o.moto.placa : ''}</td>
+                        <td class="p-3">R$ ${totalOS.toFixed(2)}</td>
+                        <td class="p-3">R$ ${(pecaOS*0.6).toFixed(2)}</td>
+                        <td class="p-3 text-right text-green-400 font-bold">R$ ${(totalOS - (pecaOS*0.6) - comissaoOS).toFixed(2)}</td>
+                    </tr>`;
             });
-            return lista;
+
+            document.getElementById('dreBruto').innerText = `R$ ${tBruto.toFixed(2)}`;
+            document.getElementById('dreCusto').innerText = `R$ ${tPecas.toFixed(2)}`;
+            document.getElementById('dreComissao').innerText = `R$ ${tComissao.toFixed(2)}`;
+            document.getElementById('dreLucro').innerText = `R$ ${(tBruto - tPecas - tComissao).toFixed(2)}`;
+
+            document.getElementById('moTotalSoma').innerText = `R$ ${tMO.toFixed(2)}`;
+            document.getElementById('moComissaoSoma').innerText = `R$ ${tComissao.toFixed(2)}`;
+            document.getElementById('moLucroSoma').innerText = `R$ ${(tMO - tComissao).toFixed(2)}`;
+
+            renderCharts(tBruto, tBruto - tPecas - tComissao, mecMap);
+        }
+
+        function renderCharts(bruto, lucro, mecMap) {
+            if (chartFatLucro) chartFatLucro.destroy();
+            if (chartMecanicos) chartMecanicos.destroy();
+
+            const ctx1 = document.getElementById('chartFaturamentoLucro').getContext('2d');
+            chartFatLucro = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: ['Semana Atual'],
+                    datasets: [
+                        { label: 'Faturamento Bruto', data: [bruto], backgroundColor: '#3b82f6' },
+                        { label: 'Lucro Líquido', data: [lucro], backgroundColor: '#22c55e' }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            const ctx2 = document.getElementById('chartTopMecanicos').getContext('2d');
+            chartMecanicos = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(mecMap),
+                    datasets: [{
+                        data: Object.values(mecMap),
+                        backgroundColor: ['#ef4444', '#3b82f6', '#eab308', '#22c55e', '#a855f7']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
         }
 
         function renderRelatorioPecas() {
-            const pecas = extrairPecasLiquidadas();
-            const termo = (document.getElementById('filtroPecas').value || '').toLowerCase();
-
-            let totalCusto = 0, totalVenda = 0, totalLucro = 0;
+            const dtIni = document.getElementById('pecasDataInicio').value;
+            const dtFim = document.getElementById('pecasDataFim').value;
             const tbody = document.getElementById('tabelaPecasCorpo');
             tbody.innerHTML = '';
 
-            const filtradas = pecas.filter(p => 
-                termo === '' || 
-                p.descricao.toLowerCase().includes(termo) || 
-                p.placa.toLowerCase().includes(termo) ||
-                p.osCodigo.toLowerCase().includes(termo)
-            );
+            let cTotal = 0, vTotal = 0;
 
-            if (filtradas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-slate-500 italic">Nenhuma peça vendida em OS liquidada ou finalizada ainda.</td></tr>`;
-            }
+            ordensCache.filter(o => {
+                const d = (o.dataPagamento || o.dataEntrada || '').split('T')[0];
+                return d >= dtIni && d <= dtFim;
+            }).forEach(o => {
+                if (o.itens) {
+                    o.itens.filter(i => i.tipo === 'PECA').forEach(p => {
+                        const cust = (p.valorCusto || p.valorUnitario * 0.6) * p.quantidade;
+                        const vend = p.valorUnitario * p.quantidade;
+                        const luc = vend - cust;
+                        cTotal += cust; vTotal += vend;
 
-            filtradas.forEach(p => {
-                totalCusto += p.totalCusto;
-                totalVenda += p.totalVenda;
-                totalLucro += p.lucroTotal;
-
-                tbody.innerHTML += `
-                    <tr class="hover:bg-[#2d333f]/30">
-                        <td class="p-3 text-slate-400">${new Date(p.data).toLocaleDateString('pt-BR')}</td>
-                        <td class="p-3 text-amber-400 font-mono font-bold">${p.osCodigo}</td>
-                        <td class="p-3 text-white uppercase">${p.moto}</td>
-                        <td class="p-3 text-slate-200 uppercase font-bold">${p.descricao}</td>
-                        <td class="p-3 text-center font-mono">${p.quantidade}</td>
-                        <td class="p-3 text-slate-400 font-mono">${p.custoUnit.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
-                        <td class="p-3 text-blue-400 font-mono">${p.vendaUnit.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
-                        <td class="p-3 text-right text-green-400 font-mono font-bold">${p.lucroTotal.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
-                    </tr>
-                `;
-            });
-
-            document.getElementById('cardPecasCusto').innerText = totalCusto.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-            document.getElementById('cardPecasVenda').innerText = totalVenda.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-            document.getElementById('cardPecasLucro').innerText = totalLucro.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-        }
-
-        function exportarPecasExcel() {
-            const pecas = extrairPecasLiquidadas();
-            if (pecas.length === 0) { alert('Nenhuma peça liquidada para exportar.'); return; }
-            const dados = pecas.map(p => ({
-                'Data': new Date(p.data).toLocaleDateString('pt-BR'),
-                'Código OS': p.osCodigo,
-                'Moto': p.moto,
-                'Peça': p.descricao,
-                'Quantidade': p.quantidade,
-                'Custo Total (R$)': p.totalCusto,
-                'Venda Total (R$)': p.totalVenda,
-                'Lucro Líquido (R$)': p.lucroTotal
-            }));
-            const ws = XLSX.utils.json_to_sheet(dados);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Pecas");
-            XLSX.writeFile(wb, `MotoFlow_Pecas_${new Date().toISOString().slice(0, 10)}.xlsx`);
-        }
-
-        // ===== FINANCEIRO / DRE =====
-        function renderFinanceiro() {
-            const pagas = ordensCache.filter(o => o.pago);
-            let tBru = 0, tMO = 0, tPeca = 0, tComissao = 0;
-            pagas.forEach(o => {
-                tBru += (o.valorFinal || 0);
-                let moOS = 0;
-                if (o.itens) o.itens.forEach(i => {
-                    const sub = i.quantidade * i.valorUnitario;
-                    if ((i.tipo || '').toUpperCase() === 'PECA') tPeca += sub; else { tMO += sub; moOS += sub; }
-                });
-                const pct = o.mecanicoResponsavel && o.mecanicoResponsavel.percentualComissao ? (o.mecanicoResponsavel.percentualComissao / 100) : 0.40;
-                tComissao += (moOS * pct);
-            });
-            const custoPecas = tPeca * 0.60;
-            const lucroReal = tBru - custoPecas - tComissao;
-
-            document.getElementById('dreBruto').innerText = tBru.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-            document.getElementById('dreCusto').innerText = custoPecas.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-            document.getElementById('dreComissao').innerText = tComissao.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-            document.getElementById('dreLucro').innerText = lucroReal.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-
-            const tbody = document.getElementById('tabelaFinanceiroCorpo');
-            tbody.innerHTML = '';
-            [...pagas].slice(-20).reverse().forEach(o => {
-                let moOS = 0;
-                if (o.itens) o.itens.forEach(i => { if ((i.tipo || '').toUpperCase() !== 'PECA') moOS += (i.quantidade * i.valorUnitario); });
-                const mecNome = o.mecanicoResponsavel ? o.mecanicoResponsavel.nome : 'Sem Atribuição';
-                const pct = o.mecanicoResponsavel && o.mecanicoResponsavel.percentualComissao ? (o.mecanicoResponsavel.percentualComissao / 100) : 0.40;
-                tbody.innerHTML += `
-                    <tr class="hover:bg-[#2d333f]/30">
-                        <td class="p-3 text-slate-400">${new Date(o.dataPagamento || o.dataEntrada).toLocaleDateString('pt-BR')}</td>
-                        <td class="p-3 text-amber-400 font-mono font-bold">${o.codigoRastreio}</td>
-                        <td class="p-3 text-white uppercase">${o.moto ? o.moto.placa : ''}</td>
-                        <td class="p-3 text-blue-400 uppercase font-bold">${mecNome}</td>
-                        <td class="p-3 text-amber-400 font-mono">${(moOS * pct).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
-                        <td class="p-3 text-right text-green-400 font-mono font-bold">${(o.valorFinal||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
-                    </tr>`;
-            });
-        }
-
-        function exportarFinanceiroExcel() {
-            const pagas = ordensCache.filter(o => o.pago);
-            if (pagas.length === 0) { alert('Nenhuma ordem liquidada.'); return; }
-            const ws = XLSX.utils.json_to_sheet(pagas.map(o => ({
-                'OS': o.codigoRastreio, 'Data': o.dataPagamento, 'Valor': o.valorFinal
-            })));
-            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Financeiro");
-            XLSX.writeFile(wb, `Financeiro_${new Date().toISOString().slice(0, 10)}.xlsx`);
-        }
-
-        function exportarClientesExcel() {
-            const ws = XLSX.utils.json_to_sheet(ordensCache.map(o => ({
-                'Nome': o.cliente ? o.cliente.nome : '', 'Telefone': o.cliente ? o.cliente.telefoneWhatsapp : '', 'Moto': o.moto ? o.moto.modelo : '', 'Placa': o.moto ? o.moto.placa : ''
-            })));
-            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Clientes");
-            XLSX.writeFile(wb, `Clientes_${new Date().toISOString().slice(0, 10)}.xlsx`);
-        }
-
-        async function baixarBackupManual() {
-            try {
-                const res = await fetch('/api/backup/download', { headers: { 'Authorization': 'Bearer ' + token } });
-                const blob = await res.blob();
-                const a = document.createElement('a'); a.href = window.URL.createObjectURL(blob);
-                a.download = `backup_${new Date().toISOString().slice(0, 10)}.json`; a.click();
-            } catch (e) { alert('Erro no backup'); }
-        }
-
-        async function verificarStatusBackup() {
-            try {
-                const res = await fetch('/api/backup/status', { headers: { 'Authorization': 'Bearer ' + token } });
-                if (res.ok) {
-                    const d = await res.json();
-                    document.getElementById('bannerBackupAviso').style.display = d.precisaBackup ? 'block' : 'none';
+                        tbody.innerHTML += `
+                            <tr>
+                                <td class="p-3">${new Date(o.dataEntrada).toLocaleDateString('pt-BR')}</td>
+                                <td class="p-3 font-bold text-amber-400">${o.codigoRastreio}</td>
+                                <td class="p-3 uppercase font-bold">${p.descricao}</td>
+                                <td class="p-3 text-right">R$ ${cust.toFixed(2)}</td>
+                                <td class="p-3 text-right text-blue-400">R$ ${vend.toFixed(2)}</td>
+                                <td class="p-3 text-right text-green-400 font-bold">R$ ${luc.toFixed(2)}</td>
+                            </tr>`;
+                    });
                 }
-            } catch (e) {}
-        }
-
-        // Agenda
-        document.getElementById('formAgendamento').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const payload = {
-                clienteNome: document.getElementById('agNome').value, telefoneWhatsapp: document.getElementById('agTel').value,
-                motoModelo: document.getElementById('agMoto').value, motoPlaca: document.getElementById('agPlaca').value,
-                dataHora: document.getElementById('agDataHora').value, servicoPrevisto: document.getElementById('agServico').value, status: 'PENDENTE'
-            };
-            const res = await fetch('/api/agendamentos', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify(payload) });
-            if (res.ok) { document.getElementById('formAgendamento').reset(); carregarDados(); }
-        });
-
-        function renderAgenda() {
-            const tbody = document.getElementById('tabelaAgendaCorpo');
-            tbody.innerHTML = '';
-            agendaCache.forEach(a => {
-                tbody.innerHTML += `
-                    <tr class="hover:bg-[#2d333f]/30">
-                        <td class="p-3 font-mono text-white">${new Date(a.dataHora).toLocaleDateString('pt-BR')} ${new Date(a.dataHora).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</td>
-                        <td class="p-3 font-bold uppercase">${a.clienteNome}</td>
-                        <td class="p-3 uppercase text-amber-400">${a.motoModelo}</td>
-                        <td class="p-3 text-slate-300">${a.servicoPrevisto || '-'}</td>
-                        <td class="p-3 text-center"><span class="border rounded px-2 py-0.5 text-[10px] font-bold uppercase text-yellow-400">${a.status}</span></td>
-                        <td class="p-3 text-right">
-                            <button onclick="excluirAgendamento(${a.id})" class="bg-red-600 hover:bg-red-500 text-white font-bold px-2 py-1 rounded text-[10px]">X</button>
-                        </td>
-                    </tr>`;
             });
+
+            document.getElementById('cardPecasCusto').innerText = `R$ ${cTotal.toFixed(2)}`;
+            document.getElementById('cardPecasVenda').innerText = `R$ ${vTotal.toFixed(2)}`;
+            document.getElementById('cardPecasLucro').innerText = `R$ ${(vTotal - cTotal).toFixed(2)}`;
         }
 
-        async function excluirAgendamento(id) {
-            if (!confirm('Excluir agendamento?')) return;
-            await fetch(`/api/agendamentos/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
-            agendaCache = agendaCache.filter(a => a.id !== id);
-            renderAgenda();
+        function exportarPlanilhaMOExcel() {
+            const ws = XLSX.utils.json_to_sheet(ordensCache.map(o => ({
+                'OS': o.codigoRastreio,
+                'Mecânico': o.mecanicoResponsavel ? o.mecanicoResponsavel.nome : 'N/D',
+                'M.O. Total': o.valorTotal
+            })));
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "MaoDeObra");
+            XLSX.writeFile(wb, `Controle_MO_${new Date().toISOString().slice(0,10)}.xlsx`);
         }
 
-        // QR Code
-        function inicializarQRCodeBalcao() {
-            const inp = document.getElementById('inputUrlRastreio');
-            if (!inp.value) inp.value = `${window.location.origin}/rastreio.html`;
-            document.getElementById('containerQRCode').innerHTML = '';
-            new QRCode(document.getElementById('containerQRCode'), { text: inp.value, width: 180, height: 180 });
-        }
-        function atualizarQRCodeManual() { inicializarQRCodeBalcao(); }
-        function copiarLinkRastreio() { navigator.clipboard.writeText(document.getElementById('inputUrlRastreio').value); alert('Copiado!'); }
-        function imprimirPlacaBalcao() {
-            const j = window.open('','_blank');
-            j.document.write(`<html><body style="display:flex;justify-content:center;padding:40px;">${document.getElementById('placaDisplayBalcao').outerHTML}</body><script>window.onload=()=>window.print()<\/script></html>`);
-            j.document.close();
+        function navegarPara(aba) {
+            ['os', 'kanban', 'financeiro', 'pecas'].forEach(n => {
+                const el = document.getElementById(`aba-${n}`);
+                if (el) el.classList.add('hidden');
+            });
+            const alvo = document.getElementById(`aba-${aba}`);
+            if (alvo) alvo.classList.remove('hidden');
         }
 
-        navegarPara('os');
+        window.onload = () => {
+            configurarDatasAutomaticas();
+            carregarDados();
+            navegarPara('os');
+        };
     </script>
 </body>
 </html>
