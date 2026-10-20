@@ -110,9 +110,17 @@
                                         <option value="CHEIO">Cheio</option>
                                     </select>
                                 </div>
-                                <div>
-                                    <label class="block text-[10px] uppercase text-slate-400 mb-1">Mecânico Inicial:</label>
-                                    <select id="osMecanicoSelect" class="input-dark w-full rounded p-2 text-sm font-bold text-slate-200"></select>
+                                
+                                <!-- Seleção de Mecânico + Comissão Livre -->
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                    <div class="md:col-span-2">
+                                        <label class="block text-[10px] uppercase text-slate-400 mb-1">Mecânico Inicial:</label>
+                                        <select id="osMecanicoSelect" onchange="atualizarComissaoMecanicoInput()" class="input-dark w-full rounded p-2 text-sm font-bold text-slate-200"></select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] uppercase text-amber-400 mb-1 font-bold">Comissão (%):</label>
+                                        <input type="number" id="osComissaoMecanico" value="40" min="0" max="100" class="input-dark w-full rounded p-2 text-sm font-bold text-amber-400 font-mono">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -145,15 +153,8 @@
                                     <input type="number" id="novaOsItemCusto" oninput="calcularVendaMargemNovaOS()" step="0.01" placeholder="0.00" class="input-dark w-full rounded p-1.5 text-xs font-mono">
                                 </div>
                                 <div class="col-span-6 sm:col-span-4" id="boxNovaOsMargem">
-                                    <label class="block text-[9px] uppercase text-amber-400 mb-0.5 font-bold">+ Margem Lucro</label>
-                                    <select id="novaOsItemMargem" onchange="calcularVendaMargemNovaOS()" class="input-dark w-full rounded p-1.5 text-xs font-bold text-amber-400">
-                                        <option value="30">+30% Lucro</option>
-                                        <option value="40">+40% Lucro</option>
-                                        <option value="50" selected>+50% (Padrão)</option>
-                                        <option value="60">+60% Lucro</option>
-                                        <option value="80">+80% Lucro</option>
-                                        <option value="100">+100% (Dobro)</option>
-                                    </select>
+                                    <label class="block text-[9px] uppercase text-amber-400 mb-0.5 font-bold">+ Margem Lucro (%)</label>
+                                    <input type="number" id="novaOsItemMargem" value="50" oninput="calcularVendaMargemNovaOS()" placeholder="Ex: 50" class="input-dark w-full rounded p-1.5 text-xs font-bold text-amber-400 font-mono">
                                 </div>
                                 <div class="col-span-12 sm:col-span-4">
                                     <label class="block text-[9px] uppercase text-emerald-400 mb-0.5 font-bold">Venda Cliente (R$)</label>
@@ -611,15 +612,8 @@
                             <input type="number" id="mdlItemCusto" oninput="calcularVendaPelaMargem()" step="0.01" placeholder="0.00" class="input-dark w-full rounded p-1.5 text-xs font-mono">
                         </div>
                         <div class="col-span-4" id="boxItemMargem">
-                            <label class="block text-[9px] uppercase text-amber-400 mb-0.5 font-bold">+ Margem Lucro</label>
-                            <select id="mdlItemMargem" onchange="calcularVendaPelaMargem()" class="input-dark w-full rounded p-1.5 text-xs font-bold text-amber-400">
-                                <option value="30">+30% Lucro</option>
-                                <option value="40">+40% Lucro</option>
-                                <option value="50" selected>+50% (Padrão)</option>
-                                <option value="60">+60% Lucro</option>
-                                <option value="80">+80% Lucro</option>
-                                <option value="100">+100% (Dobro)</option>
-                            </select>
+                            <label class="block text-[9px] uppercase text-amber-400 mb-0.5 font-bold">+ Margem Lucro (%)</label>
+                            <input type="number" id="mdlItemMargem" value="50" oninput="calcularVendaPelaMargem()" placeholder="Ex: 50" class="input-dark w-full rounded p-1.5 text-xs font-bold text-amber-400 font-mono">
                         </div>
                         <div class="col-span-4">
                             <label class="block text-[9px] uppercase text-emerald-400 mb-0.5 font-bold">Venda Cliente (R$)</label>
@@ -657,18 +651,39 @@
                 </div>
             </div>
             <div class="p-4 border-t border-[#2d333f] bg-[#1a1d24] flex flex-wrap gap-2" id="modalOSBotoes">
-    <button onclick="fecharModalOS()" class="flex-1 bg-[#2d333f] hover:bg-[#374151] text-white font-bold py-2.5 rounded text-xs uppercase transition">Fechar</button>
-    
-    <!-- Botão de Avisar WhatsApp (Visível quando PRONTA) -->
-    <button id="btnAvisarWppPronta" onclick="avisarClienteMotoPronta()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded text-xs uppercase transition flex items-center justify-center gap-1 shadow-lg">
-        📲 Avisar Cliente (WPP)
-    </button>
-    
-    <!-- Botão de Liquidar (Visível APENAS quando PRONTA e Não Paga) -->
-    <button id="btnLiquidarOS" onclick="liquidarOSModal()" class="hidden flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded text-xs uppercase transition shadow-lg">
-        💰 Receber Pagamento
-    </button>
-</div>
+                <button onclick="fecharModalOS()" class="flex-1 bg-[#2d333f] hover:bg-[#374151] text-white font-bold py-2.5 rounded text-xs uppercase transition">Fechar</button>
+                
+                <!-- Botão de Avisar WhatsApp (Visível quando PRONTA) -->
+                <button id="btnAvisarWppPronta" onclick="avisarClienteMotoPronta()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded text-xs uppercase transition flex items-center justify-center gap-1 shadow-lg">
+                    📲 Avisar Cliente (WPP)
+                </button>
+                
+                <!-- Botão de Liquidar (Visível APENAS quando PRONTA e Não Paga) -->
+                <button id="btnLiquidarOS" onclick="liquidarOSModal()" class="hidden flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded text-xs uppercase transition shadow-lg">
+                    💰 Receber Pagamento
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE SUCESSO E AÇÕES RÁPIDAS AO GERAR OS -->
+    <div id="modalSucessoOS" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-[#1f232b] border border-[#2d333f] rounded-xl w-full max-w-md shadow-2xl p-6 text-center border-t-4 border-t-green-500 space-y-4">
+            <div class="w-12 h-12 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">✓</div>
+            <h3 class="text-lg font-bold text-white uppercase">Ordem de Serviço Criada!</h3>
+            <p class="text-xs text-slate-400" id="txtSucessoOSResumo"></p>
+            
+            <div class="space-y-2 pt-2">
+                <button id="btnSucessoZap" onclick="enviarZapNovaOS()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg text-xs uppercase transition flex items-center justify-center gap-2 shadow-lg">
+                    📲 Enviar Link no WhatsApp do Cliente
+                </button>
+                <button id="btnSucessoImprimir" onclick="imprimirNovaOSCriada()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg text-xs uppercase transition flex items-center justify-center gap-2">
+                    🖨️ Imprimir Ordem de Serviço
+                </button>
+                <button onclick="fecharSucessoOS()" class="w-full bg-[#2d333f] hover:bg-[#374151] text-white font-bold py-2.5 rounded-lg text-xs uppercase transition">
+                    ➡️ Ir para o Pátio Kanban
+                </button>
+            </div>
         </div>
     </div>
 
@@ -686,6 +701,7 @@
         let agendaCache = [];
         let mecanicosCache = [];
         let osDetalheAtiva = null;
+        let osRecemCriada = null;
 
         // Lista temporária para os itens inseridos na Nova OS antes do envio
         let itensNovaOSCache = [];
@@ -730,6 +746,14 @@
             });
         }
 
+        function atualizarComissaoMecanicoInput() {
+            const mecId = document.getElementById('osMecanicoSelect').value;
+            const mec = mecanicosCache.find(m => m.id == mecId);
+            if (mec && mec.percentualComissao !== undefined) {
+                document.getElementById('osComissaoMecanico').value = mec.percentualComissao;
+            }
+        }
+
         function navegarPara(aba) {
             ['os', 'kanban', 'agenda', 'clientes', 'financeiro', 'pecas', 'backup', 'qrcode'].forEach(n => {
                 const el = document.getElementById(`aba-${n}`);
@@ -745,7 +769,7 @@
             else if (aba !== 'os') carregarDados();
         }
 
-        // ===== NOVA OS (COM LANÇAMENTO DE ITENS INICIAIS) =====
+        // ===== NOVA OS (COM LANÇAMENTO DE ITENS E MARGEM DIGITÁVEL) =====
         function alternarCamposItemNovaOS() {
             const tipo = document.getElementById('novaOsItemTipo').value;
             const bMargem = document.getElementById('boxNovaOsMargem');
@@ -830,12 +854,16 @@
             e.preventDefault();
             const btn = document.getElementById('btnGerarOS');
             btn.innerHTML = "A GERAR..."; btn.disabled = true;
+            
             const mecId = document.getElementById('osMecanicoSelect').value;
+            const comissaoLivre = parseFloat(document.getElementById('osComissaoMecanico').value) || 40;
+
             const payload = {
                 cliente: { nome: document.getElementById('osCliente').value, telefoneWhatsapp: document.getElementById('osTel').value },
                 moto: { placa: document.getElementById('osPlaca').value, modelo: document.getElementById('osModelo').value, kmAtual: parseInt(document.getElementById('osKm').value) || 0 },
                 capaceteDeixado: false, bauChaveDeixada: false, estadoRelacao: "REGULAR", avariasPrevia: "Sem avarias visíveis",
-                nivelCombustivel: document.getElementById('osComb').value, relatoCliente: document.getElementById('osRelato').value
+                nivelCombustivel: document.getElementById('osComb').value, relatoCliente: document.getElementById('osRelato').value,
+                percentualComissaoMecanico: comissaoLivre
             };
 
             try {
@@ -845,32 +873,52 @@
                     body: JSON.stringify(payload)
                 });
                 if (res.ok) {
-                    const osCriada = await res.json();
+                    osRecemCriada = await res.json();
                     
-                    // Se foi selecionado um mecânico
                     if (mecId) {
-                        await fetch(`${API}/${osCriada.id}/mecanico?mecanicoId=${mecId}`, { method: 'PATCH', headers: { 'Authorization': 'Bearer ' + token } });
+                        await fetch(`${API}/${osRecemCriada.id}/mecanico?mecanicoId=${mecId}&comissao=${comissaoLivre}`, { 
+                            method: 'PATCH', 
+                            headers: { 'Authorization': 'Bearer ' + token } 
+                        });
                     }
 
-                    // Envia os itens/serviços adicionados previamente
                     for (const item of itensNovaOSCache) {
-                        await fetch(`${API}/${osCriada.id}/itens`, {
+                        await fetch(`${API}/${osRecemCriada.id}/itens`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                             body: JSON.stringify(item)
                         });
                     }
 
+                    document.getElementById('txtSucessoOSResumo').innerText = `OS #${osRecemCriada.codigoRastreio} para ${osRecemCriada.cliente.nome} (${osRecemCriada.moto.modelo})`;
+                    document.getElementById('modalSucessoOS').classList.remove('hidden');
+
                     document.getElementById('formOS').reset();
                     itensNovaOSCache = [];
                     renderItensNovaOS();
-
-                    alert("Ordem gerada e enviada ao Pátio com sucesso!");
-                    navegarPara('kanban');
+                    carregarDados();
                 } else alert("Erro ao gerar OS.");
             } catch (err) { alert('Falha de conexão.'); }
             btn.innerHTML = "Gerar Documento e Enviar ao Pátio ➜"; btn.disabled = false;
         });
+
+        function enviarZapNovaOS() {
+            if (!osRecemCriada) return;
+            const tel = osRecemCriada.cliente.telefoneWhatsapp.replace(/\D/g, '');
+            const urlRastreio = `${window.location.origin}/rastreio.html?placa=${osRecemCriada.moto.placa}`;
+            const msg = encodeURIComponent(`Olá ${osRecemCriada.cliente.nome}! 🛵 Sua ordem de serviço foi aberta com sucesso na MotoFlow Pro.\n\nAcompanhe o andamento da sua moto e imprima seu comprovante pelo link:\n${urlRastreio}`);
+            window.open(`https://wa.me/55${tel}?text=${msg}`, '_blank');
+        }
+
+        function imprimirNovaOSCriada() {
+            if (!osRecemCriada) return;
+            imprimirOSDireto(osRecemCriada.id);
+        }
+
+        function fecharSucessoOS() {
+            document.getElementById('modalSucessoOS').classList.add('hidden');
+            navegarPara('kanban');
+        }
 
         // ===== KANBAN =====
         function renderizarKanban() {
@@ -1002,59 +1050,57 @@
         }
 
         function abrirModalOS(id) {
-    const os = ordensCache.find(o => o.id === id);
-    if (!os) return;
-    osDetalheAtiva = os;
-    document.getElementById('modalOSCodigo').innerText = os.codigoRastreio;
-    document.getElementById('modalOSCli').innerText = os.cliente ? os.cliente.nome : '';
-    document.getElementById('modalOSMoto').innerText = os.moto ? os.moto.modelo : '';
-    document.getElementById('modalOSPlaca').innerText = os.moto ? os.moto.placa : '';
-    document.getElementById('modalMecanicoSelect').value = os.mecanicoResponsavel ? os.mecanicoResponsavel.id : '';
+            const os = ordensCache.find(o => o.id === id);
+            if (!os) return;
+            osDetalheAtiva = os;
+            document.getElementById('modalOSCodigo').innerText = os.codigoRastreio;
+            document.getElementById('modalOSCli').innerText = os.cliente ? os.cliente.nome : '';
+            document.getElementById('modalOSMoto').innerText = os.moto ? os.moto.modelo : '';
+            document.getElementById('modalOSPlaca').innerText = os.moto ? os.moto.placa : '';
+            document.getElementById('modalMecanicoSelect').value = os.mecanicoResponsavel ? os.mecanicoResponsavel.id : '';
 
-    atualizarItensModal();
-    
-    const bLiq = document.getElementById('btnLiquidarOS');
-    const blcFechamento = document.getElementById('blocoFechamento');
-    const btnWppPronta = document.getElementById('btnAvisarWppPronta');
+            atualizarItensModal();
+            
+            const bLiq = document.getElementById('btnLiquidarOS');
+            const blcFechamento = document.getElementById('blocoFechamento');
+            const btnWppPronta = document.getElementById('btnAvisarWppPronta');
 
-    // REGRA: Só libera "Receber Pagamento" se a OS estiver com status PRONTA e NÃO estiver paga
-    const estaPronta = (os.status === 'PRONTA' || os.status === 'PRONTO');
-    
-    if (!os.pago && estaPronta) {
-        bLiq.classList.remove('hidden');
-        blcFechamento.classList.remove('hidden');
-        document.getElementById('mdlDesc').value = '0.00';
-        recalcularDescontoInterativo();
-    } else {
-        bLiq.classList.add('hidden');
-        blcFechamento.classList.add('hidden');
-    }
+            // Trava: Só exibe fechamento de caixa/liquidação se o status for PRONTA e não estiver paga
+            const estaPronta = (os.status === 'PRONTA' || os.status === 'PRONTO');
+            
+            if (!os.pago && estaPronta) {
+                bLiq.classList.remove('hidden');
+                blcFechamento.classList.remove('hidden');
+                document.getElementById('mdlDesc').value = '0.00';
+                recalcularDescontoInterativo();
+            } else {
+                bLiq.classList.add('hidden');
+                blcFechamento.classList.add('hidden');
+            }
 
-    // Exibe o botão de notificação via WhatsApp se o status for PRONTA
-    if (estaPronta) {
-        btnWppPronta.classList.remove('hidden');
-    } else {
-        btnWppPronta.classList.add('hidden');
-    }
+            if (estaPronta) {
+                btnWppPronta.classList.remove('hidden');
+            } else {
+                btnWppPronta.classList.add('hidden');
+            }
 
-    document.getElementById('modalOS').classList.remove('hidden');
-}
+            document.getElementById('modalOS').classList.remove('hidden');
+        }
 
-// Função para avisar o cliente manualmente via WhatsApp que a moto está pronta
-function avisarClienteMotoPronta() {
-    if (!osDetalheAtiva) return;
-    const cli = osDetalheAtiva.cliente;
-    const moto = osDetalheAtiva.moto;
-    if (!cli || !cli.telefoneWhatsapp) {
-        alert("Cliente não possui telefone cadastrado.");
-        return;
-    }
-    const tel = cli.telefoneWhatsapp.replace(/\D/g, '');
-    const valor = (osDetalheAtiva.valorTotal || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    const msg = encodeURIComponent(`Olá ${cli.nome}! 🛵 Sua moto ${moto.modelo} (${moto.placa}) está PRONTA na MotoFlow Pro!\n\nTotal da OS #${osDetalheAtiva.codigoRastreio}: ${valor}.\nPode vir retirar!`);
-    
-    window.open(`https://wa.me/55${tel}?text=${msg}`, '_blank');
-}
+        function avisarClienteMotoPronta() {
+            if (!osDetalheAtiva) return;
+            const cli = osDetalheAtiva.cliente;
+            const moto = osDetalheAtiva.moto;
+            if (!cli || !cli.telefoneWhatsapp) {
+                alert("Cliente não possui telefone cadastrado.");
+                return;
+            }
+            const tel = cli.telefoneWhatsapp.replace(/\D/g, '');
+            const valor = (osDetalheAtiva.valorTotal || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const msg = encodeURIComponent(`Olá ${cli.nome}! 🛵 Sua moto ${moto.modelo} (${moto.placa}) está PRONTA na MotoFlow Pro!\n\nTotal da OS #${osDetalheAtiva.codigoRastreio}: ${valor}.\nPode vir retirar!`);
+            
+            window.open(`https://wa.me/55${tel}?text=${msg}`, '_blank');
+        }
 
         async function alterarMecanicoOS(mecId) {
             if (!osDetalheAtiva || !mecId) return;
@@ -1125,7 +1171,7 @@ function avisarClienteMotoPronta() {
         }
         function fecharModalOS() { document.getElementById('modalOS').classList.add('hidden'); }
 
-        // ===== GERENCIAMENTO DE CLIENTES (ADICIONAR / EDITAR) =====
+        // ===== GERENCIAMENTO DE CLIENTES =====
         function abrirModalCliente() {
             document.getElementById('modalClienteTitulo').innerText = '+ Novo Cliente';
             document.getElementById('cliModalTelAntigo').value = '';
@@ -1162,7 +1208,6 @@ function avisarClienteMotoPronta() {
             const placa = document.getElementById('cliModalPlaca').value;
 
             if (telAntigo) {
-                // Atualiza em memória e reenvia para manter sincronizado nas ordens do cliente
                 ordensCache.forEach(o => {
                     if (o.cliente && o.cliente.telefoneWhatsapp === telAntigo) {
                         o.cliente.nome = nome;
@@ -1175,14 +1220,13 @@ function avisarClienteMotoPronta() {
                 });
                 alert("Cliente atualizado com sucesso!");
             } else {
-                // Preenche a tela de Nova OS para cadastrar a primeira entrada
                 document.getElementById('osCliente').value = nome;
                 document.getElementById('osTel').value = tel;
                 document.getElementById('osModelo').value = moto;
                 document.getElementById('osPlaca').value = placa;
                 fecharModalCliente();
                 navegarPara('os');
-                alert("Cliente preparado! Preencha o diagnóstico e clique em 'Gerar Documento'.");
+                alert("Cliente preparado! Preencha a OS e clique em 'Gerar Documento'.");
                 return;
             }
 
