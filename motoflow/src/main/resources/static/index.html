@@ -189,8 +189,21 @@
                         <span class="text-xs text-slate-400 uppercase font-bold">Até:</span>
                         <input type="date" id="dreDataFim" onchange="renderFinanceiro()" class="input-dark px-3 py-1.5 rounded text-xs font-mono">
                     </div>
+                    <button onclick="exportarFinanceiroExcel()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded text-xs uppercase transition">⬇ EXPORTAR SEMANA (EXCEL)</button>
                 </div>
             </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 panel-bg rounded-lg p-5">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase mb-4 text-center">Faturamento vs Lucro (Gráfico)</h3>
+                    <div class="h-64"><canvas id="chartFaturamentoLucro"></canvas></div>
+                </div>
+                <div class="lg:col-span-5 panel-bg rounded-lg p-5">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase mb-4 text-center">Top Mecânicos</h3>
+                    <div class="h-64 flex justify-center"><canvas id="chartTopMecanicos"></canvas></div>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div class="panel-bg rounded-lg p-4 border-l-4 border-l-red-500">
                     <span class="text-[10px] uppercase text-slate-400 font-bold mb-1 block">Faturamento Bruto</span>
@@ -209,28 +222,166 @@
                     <span id="dreLucro" class="text-2xl font-bold text-green-400">R$ 0,00</span>
                 </div>
             </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 panel-bg rounded-lg p-5">
+                    <h3 class="text-sm font-bold text-white mb-4 uppercase">Histórico de Vendas Efetivadas</h3>
+                    <div class="overflow-x-auto bg-[#1a1d24] rounded border border-[#2d333f]">
+                        <table class="w-full text-left text-xs">
+                            <thead class="text-red-500 uppercase font-bold border-b border-[#2d333f]">
+                                <tr>
+                                    <th class="p-3">Data</th>
+                                    <th class="p-3">OS</th>
+                                    <th class="p-3">Placa</th>
+                                    <th class="p-3">Bruto</th>
+                                    <th class="p-3">Taxas/Custo</th>
+                                    <th class="p-3 text-right">Lucro</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaFinanceiroCorpo" class="divide-y divide-[#2d333f] text-slate-300"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 panel-bg rounded-lg p-5 flex flex-col justify-between border-t-4 border-t-blue-500">
+                    <div>
+                        <h3 class="text-sm font-bold text-blue-400 mb-3 uppercase flex items-center gap-1">☁️ Controle de M.O. (Nuvem)</h3>
+                        <div class="grid grid-cols-3 gap-2 text-center mb-4 bg-[#121418] p-3 rounded border border-[#2d333f]">
+                            <div>
+                                <span class="text-[9px] uppercase text-slate-400 block font-bold">Total M.O.</span>
+                                <span id="moTotalSoma" class="text-xs font-bold text-white">R$ 0,00</span>
+                            </div>
+                            <div>
+                                <span class="text-[9px] uppercase text-slate-400 block font-bold">Comissão</span>
+                                <span id="moComissaoSoma" class="text-xs font-bold text-amber-400">R$ 0,00</span>
+                            </div>
+                            <div>
+                                <span class="text-[9px] uppercase text-slate-400 block font-bold">Lucro Oficina</span>
+                                <span id="moLucroSoma" class="text-xs font-bold text-green-400">R$ 0,00</span>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto max-h-48 overflow-y-auto mb-4 bg-[#121418] rounded border border-[#2d333f]">
+                            <table class="w-full text-left text-[11px]">
+                                <thead class="text-slate-400 uppercase font-bold border-b border-[#2d333f]">
+                                    <tr>
+                                        <th class="p-2">Mecânico</th>
+                                        <th class="p-2">Modelo</th>
+                                        <th class="p-2">M.O. Total</th>
+                                        <th class="p-2 text-right">Comissão</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabelaControleMOCorpo" class="divide-y divide-[#2d333f] text-slate-300"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <button onclick="exportarPlanilhaMOExcel()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded text-xs uppercase transition shadow-md">
+                            📊 EXPORTAR PLANILHA EDITÁVEL (EXCEL)
+                        </button>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- ABA 5: RELATÓRIO DE PEÇAS -->
         <section id="aba-pecas" class="hidden space-y-6">
+            <div class="panel-bg rounded-lg p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div><h2 class="text-xl font-bold text-white tracking-tight flex items-center gap-2">📦 Lucro sobre Peças</h2></div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-slate-400 uppercase font-bold">De:</span>
+                        <input type="date" id="pecasDataInicio" onchange="renderRelatorioPecas()" class="input-dark px-3 py-1.5 rounded text-xs font-mono">
+                        <span class="text-xs text-slate-400 uppercase font-bold">Até:</span>
+                        <input type="date" id="pecasDataFim" onchange="renderRelatorioPecas()" class="input-dark px-3 py-1.5 rounded text-xs font-mono">
+                    </div>
+                    <button onclick="exportarPecasExcel()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded text-xs uppercase transition">⬇ EXPORTAR LISTA (EXCEL)</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="panel-bg rounded-lg p-4 border-l-4 border-l-red-500">
+                    <span class="text-[10px] uppercase text-slate-400 font-bold mb-1 block">Investimento (Custo das Peças)</span>
+                    <span id="cardPecasCusto" class="text-2xl font-bold text-white">R$ 0,00</span>
+                </div>
+                <div class="panel-bg rounded-lg p-4 border-l-4 border-l-blue-500">
+                    <span class="text-[10px] uppercase text-slate-400 font-bold mb-1 block">Faturamento Bruto de Peças</span>
+                    <span id="cardPecasVenda" class="text-2xl font-bold text-white">R$ 0,00</span>
+                </div>
+                <div class="panel-bg rounded-lg p-4 border-l-4 border-l-green-500">
+                    <span class="text-[10px] uppercase text-slate-400 font-bold mb-1 block">Lucro Real Exclusivo em Peças</span>
+                    <span id="cardPecasLucro" class="text-2xl font-bold text-green-400">R$ 0,00</span>
+                </div>
+            </div>
+
             <div class="panel-bg rounded-lg p-5">
-                <h2 class="text-xl font-bold text-white tracking-tight">📦 Lucro sobre Peças</h2>
+                <div class="overflow-x-auto bg-[#1a1d24] rounded border border-[#2d333f]">
+                    <table class="w-full text-left text-xs">
+                        <thead class="text-red-500 uppercase font-bold border-b border-[#2d333f]">
+                            <tr>
+                                <th class="p-3">Data</th>
+                                <th class="p-3">OS Nº</th>
+                                <th class="p-3">Itens Vendidos</th>
+                                <th class="p-3 text-right">Custo Pago</th>
+                                <th class="p-3 text-right">Valor Vendido</th>
+                                <th class="p-3 text-right">Lucro Gerado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaPecasCorpo" class="divide-y divide-[#2d333f] text-slate-300"></tbody>
+                    </table>
+                </div>
             </div>
         </section>
-        
-        <section id="aba-backup" class="hidden"></section>
+
+        <!-- ABA 6: BACKUP -->
+        <section id="aba-backup" class="hidden space-y-6">
+            <div class="panel-bg rounded-xl p-5 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-white tracking-tight">🔒 Cópia de Segurança (Backup)</h2>
+            </div>
+            <button onclick="baixarBackupManual()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-xs uppercase shadow-md">
+                ⬇ Descarregar Backup Agora (.JSON)
+            </button>
+        </section>
     </main>
 
-    <!-- SCRIPT DE INTELIGÊNCIA UNIFICADA -->
+    <!-- SCRIPT PRINCIPAL -->
     <script>
         const API = '/api/os';
         let ordensCache = [];
         let mecanicosCache = [];
         let itensNovaOSCache = [];
+        let chartFatLucro = null;
+        let chartMecanicos = null;
+
+        const KANBAN_COLS = [
+            { id: 'ORCAMENTO', tit: 'ORÇAMENTOS', cor: 'border-t-amber-500', accepts: ['RECEBIDA', 'ORCAMENTO'] },
+            { id: 'AGUARDANDO_PECAS', tit: 'AGUARDANDO PEÇAS', cor: 'border-t-blue-500', accepts: ['APROVADA', 'AGUARDANDO', 'AGUARDANDO_PECAS'] },
+            { id: 'EM_MANUTENCAO', tit: 'EM SERVIÇO', cor: 'border-t-red-500', accepts: ['EM_MANUTENCAO', 'TESTE_RODAGEM', 'EM_SERVICO'] },
+            { id: 'PRONTA', tit: 'PRONTO / PÁTIO', cor: 'border-t-green-500', accepts: ['PRONTA'] },
+            { id: 'FINALIZADA', tit: 'ENTREGUES', cor: 'border-t-slate-500', accepts: ['FINALIZADA'] }
+        ];
 
         function fazerLogout() { localStorage.clear(); window.location.href = 'login.html'; }
 
-        // CÁLCULO AUTOMÁTICO DE MARGEM DE LUCRO (Corrigindo o erro da imagem)
+        function configurarDatasAutomaticas() {
+            const hoje = new Date();
+            const diaSemana = hoje.getDay();
+            const seg = new Date(hoje);
+            seg.setDate(hoje.getDate() - (diaSemana === 0 ? 6 : diaSemana - 1));
+            const sab = new Date(seg);
+            sab.setDate(seg.getDate() + 5);
+
+            const fmt = d => d.toISOString().split('T')[0];
+            
+            if(document.getElementById('dreDataInicio')) {
+                document.getElementById('dreDataInicio').value = fmt(seg);
+                document.getElementById('dreDataFim').value = fmt(sab);
+                document.getElementById('pecasDataInicio').value = fmt(seg);
+                document.getElementById('pecasDataFim').value = fmt(sab);
+            }
+        }
+
         function calcularVendaMargemNovaOS() {
             const custo = parseFloat(document.getElementById('novaOsItemCusto').value) || 0;
             const margem = parseFloat(document.getElementById('novaOsItemMargem').value) || 0;
@@ -238,12 +389,6 @@
                 const vendaCalculada = custo * (1 + (margem / 100));
                 document.getElementById('novaOsItemValor').value = vendaCalculada.toFixed(2);
             }
-        }
-
-        function renderizarKanban() {
-            const container = document.getElementById('secaoKanban');
-            if (!container) return;
-            container.innerHTML = '<div class="text-slate-500 text-xs italic">Kanban pronto.</div>';
         }
 
         async function carregarDados() {
@@ -255,6 +400,8 @@
                 if (res.ok) {
                     ordensCache = await res.json();
                     renderizarKanban();
+                    renderFinanceiro();
+                    renderRelatorioPecas();
                 }
             } catch (e) { console.error(e); }
         }
@@ -342,10 +489,315 @@
             document.getElementById('txtTotalNovaOS').innerText = `Total: R$ ${total.toFixed(2)}`;
         }
 
-        function renderFinanceiro() {}
+        document.getElementById('formOS').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnGerarOS');
+            btn.innerHTML = "A GERAR..."; btn.disabled = true;
+            
+            const mecId = document.getElementById('osMecanicoSelect').value;
+            const comissaoLivre = parseFloat(document.getElementById('osComissaoMecanico').value) || 40;
+
+            const payload = {
+                cliente: { nome: document.getElementById('osCliente').value, telefoneWhatsapp: document.getElementById('osTel').value },
+                moto: { placa: document.getElementById('osPlaca').value, modelo: document.getElementById('osModelo').value, kmAtual: parseInt(document.getElementById('osKm').value) || 0 },
+                capaceteDeixado: false, bauChaveDeixada: false, estadoRelacao: "REGULAR", avariasPrevia: "Sem avarias visíveis",
+                nivelCombustivel: "1/2", relatoCliente: "Serviço solicitado",
+                percentualComissaoMecanico: comissaoLivre
+            };
+
+            try {
+                const res = await fetch(API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenVal },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    const osSalva = await res.json();
+                    
+                    if (mecId) {
+                        await fetch(`${API}/${osSalva.id}/mecanico?mecanicoId=${mecId}&comissao=${comissaoLivre}`, { 
+                            method: 'PATCH', 
+                            headers: { 'Authorization': 'Bearer ' + tokenVal } 
+                        });
+                    }
+
+                    for (const item of itensNovaOSCache) {
+                        await fetch(`${API}/${osSalva.id}/itens`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenVal },
+                            body: JSON.stringify(item)
+                        });
+                    }
+
+                    alert(`OS #${osSalva.codigoRastreio} gerada com sucesso!`);
+                    document.getElementById('formOS').reset();
+                    itensNovaOSCache = [];
+                    renderItensNovaOS();
+                    carregarDados();
+                    navegarPara('kanban');
+                } else alert("Erro ao gerar OS.");
+            } catch (err) { alert('Falha de conexão.'); }
+            btn.innerHTML = "Gerar Documento e Enviar ao Pátio ➜"; btn.disabled = false;
+        });
+
+        // KANBAN COMPLETO E FUNCIONAL
+        function renderizarKanban() {
+            const container = document.getElementById('secaoKanban');
+            if (!container) return;
+            const termoBusca = (document.getElementById('filtroKanbanPlaca')?.value || '').trim().toUpperCase();
+            container.innerHTML = '';
+
+            KANBAN_COLS.forEach(col => {
+                const ordens = ordensCache.filter(o => {
+                    const matchStatus = col.accepts.includes(o.status);
+                    const matchPlaca = termoBusca === '' || (o.moto && o.moto.placa.toUpperCase().includes(termoBusca));
+                    return matchStatus && matchPlaca;
+                });
+
+                const colDiv = document.createElement('div');
+                colDiv.className = `w-[280px] min-w-[280px] flex flex-col h-full`;
+                colDiv.ondragover = e => { e.preventDefault(); colDiv.classList.add('col-drag-over'); };
+                colDiv.ondragleave = () => colDiv.classList.remove('col-drag-over');
+                
+                colDiv.ondrop = async e => {
+                    e.preventDefault(); 
+                    colDiv.classList.remove('col-drag-over');
+                    const id = e.dataTransfer.getData('text');
+                    if (id) {
+                        await fetch(`${API}/${id}/status?novoStatus=${col.id}`, { method: 'PATCH', headers: { 'Authorization': 'Bearer ' + tokenVal } });
+                        carregarDados();
+                    }
+                };
+
+                colDiv.innerHTML = `
+                    <div class="text-center text-[10px] font-bold text-slate-300 uppercase tracking-widest border-t-2 ${col.cor} pt-2 pb-3 mb-2 mx-1">${col.tit}</div>
+                    <div class="flex-1 overflow-y-auto space-y-3 no-scrollbar p-1" id="cards-${col.id}">
+                        ${ordens.length === 0 ? `<div class="bg-[#1f232b] h-20 rounded-lg opacity-40 border border-[#2d333f] flex items-center justify-center text-xs text-slate-500">Vazio</div>` : ''}
+                    </div>
+                `;
+                const cardCont = colDiv.querySelector(`#cards-${col.id}`);
+                ordens.forEach(o => cardCont.appendChild(criarCardKanban(o)));
+                container.appendChild(colDiv);
+            });
+        }
+
+        function criarCardKanban(os) {
+            const div = document.createElement('div');
+            div.draggable = true;
+            div.ondragstart = e => e.dataTransfer.setData('text', os.id);
+            const nCli = os.cliente ? os.cliente.nome.split(' ')[0] : 'N/D';
+            const mecNome = os.mecanicoResponsavel ? os.mecanicoResponsavel.nome : 'Sem Mecânico';
+            
+            div.className = "bg-[#1f232b] border border-[#2d333f] rounded-lg p-3 shadow-md hover:border-slate-500 cursor-grab active:cursor-grabbing transition";
+            div.innerHTML = `
+                <div class="mb-2">
+                    <h4 class="text-xs font-bold text-white uppercase">${os.moto ? os.moto.modelo : 'N/D'} - ${os.moto ? os.moto.placa : ''}</h4>
+                    <p class="text-[10px] text-slate-400 mt-0.5">Cliente: <span class="text-slate-300 uppercase">${nCli}</span></p>
+                    <p class="text-[10px] text-slate-400">Mecânico: <span class="text-blue-400 font-bold uppercase">${mecNome}</span></p>
+                </div>
+                <div class="bg-[#121418] border border-[#2d333f] rounded text-[10px] text-slate-300 font-bold p-1.5 text-center mb-2 uppercase">
+                    ⚙ ${os.status.replace(/_/g, ' ')}
+                </div>
+                <div class="grid grid-cols-2 gap-1">
+                    <button onclick="imprimirOSDireto(${os.id})" class="bg-[#10b981] hover:bg-[#059669] text-white text-[9px] font-bold py-1 rounded transition uppercase">IMPRIMIR OS</button>
+                    <button onclick="excluirOS(${os.id})" class="bg-[#ef4444] hover:bg-[#dc2626] text-white text-[9px] font-bold py-1 rounded transition uppercase">DEL</button>
+                </div>
+            `;
+            return div;
+        }
+
+        async function excluirOS(id) {
+            if (!confirm('Deseja realmente excluir esta Ordem de Serviço?')) return;
+            try {
+                const res = await fetch(`${API}/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + tokenVal } });
+                if (res.ok) carregarDados();
+                else alert('Erro ao excluir OS.');
+            } catch (e) { alert('Erro de conexão.'); }
+        }
+
+        function imprimirOSDireto(osId) {
+            const os = ordensCache.find(o => o.id === osId);
+            if (!os) return;
+            const win = window.open('', '_blank');
+            win.document.write(gerarHTMLComprovanteOS(os));
+            win.document.close();
+        }
+
+        function gerarHTMLComprovanteOS(os) {
+            const dataFormatted = new Date(os.dataEntrada || Date.now()).toLocaleDateString('pt-BR');
+            const clienteNome = os.cliente ? os.cliente.nome : 'N/D';
+            const motoModelo = os.moto ? os.moto.modelo : 'N/D';
+            const motoPlaca = os.moto ? os.moto.placa : 'N/D';
+
+            let servicosHTML = '';
+            let pecasHTML = '';
+            let totalServicos = 0;
+            let totalPecas = 0;
+
+            if (os.itens && os.itens.length > 0) {
+                os.itens.forEach(i => {
+                    const qtd = i.quantidade || 1;
+                    const unit = i.valorUnitario || 0;
+                    const sub = qtd * unit;
+                    const tipo = (i.tipo || '').toUpperCase();
+
+                    if (tipo === 'SERVICO' || i.descricao.startsWith('MÃO DE OBRA')) {
+                        totalServicos += sub;
+                        servicosHTML += `<tr><td style="padding:4px; font-weight:bold;">${i.descricao}</td><td style="padding:4px; text-align:center;">${qtd}</td><td style="padding:4px; text-align:center;">un</td><td style="padding:4px; text-align:right;">R$ ${unit.toFixed(2)}</td><td style="padding:4px; text-align:right; font-weight:bold;">R$ ${sub.toFixed(2)}</td></tr>`;
+                    } else {
+                        totalPecas += sub;
+                        pecasHTML += `<tr><td style="padding:4px;">${i.descricao}</td><td style="padding:4px; text-align:center;">${qtd}</td><td style="padding:4px; text-align:center;">un</td><td style="padding:4px; text-align:right;">R$ ${unit.toFixed(2)}</td><td style="padding:4px; text-align:right; font-weight:bold;">R$ ${sub.toFixed(2)}</td></tr>`;
+                    }
+                });
+            }
+
+            return `<!DOCTYPE html><html><head><title>OS #${os.codigoRastreio}</title><style>body { font-family: Arial, sans-serif; padding: 20px; } .sheet { max-width: 800px; margin: 0 auto; border: 1px solid #000; padding: 20px; } table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 10px; } th, td { border-bottom: 1px solid #ccc; } th { background: #eee; }</style></head><body><div class="sheet"><h2>MOTOFLOW PRO - OS #${os.codigoRastreio}</h2><p>CLIENTE: ${clienteNome} | VEÍCULO: ${motoModelo} (${motoPlaca}) | DATA: ${dataFormatted}</p>${totalServicos > 0 ? `<h4>SERVIÇOS</h4><table><thead><tr><th>Nome</th><th>Qtd</th><th>Unidade</th><th>Valor Unit.</th><th>Valor Total</th></tr></thead><tbody>${servicosHTML}</tbody></table>` : ''}${totalPecas > 0 ? `<h4>PEÇAS</h4><table><thead><tr><th>Nome</th><th>Qtd</th><th>Unidade</th><th>Valor Unit.</th><th>Valor Total</th></tr></thead><tbody>${pecasHTML}</tbody></table>` : ''}<h3 style="text-align:right;">Total Geral: R$ ${(totalServicos + totalPecas).toFixed(2)}</h3></div><script>window.onload = () => window.print();<\/script></body></html>`;
+        }
+
+        function renderFinanceiro() {
+            const dtIni = document.getElementById('dreDataInicio')?.value;
+            const dtFim = document.getElementById('dreDataFim')?.value;
+            if(!dtIni || !dtFim) return;
+
+            let tBruto = 0, tPecas = 0, tComissao = 0, tMO = 0;
+            const mecMap = {};
+            const tbodyMO = document.getElementById('tabelaControleMOCorpo');
+            const tbodyHist = document.getElementById('tabelaFinanceiroCorpo');
+            if(tbodyMO) tbodyMO.innerHTML = ''; 
+            if(tbodyHist) tbodyHist.innerHTML = '';
+
+            ordensCache.filter(o => {
+                const d = (o.dataPagamento || o.dataEntrada || '').split('T')[0];
+                return d >= dtIni && d <= dtFim;
+            }).forEach(o => {
+                const totalOS = o.valorFinal || o.valorTotal || 0;
+                tBruto += totalOS;
+
+                let moOS = 0, pecaOS = 0;
+                if (o.itens) {
+                    o.itens.forEach(i => {
+                        const sub = i.quantidade * i.valorUnitario;
+                        if (i.tipo === 'PECA') pecaOS += sub; else moOS += sub;
+                    });
+                }
+
+                const mec = o.mecanicoResponsavel ? o.mecanicoResponsavel.nome : 'MECÂNICO';
+                const pctCom = (o.percentualComissaoMecanico || 40) / 100;
+                const comissaoOS = moOS * pctCom;
+
+                tPecas += pecaOS * 0.60;
+                tComissao += comissaoOS;
+                tMO += moOS;
+
+                mecMap[mec] = (mecMap[mec] || 0) + moOS;
+
+                if(tbodyMO) {
+                    tbodyMO.innerHTML += `<tr><td class="p-2 font-bold">${mec}</td><td class="p-2">${o.moto ? o.moto.modelo : ''}</td><td class="p-2">R$ ${moOS.toFixed(2)}</td><td class="p-2 text-right text-amber-400">R$ ${comissaoOS.toFixed(2)}</td></tr>`;
+                }
+
+                if(tbodyHist) {
+                    tbodyHist.innerHTML += `<tr><td class="p-3">${new Date(o.dataEntrada).toLocaleDateString('pt-BR')}</td><td class="p-3 font-bold text-amber-400">${o.codigoRastreio}</td><td class="p-3">${o.moto ? o.moto.placa : ''}</td><td class="p-3">R$ ${totalOS.toFixed(2)}</td><td class="p-3">R$ ${(pecaOS*0.6).toFixed(2)}</td><td class="p-3 text-right text-green-400 font-bold">R$ ${(totalOS - (pecaOS*0.6) - comissaoOS).toFixed(2)}</td></tr>`;
+                }
+            });
+
+            if(document.getElementById('dreBruto')) {
+                document.getElementById('dreBruto').innerText = `R$ ${tBruto.toFixed(2)}`;
+                document.getElementById('dreCusto').innerText = `R$ ${tPecas.toFixed(2)}`;
+                document.getElementById('dreComissao').innerText = `R$ ${tComissao.toFixed(2)}`;
+                document.getElementById('dreLucro').innerText = `R$ ${(tBruto - tPecas - tComissao).toFixed(2)}`;
+
+                document.getElementById('moTotalSoma').innerText = `R$ ${tMO.toFixed(2)}`;
+                document.getElementById('moComissaoSoma').innerText = `R$ ${tComissao.toFixed(2)}`;
+                document.getElementById('moLucroSoma').innerText = `R$ ${(tMO - tComissao).toFixed(2)}`;
+            }
+
+            renderCharts(tBruto, tBruto - tPecas - tComissao, mecMap);
+        }
+
+        function renderCharts(bruto, lucro, mecMap) {
+            const el1 = document.getElementById('chartFaturamentoLucro');
+            const el2 = document.getElementById('chartTopMecanicos');
+            if(!el1 || !el2) return;
+
+            if (chartFatLucro) chartFatLucro.destroy();
+            if (chartMecanicos) chartMecanicos.destroy();
+
+            const ctx1 = el1.getContext('2d');
+            chartFatLucro = new Chart(ctx1, {
+                type: 'bar',
+                data: { labels: ['Semana Atual'], datasets: [{ label: 'Bruto', data: [bruto], backgroundColor: '#3b82f6' }, { label: 'Lucro', data: [lucro], backgroundColor: '#22c55e' }] },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            const ctx2 = el2.getContext('2d');
+            chartMecanicos = new Chart(ctx2, {
+                type: 'doughnut',
+                data: { labels: Object.keys(mecMap), datasets: [{ data: Object.values(mecMap), backgroundColor: ['#ef4444', '#3b82f6', '#eab308', '#22c55e', '#a855f7'] }] },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        function renderRelatorioPecas() {
+            const dtIni = document.getElementById('pecasDataInicio')?.value;
+            const dtFim = document.getElementById('pecasDataFim')?.value;
+            const tbody = document.getElementById('tabelaPecasCorpo');
+            if(!tbody || !dtIni || !dtFim) return;
+            tbody.innerHTML = '';
+
+            let cTotal = 0, vTotal = 0;
+
+            ordensCache.filter(o => {
+                const d = (o.dataPagamento || o.dataEntrada || '').split('T')[0];
+                return d >= dtIni && d <= dtFim;
+            }).forEach(o => {
+                if (o.itens) {
+                    o.itens.filter(i => i.tipo === 'PECA').forEach(p => {
+                        const cust = (p.valorCusto || p.valorUnitario * 0.6) * p.quantidade;
+                        const vend = p.valorUnitario * p.quantidade;
+                        const luc = vend - cust;
+                        cTotal += cust; vTotal += vend;
+
+                        tbody.innerHTML += `<tr><td class="p-3">${new Date(o.dataEntrada).toLocaleDateString('pt-BR')}</td><td class="p-3 font-bold text-amber-400">${o.codigoRastreio}</td><td class="p-3 uppercase font-bold">${p.descricao}</td><td class="p-3 text-right">R$ ${cust.toFixed(2)}</td><td class="p-3 text-right text-blue-400">R$ ${vend.toFixed(2)}</td><td class="p-3 text-right text-green-400 font-bold">R$ ${luc.toFixed(2)}</td></tr>`;
+                    });
+                }
+            });
+
+            if(document.getElementById('cardPecasCusto')) {
+                document.getElementById('cardPecasCusto').innerText = `R$ ${cTotal.toFixed(2)}`;
+                document.getElementById('cardPecasVenda').innerText = `R$ ${vTotal.toFixed(2)}`;
+                document.getElementById('cardPecasLucro').innerText = `R$ ${(vTotal - cTotal).toFixed(2)}`;
+            }
+        }
+
+        function exportarFinanceiroExcel() {
+            const ws = XLSX.utils.json_to_sheet(ordensCache.map(o => ({ 'OS': o.codigoRastreio, 'Data': o.dataEntrada, 'Valor Total': o.valorTotal })));
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Financeiro");
+            XLSX.writeFile(wb, `Financeiro_${new Date().toISOString().slice(0, 10)}.xlsx`);
+        }
+
+        function exportarPlanilhaMOExcel() {
+            const ws = XLSX.utils.json_to_sheet(ordensCache.map(o => ({ 'OS': o.codigoRastreio, 'Mecânico': o.mecanicoResponsavel ? o.mecanicoResponsavel.nome : 'N/D', 'Total': o.valorTotal })));
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "MaoDeObra");
+            XLSX.writeFile(wb, `Controle_MO_${new Date().toISOString().slice(0,10)}.xlsx`);
+        }
+
+        function exportarPecasExcel() {
+            const ws = XLSX.utils.json_to_sheet(ordensCache.map(o => ({ 'OS': o.codigoRastreio, 'Placa': o.moto ? o.moto.placa : '' })));
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Pecas");
+            XLSX.writeFile(wb, `Pecas_${new Date().toISOString().slice(0,10)}.xlsx`);
+        }
+
+        async function baixarBackupManual() {
+            try {
+                const res = await fetch('/api/backup/download', { headers: { 'Authorization': 'Bearer ' + tokenVal } });
+                const blob = await res.blob();
+                const a = document.createElement('a'); a.href = window.URL.createObjectURL(blob);
+                a.download = `backup_${new Date().toISOString().slice(0, 10)}.json`; a.click();
+            } catch (e) { alert('Erro ao descarregar backup'); }
+        }
 
         function navegarPara(aba) {
-            ['os', 'kanban', 'financeiro', 'pecas'].forEach(n => {
+            ['os', 'kanban', 'financeiro', 'pecas', 'backup'].forEach(n => {
                 const el = document.getElementById(`aba-${n}`);
                 const btn = document.getElementById(`nav-${n}`);
                 if (el) el.classList.add('hidden');
@@ -355,11 +807,13 @@
             const btnAlvo = document.getElementById(`nav-${aba}`);
             if (alvo) alvo.classList.remove('hidden');
             if (btnAlvo) btnAlvo.classList.add('tab-active');
+            if (aba === 'kanban') renderizarKanban();
         }
 
         window.onload = () => {
+            configurarDatasAutomaticas();
             carregarDados();
-            navegarPara('os');
+            navegarPara('kanban');
         };
     </script>
 </body>
