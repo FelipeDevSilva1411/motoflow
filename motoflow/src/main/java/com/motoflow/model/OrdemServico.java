@@ -32,6 +32,9 @@ public class OrdemServico {
     @JoinColumn(name = "mecanico_id")
     private Mecanico mecanicoResponsavel;
 
+    @Column(name = "percentual_comissao_mecanico")
+    private BigDecimal percentualComissaoMecanico = new BigDecimal("40.0");
+
     private LocalDateTime dataEntrada = LocalDateTime.now();
     private LocalDateTime dataEntrega;
 
@@ -94,6 +97,9 @@ public class OrdemServico {
     public Mecanico getMecanicoResponsavel() { return mecanicoResponsavel; }
     public void setMecanicoResponsavel(Mecanico mecanicoResponsavel) { this.mecanicoResponsavel = mecanicoResponsavel; }
     
+    public BigDecimal getPercentualComissaoMecanico() { return percentualComissaoMecanico; }
+    public void setPercentualComissaoMecanico(BigDecimal percentualComissaoMecanico) { this.percentualComissaoMecanico = percentualComissaoMecanico; }
+
     public LocalDateTime getDataEntrada() { return dataEntrada; }
     public void setDataEntrada(LocalDateTime dataEntrada) { this.dataEntrada = dataEntrada; }
     
