@@ -1319,113 +1319,212 @@
             document.getElementById('modalHistoricoCliente').classList.remove('hidden');
         }
 
-        // ===== IMPRESSÃO LIMPA (SEM STATUS, SINTOMAS OU AVARIAS) =====
-        function imprimirOSDireto(osId) {
-            const os = ordensCache.find(o => o.id === osId);
-            if (!os) return;
-            const win = window.open('', '_blank');
-            const dataFormatted = new Date(os.dataEntrada || Date.now()).toLocaleString('pt-BR');
+        // ===== IMPRESSÃO EXECUTIVA PADRÃO MOTOFLOW PRO (LAYOUT SIMILAR AG DIESEL) =====
+        function gerarHTMLComprovanteOS(os) {
+            const dataFormatted = os.dataEntrada ? new Date(os.dataEntrada).toLocaleDateString('pt-BR') : new Date().toLocaleDateString('pt-BR');
             const clienteNome = os.cliente ? os.cliente.nome : 'N/D';
             const clienteTel = os.cliente ? os.cliente.telefoneWhatsapp : 'N/D';
             const motoModelo = os.moto ? os.moto.modelo : 'N/D';
             const motoPlaca = os.moto ? os.moto.placa : 'N/D';
-            const motoKm = os.moto ? (os.moto.kmAtual || 0) : 0;
+            const motoKm = os.moto ? (os.moto.kmAtual || '') : '';
             const mecNome = os.mecanicoResponsavel ? os.mecanicoResponsavel.nome : 'N/D';
 
-            let itensHTML = '';
-            let total = 0;
+            let servicosHTML = '';
+            let pecasHTML = '';
+            let totalServicos = 0;
+            let totalPecas = 0;
+
             if (os.itens && os.itens.length > 0) {
                 os.itens.forEach(i => {
-                    const sub = (i.quantidade || 1) * (i.valorUnitario || 0);
-                    total += sub;
-                    itensHTML += `
-                        <tr>
-                            <td style="padding:6px; border-bottom:1px solid #ddd; text-align:center;">${i.quantidade}x</td>
-                            <td style="padding:6px; border-bottom:1px solid #ddd; font-weight:bold;">${i.descricao}</td>
-                            <td style="padding:6px; border-bottom:1px solid #ddd; text-align:right;">R$ ${(i.valorUnitario || 0).toFixed(2)}</td>
-                            <td style="padding:6px; border-bottom:1px solid #ddd; text-align:right; font-weight:bold;">R$ ${sub.toFixed(2)}</td>
-                        </tr>`;
+                    const qtd = i.quantidade || 1;
+                    const unit = i.valorUnitario || 0;
+                    const sub = qtd * unit;
+                    const tipo = (i.tipo || '').toUpperCase();
+
+                    if (tipo === 'SERVICO' || tipo === 'M.O.') {
+                        totalServicos += sub;
+                        servicosHTML += `
+                            <tr>
+                                <td style="padding:4px 6px; font-weight:bold; text-transform:uppercase;">${i.descricao} - ${mecNome}</td>
+                                <td style="padding:4px 6px; text-align:center;">${qtd}</td>
+                                <td style="padding:4px 6px; text-align:center;">un</td>
+                                <td style="padding:4px 6px; text-align:right;">R$ ${unit.toFixed(2)}</td>
+                                <td style="padding:4px 6px; text-align:right; font-weight:bold;">R$ ${sub.toFixed(2)}</td>
+                            </tr>`;
+                    } else {
+                        totalPecas += sub;
+                        pecasHTML += `
+                            <tr>
+                                <td style="padding:4px 6px; text-weight:bold; text-transform:uppercase;">${i.descricao}</td>
+                                <td style="padding:4px 6px; text-align:center;">${qtd}</td>
+                                <td style="padding:4px 6px; text-align:center;">un</td>
+                                <td style="padding:4px 6px; text-align:right;">R$ ${unit.toFixed(2)}</td>
+                                <td style="padding:4px 6px; text-align:right; font-weight:bold;">R$ ${sub.toFixed(2)}</td>
+                            </tr>`;
+                    }
                 });
-            } else {
-                itensHTML = `<tr><td colspan="4" style="padding:10px; text-align:center; color:#777;">Nenhum item/serviço registrado.</td></tr>`;
             }
 
-            const valorFinalCalculado = os.pago ? (os.valorFinal || total) : total;
+            const totalGeral = totalServicos + totalPecas;
 
-            win.document.write(`
+            return `
                 <!DOCTYPE html>
                 <html lang="pt-BR">
                 <head>
                     <meta charset="UTF-8">
-                    <title>Comprovante OS #${os.codigoRastreio}</title>
+                    <title>OS #${os.codigoRastreio || '000'}</title>
                     <style>
-                        body { font-family: 'Courier New', Courier, monospace; margin: 0; padding: 20px; color: #000; background: #fff; }
-                        .ticket { max-width: 600px; margin: 0 auto; border: 1px solid #000; padding: 20px; }
-                        .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
-                        .header h2 { margin: 0; font-size: 22px; text-transform: uppercase; }
-                        .header p { margin: 2px 0; font-size: 11px; }
-                        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px; margin-bottom: 15px; border-bottom: 1px dashed #000; padding-bottom: 10px; }
-                        .info-block p { margin: 3px 0; }
-                        table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 15px; }
-                        th { background: #f0f0f0; padding: 6px; border-bottom: 2px solid #000; text-align: left; }
-                        .totais { text-align: right; font-size: 14px; border-top: 2px solid #000; padding-top: 10px; }
-                        .footer { margin-top: 30px; text-align: center; font-size: 11px; border-top: 1px solid #ccc; padding-top: 15px; }
-                        .linha-assinatura { margin-top: 40px; border-top: 1px solid #000; width: 250px; margin-left: auto; margin-right: auto; }
+                        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; color: #000; background: #23272f; }
+                        .noprint-bar { max-width: 800px; margin: 0 auto 15px auto; display: flex; gap: 10px; justify-content: space-between; }
+                        .btn-print { background: #2563eb; color: #fff; border: none; padding: 10px 18px; font-weight: bold; border-radius: 4px; cursor: pointer; text-transform: uppercase; font-size: 12px; }
+                        .btn-cupom { background: #d97706; color: #fff; border: none; padding: 10px 18px; font-weight: bold; border-radius: 4px; cursor: pointer; text-transform: uppercase; font-size: 12px; }
+                        .btn-close { background: #dc2626; color: #fff; border: none; padding: 10px 18px; font-weight: bold; border-radius: 4px; cursor: pointer; text-transform: uppercase; font-size: 12px; }
+                        .sheet { max-width: 800px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+                        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 12px; }
+                        .company-info h2 { margin: 0; font-size: 18px; font-weight: 900; text-transform: uppercase; }
+                        .company-info p { margin: 2px 0; font-size: 10px; text-transform: uppercase; }
+                        .contact-info { text-align: right; font-size: 10px; }
+                        .contact-info p { margin: 2px 0; }
+                        .section-box { margin-bottom: 10px; }
+                        .section-title { font-size: 11px; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; border-bottom: 1px solid #ccc; padding-bottom: 2px; }
+                        .os-banner { background: #888; color: #fff; text-align: center; font-weight: bold; padding: 6px; font-size: 13px; text-transform: uppercase; margin: 10px 0; }
+                        table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 8px; }
+                        th { background: #e5e7eb; padding: 5px; text-align: left; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #9ca3af; }
+                        .subtotal-row { text-align: right; font-weight: bold; font-size: 11px; padding: 4px 6px; }
+                        .totals-block { border-top: 2px solid #000; padding-top: 8px; margin-top: 10px; text-align: right; font-size: 12px; }
+                        .totals-block p { margin: 3px 0; }
+                        .obs-block { margin-top: 15px; font-size: 10px; border-top: 1px solid #ddd; padding-top: 8px; }
+                        @media print {
+                            body { background: #fff; padding: 0; }
+                            .noprint-bar { display: none !important; }
+                            .sheet { box-shadow: none; padding: 0; max-width: 100%; }
+                        }
                     </style>
                 </head>
                 <body>
-                    <div class="ticket">
+                    <div class="noprint-bar">
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn-print" onclick="window.print()">🖨️ Imprimir A4</button>
+                            <button class="btn-cupom" onclick="window.print()">🖨️ Imprimir Cupom (80mm)</button>
+                        </div>
+                        <button class="btn-close" onclick="window.close()">Fechar (X)</button>
+                    </div>
+
+                    <div class="sheet">
                         <div class="header">
-                            <h2>MOTOFLOW PRO</h2>
-                            <p>OFICINA MECÂNICA ESPECIALIZADA EM MOTOCICLETAS</p>
-                            <p>ORDEM DE SERVIÇO DE MANUTENÇÃO</p>
-                        </div>
-
-                        <div class="info-grid">
-                            <div class="info-block">
-                                <p><strong>CÓDIGO OS:</strong> ${os.codigoRastreio}</p>
-                                <p><strong>DATA ENTRADA:</strong> ${dataFormatted}</p>
-                                <p><strong>MECÂNICO RESP.:</strong> ${mecNome}</p>
+                            <div class="company-info">
+                                <h2>MOTOFLOW PRO</h2>
+                                <p>CENTRO AUTOMOTIVO ESPECIALIZADO EM MOTOCICLETAS</p>
+                                <p>RUA DAS OFICINAS, 1000 - FORTALEZA/CE</p>
                             </div>
-                            <div class="info-block">
-                                <p><strong>CLIENTE:</strong> ${clienteNome}</p>
-                                <p><strong>TELEFONE:</strong> ${clienteTel}</p>
-                                <p><strong>VEÍCULO:</strong> ${motoModelo} (${motoPlaca})</p>
-                                <p><strong>KM ATUAL:</strong> ${motoKm} KM</p>
+                            <div class="contact-info">
+                                <p><strong>Tel.:</strong> (85) 99999-8888</p>
+                                <p>motoflowpro@gmail.com</p>
+                                <p><strong>Contato:</strong> (85) 99999-8888</p>
                             </div>
                         </div>
 
-                        <h4 style="margin: 0 0 10px 0; font-size:13px; text-transform:uppercase;">Discriminação de Peças e Serviços</h4>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th style="width:10%; text-align:center;">Qtd</th>
-                                    <th style="width:50%;">Descrição</th>
-                                    <th style="width:20%; text-align:right;">Unitário</th>
-                                    <th style="width:20%; text-align:right;">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${itensHTML}
-                            </tbody>
-                        </table>
-
-                        <div class="totais">
-                            <p style="margin:0;"><strong>TOTAL GERAL: R$ ${valorFinalCalculado.toFixed(2)}</strong></p>
+                        <div class="section-box">
+                            <div class="section-title">DADOS DO CLIENTE</div>
+                            <div style="display:flex; justify-between: space-between; font-size:12px; font-weight:bold; text-transform:uppercase;">
+                                <span>${clienteNome}</span>
+                                <span>Data: ${dataFormatted}</span>
+                            </div>
                         </div>
 
-                        <div class="footer">
-                            <div class="linha-assinatura"></div>
-                            <p style="margin-top:5px; font-weight:bold;">${clienteNome}</p>
-                            <p style="color:#555; font-size:10px; margin-top:10px;">Obrigado pela preferência! Mantenha suas revisões em dia.</p>
+                        <div class="os-banner">
+                            ORDEM DE SERVIÇO Nº ${os.codigoRastreio || '000'}
+                        </div>
+
+                        <div class="section-box">
+                            <div class="section-title">VEÍCULO</div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Marca / Modelo</th>
+                                        <th>Placa</th>
+                                        <th>Km</th>
+                                        <th>Mecânico Responsável</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="padding:4px 6px; text-transform:uppercase; font-weight:bold;">${motoModelo}</td>
+                                        <td style="padding:4px 6px; text-transform:uppercase; font-weight:bold; font-family:monospace;">${motoPlaca}</td>
+                                        <td style="padding:4px 6px;">${motoKm}</td>
+                                        <td style="padding:4px 6px; text-transform:uppercase;">${mecNome}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        ${totalServicos > 0 ? `
+                        <div class="section-box">
+                            <div class="section-title">SERVIÇOS</div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width:45%;">Nome</th>
+                                        <th style="width:10%; text-align:center;">Quantidade</th>
+                                        <th style="width:10%; text-align:center;">Unidade</th>
+                                        <th style="width:18%; text-align:right;">Valor Unitário</th>
+                                        <th style="width:17%; text-align:right;">Valor Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${servicosHTML}</tbody>
+                            </table>
+                            <div class="subtotal-row">Total Serviços: R$ ${totalServicos.toFixed(2)}</div>
+                        </div>` : ''}
+
+                        ${totalPecas > 0 ? `
+                        <div class="section-box">
+                            <div class="section-title">PEÇAS</div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width:45%;">Nome</th>
+                                        <th style="width:10%; text-align:center;">Quantidade</th>
+                                        <th style="width:10%; text-align:center;">Unidade</th>
+                                        <th style="width:18%; text-align:right;">Valor Unitário</th>
+                                        <th style="width:17%; text-align:right;">Valor Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${pecasHTML}</tbody>
+                            </table>
+                            <div class="subtotal-row">Total Peças: R$ ${totalPecas.toFixed(2)}</div>
+                        </div>` : ''}
+
+                        ${(totalServicos === 0 && totalPecas === 0) ? `
+                        <div style="text-align:center; padding:15px; font-style:italic; font-size:11px; color:#666;">Nenhum item ou serviço lançado nesta Ordem de Serviço.</div>` : ''}
+
+                        <div class="totals-block">
+                            ${totalPecas > 0 ? `<p><strong>Total Peças: R$ ${totalPecas.toFixed(2)}</strong></p>` : ''}
+                            <p style="font-size:15px; margin-top:4px;"><strong>Total Geral: R$ ${totalGeral.toFixed(2)}</strong></p>
+                        </div>
+
+                        <div class="obs-block">
+                            <p style="font-weight:bold; margin-bottom:3px;">OBSERVAÇÕES</p>
+                            <p style="margin:2px 0;">OBS: SERVIÇOS E PEÇAS SÃO PARCELADOS SEPARADAMENTE OU À VISTA</p>
+                            <p style="margin:2px 0;">Garantia de Serviços e Peças: 90 dias conforme CDC.</p>
                         </div>
                     </div>
-                    <script>
-                        window.onload = function() { window.print(); }
-                    <\/script>
                 </body>
                 </html>
-            `);
+            `;
+        }
+
+        function imprimirOSDireto(osId) {
+            const os = ordensCache.find(o => o.id === osId);
+            if (!os) return;
+            const win = window.open('', '_blank');
+            win.document.write(gerarHTMLComprovanteOS(os));
+            win.document.close();
+        }
+
+        function imprimirNovaOSCriada() {
+            if (!osRecemCriada) return;
+            const win = window.open('', '_blank');
+            win.document.write(gerarHTMLComprovanteOS(osRecemCriada));
             win.document.close();
         }
 

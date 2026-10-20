@@ -30,6 +30,9 @@ public class OrdemServicoController {
     @Autowired
     private MotoRepository motoRepository;
 
+    @Autowired
+    private MecanicoRepository mecanicoRepository;
+
     // 1. Listar Todas
     @GetMapping
     public List<OrdemServico> listarTodas() {
@@ -163,32 +166,66 @@ public class OrdemServicoController {
                                                   .orElse(ResponseEntity.notFound().build()));
     }
 
-    // Utilitário Privado
-    private String gerarCodigoRastreio() {
-        return "MF-" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+    // 8b. Endpoint Público para Rastreio na Web
+    @GetMapping("/public/rastreio")
+    public ResponseEntity<List<OrdemServico>> rastrearPublico(
+            @RequestParam(required = false) String placa, 
+            @RequestParam(required = false) String codigo) {
+        if (placa != null && !placa.isBlank()) {
+            String limpa = placa.trim().replaceAll("[^a-zA-Z0-9]", "").toUpperCase();
+            List<OrdemServico> lista = repository.findByMotoPlacaIgnoreCaseOrderByDataEntradaDesc(limpa);
+            if (lista.isEmpty()) {
+                lista = repository.findByMotoPlacaIgnoreCaseOrderByDataEntradaDesc(placa.trim().toUpperCase());
+            }
+            return ResponseEntity.ok(lista);
+        }
+        if (codigo != null && !codigo.isBlank()) {
+            return repository.findByCodigoRastreioIgnoreCase(codigo.trim().toUpperCase())
+                    .map(os -> ResponseEntity.ok(List.of(os)))
+                    .orElse(ResponseEntity.ok(List.of()));
+        }
+        return ResponseEntity.ok(List.of());
     }
 
-    // Endpoint Paginado de Alta Performance (Uso em Relatórios e Históricos)
+    // 9. Excluir OS por ID (Solução para o erro 405 Method Not Allowed)
+    @Transactional
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> excluirOS(@PathVariable Long id) {
+        if (!repository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        repository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // 10. Associar mecânico responsável à OS com suporte a comissão customizada
+    @Transactional
+    @PatchMapping("/{id}/mecanico")
+    public ResponseEntity<OrdemServico> atribuirMecanico(
+            @PathVariable Long id, 
+            @RequestParam Long mecanicoId,
+            @RequestParam(required = false) BigDecimal comissao) {
+        return repository.findById(id).flatMap(os -> 
+            mecanicoRepository.findById(mecanicoId).map(mec -> {
+                os.setMecanicoResponsavel(mec);
+                if (comissao != null) {
+                    os.setPercentualComissaoMecanico(comissao);
+                }
+                return ResponseEntity.ok(repository.save(os));
+            })
+        ).orElse(ResponseEntity.notFound().build());
+    }
+
+    // Endpoint Paginado de Alta Performance
     @GetMapping("/pagina")
     public ResponseEntity<Page<OrdemServico>> listarPaginado(
             @PageableDefault(page = 0, size = 50, sort = "dataEntrada", direction = Sort.Direction.DESC) Pageable pageable) {
-        
         Page<OrdemServico> paginaDeOrdens = repository.findAll(pageable);
         return ResponseEntity.ok(paginaDeOrdens);
     }
 
-    @Autowired
-    private MecanicoRepository mecanicoRepository;
-
-    // Associar mecânico responsável à OS
-    @Transactional
-    @PatchMapping("/{id}/mecanico")
-    public ResponseEntity<OrdemServico> atribuirMecanico(@PathVariable Long id, @RequestParam Long mecanicoId) {
-        return repository.findById(id).flatMap(os -> 
-            mecanicoRepository.findById(mecanicoId).map(mec -> {
-                os.setMecanicoResponsavel(mec);
-                return ResponseEntity.ok(repository.save(os));
-            })
-        ).orElse(ResponseEntity.notFound().build());
+    // Utilitário Privado
+    private String gerarCodigoRastreio() {
+        return "MF-" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
     }
 }
