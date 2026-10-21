@@ -83,7 +83,7 @@
 
                     <div class="panel-bg rounded-lg p-5 border-l-4 border-l-amber-500">
                         <div class="flex justify-between items-center mb-4 border-b border-[#2d333f] pb-2">
-                            <h3 class="text-sm font-bold text-white uppercase">📦 Peças e Reposição (Com Sugestões Inteligentes e Margem Antijuízo)</h3>
+                            <h3 class="text-sm font-bold text-white uppercase">📦 Peças e Reposição</h3>
                             <span id="txtTotalNovaOS" class="text-sm font-bold text-emerald-400 font-mono">Total Geral: R$ 0,00</span>
                         </div>
                         <div class="grid grid-cols-12 gap-3 mb-4 items-end">
@@ -92,20 +92,17 @@
                                 <label class="block text-[9px] uppercase text-slate-400 mb-0.5">Descrição da Peça:</label>
                                 <input type="text" id="novaOsItemDesc" list="sugestoesPecasBanco" class="input-dark w-full rounded p-2 text-xs uppercase" autocomplete="off">
                                 <datalist id="sugestoesPecasBanco">
-                                    <option value="ÓLEO 20W50 MOBIL">
-                                    <option value="ÓLEO 10W30 SEMi-SINTÉTICO">
-                                    <option value="PASTILHA DE FREIO DIANTEIRA">
-                                    <option value="PATIM DE FREIO TRASEIRO">
-                                    <option value="KIT RELAÇÃO (COROA, CORRENTE E PINHÃO)">
-                                    <option value="VELA DE IGNIÇÃO NGK">
-                                    <option value="FILtro DE AR">
-                                    <option value="CABO DE EMBREAGEM">
-                                    <option value="PNEU DIANTEIRO">
-                                    <option value="PNEU TRASEIRO">
+                                    <option value="ÓLEO 20W50 MOBIL"><option value="ÓLEO 10W30 SEMi-SINTÉTICO"><option value="PASTILHA DE FREIO DIANTEIRA"><option value="PATIM DE FREIO TRASEIRO"><option value="KIT RELAÇÃO (COROA, CORRENTE E PINHÃO)"><option value="VELA DE IGNIÇÃO NGK"><option value="FILTRO DE AR"><option value="CABO DE EMBREAGEM"><option value="PNEU DIANTEIRO"><option value="PNEU TRASEIRO">
                                 </datalist>
                             </div>
-                            <div class="col-span-4"><label class="block text-[9px] uppercase text-slate-400 mb-0.5">Custo Limpo (R$):</label><input type="number" id="novaOsItemCusto" oninput="calcularVendaMargemNovaOS()" step="0.01" class="input-dark w-full rounded p-2 text-xs font-mono"></div>
-                            <div class="col-span-4"><label class="block text-[9px] uppercase text-amber-400 mb-0.5 font-bold">Margem (%):</label><input type="number" id="novaOsItemMargem" value="50" oninput="calcularVendaMargemNovaOS()" class="input-dark w-full rounded p-2 text-xs font-bold text-amber-400 font-mono"></div>
+                            <div class="col-span-4"><label class="block text-[9px] uppercase text-slate-400 mb-0.5">Custo Limpo (R$):</label><input type="number" id="novaOsItemCusto" oninput="calcularVendaMargemNovaOS(true)" step="0.01" class="input-dark w-full rounded p-2 text-xs font-mono"></div>
+                            <div class="col-span-4">
+                                <label class="block text-[9px] uppercase text-amber-400 mb-0.5 font-bold flex justify-between">
+                                    <span>Margem (%):</span>
+                                    <span id="labelSugestaoMargem" class="text-[8px] text-emerald-500"></span>
+                                </label>
+                                <input type="number" id="novaOsItemMargem" oninput="calcularVendaMargemNovaOS(false)" class="input-dark w-full rounded p-2 text-xs font-bold text-amber-400 font-mono">
+                            </div>
                             <div class="col-span-4"><label class="block text-[9px] uppercase text-emerald-400 mb-0.5 font-bold">Venda (R$):</label><input type="number" id="novaOsItemValor" step="0.01" class="input-dark w-full rounded p-2 text-xs font-mono font-bold text-emerald-400"></div>
                             <div class="col-span-12 mt-1"><button type="button" onclick="adicionarItemNovaOS()" class="w-full bg-[#2d333f] hover:bg-[#374151] text-white font-bold py-2.5 rounded text-xs uppercase border border-[#4b5563]">+ INSERIR PEÇA</button></div>
                         </div>
@@ -119,11 +116,8 @@
                         <select id="osCondicaoPgto" class="input-dark w-full md:w-1/2 rounded p-2.5 text-xs font-bold text-amber-400">
                             <option value="À Vista (Dinheiro/Pix)">À Vista (Dinheiro/Pix)</option>
                             <option value="Cartão de Crédito 1x">Cartão de Crédito 1x</option>
-                            <option value="Cartão de Crédito 2x">Cartão de Crédito 2x</option>
-                            <option value="Cartão de Crédito 3x">Cartão de Crédito 3x</option>
-                            <option value="Cartão de Crédito 4x">Cartão de Crédito 4x</option>
-                            <option value="Cartão de Crédito 5x">Cartão de Crédito 5x</option>
-                            <option value="Cartão de Crédito 6x">Cartão de Crédito 6x</option>
+                            <option value="Cartão de Crédito 2x a 3x">Cartão de Crédito 2x a 3x</option>
+                            <option value="Cartão de Crédito 4x a 6x">Cartão de Crédito 4x a 6x</option>
                             <option value="A Combinar / Pendente">A Combinar / Pendente</option>
                         </select>
                     </div>
@@ -204,13 +198,16 @@
                         <div><label class="block text-xs uppercase text-slate-400 mb-1">URL da Logo (Imagem):</label><input type="text" id="cfgLogo" placeholder="https://exemplo.com/logo.png" class="input-dark w-full rounded p-2.5 text-sm font-mono"></div>
                     </div>
 
+                    <!-- TAXAS DE MAQUININHA -->
                     <div class="border-t border-[#2d333f] pt-4 mt-4">
-                        <h3 class="text-sm font-bold text-amber-400 mb-2 uppercase">💳 Taxas de Maquininha & Margem Antijuízo</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><label class="block text-xs uppercase text-slate-400 mb-1">Taxa Média Cartão Crédito (%):</label><input type="number" step="0.1" id="cfgTaxaCredito" value="3.5" class="input-dark w-full rounded p-2.5 text-sm font-mono text-amber-400 font-bold"></div>
-                            <div><label class="block text-xs uppercase text-slate-400 mb-1">Margem de Lucro Mínima Sugerida (%):</label><input type="number" step="1" id="cfgMargemMinima" value="40" class="input-dark w-full rounded p-2.5 text-sm font-mono text-emerald-400 font-bold"></div>
+                        <h3 class="text-sm font-bold text-amber-400 mb-2 uppercase">💳 Taxas da Maquininha & Margem Antijuízo</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div><label class="block text-[10px] uppercase text-slate-400 mb-1">Débito (%):</label><input type="number" step="0.1" id="cfgTaxaDebito" class="input-dark w-full rounded p-2 text-xs font-mono text-amber-400 font-bold"></div>
+                            <div><label class="block text-[10px] uppercase text-slate-400 mb-1">Crédito 1x (%):</label><input type="number" step="0.1" id="cfgTaxaCred1" class="input-dark w-full rounded p-2 text-xs font-mono text-amber-400 font-bold"></div>
+                            <div><label class="block text-[10px] uppercase text-slate-400 mb-1">Crédito Parc. (%):</label><input type="number" step="0.1" id="cfgTaxaCredMax" class="input-dark w-full rounded p-2 text-xs font-mono text-amber-400 font-bold"></div>
+                            <div><label class="block text-[10px] uppercase text-slate-400 mb-1">Lucro Livre Desejado (%):</label><input type="number" step="1" id="cfgLucroDesejado" class="input-dark w-full rounded p-2 text-xs font-mono text-emerald-400 font-bold"></div>
                         </div>
-                        <p class="text-[10px] text-slate-500 mt-1">O sistema usará esta margem mínima para alertar ou sugerir preços que evitem prejuízos nas vendas no cartão.</p>
+                        <p class="text-[10px] text-slate-500 mt-2">Informe as taxas da sua maquininha. O sistema calculará a Margem Mínima Segura nas peças para garantir o Lucro Livre Desejado, não importa como o cliente pague.</p>
                     </div>
 
                     <div class="pt-4 border-t border-[#2d333f] flex justify-end">
@@ -330,7 +327,7 @@
     <datalist id="sugestoesClientes"></datalist>
     <datalist id="sugestoesPlacas"></datalist>
 
-    <!-- MODAL RECEBER PAGAMENTO (VAI DIRETO PARA FINANÇAS E PEÇAS) -->
+    <!-- MODAL RECEBER PAGAMENTO -->
     <div id="modalReceberPagamento" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-[80]">
         <div class="bg-[#1f232b] border border-[#2d333f] rounded-lg w-full max-w-md shadow-2xl overflow-hidden">
             <div class="bg-green-600 p-4 text-center"><h3 class="text-white font-bold text-lg uppercase tracking-wider">💲 Fechar Conta / Receber</h3></div>
@@ -351,14 +348,15 @@
                     <label class="block text-xs uppercase text-slate-400 mb-1">Forma de Pagamento:</label>
                     <select id="recFormaPgto" class="input-dark w-full rounded p-3 text-sm font-bold text-blue-400">
                         <option value="PIX">PIX</option>
-                        <option value="Cartão de Crédito">Cartão de Crédito</option>
                         <option value="Cartão de Débito">Cartão de Débito</option>
+                        <option value="Cartão de Crédito 1x">Cartão de Crédito 1x</option>
+                        <option value="Cartão de Crédito Parcelado">Cartão de Crédito Parcelado</option>
                         <option value="Dinheiro">Dinheiro</option>
                     </select>
                 </div>
                 <div class="flex gap-2 pt-4 border-t border-[#2d333f]">
                     <button onclick="document.getElementById('modalReceberPagamento').classList.add('hidden')" class="w-1/3 bg-[#2d333f] text-white font-bold py-3 rounded text-xs uppercase">Cancelar</button>
-                    <button onclick="confirmarRecebimentoPagamento()" class="w-2/3 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded text-xs uppercase shadow-lg">✅ Confirmar & Baixar no Caixa</button>
+                    <button onclick="confirmarRecebimentoPagamento()" class="w-2/3 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded text-xs uppercase shadow-lg">✅ Confirmar & Baixar no DRE</button>
                 </div>
             </div>
         </div>
@@ -429,10 +427,16 @@
 
     <script>
         const API = '/api/os';
-        let ordensCache = [], mecanicosCache = [], agendaCache = [], itensNovaOSCache = [];
+        let ordensCache = [], agendaCache = [], itensNovaOSCache = [];
         let chartFatLucro = null;
         let osEditandoId = null, osVisualizandoAtualmente = null, osRecebendoId = null;
-        
+
+        let mecanicosCache = JSON.parse(localStorage.getItem('motoflowMecanicos')) || [
+            { id: 1, nome: "JEAN", percentualComissao: 40 },
+            { id: 2, nome: "VICTOR", percentualComissao: 40 },
+            { id: 3, nome: "FELIPINHO", percentualComissao: 40 }
+        ];
+
         let configOficina = JSON.parse(localStorage.getItem('motoflowConfig')) || {
             nome: "MOTOFLOW OFICINA",
             cnpj: "00.000.000/0001-00",
@@ -440,8 +444,10 @@
             telefone: "85999999999",
             email: "oficina@motoflow.com",
             logoUrl: "",
-            taxaCredito: 3.5,
-            margemMinima: 40
+            taxaDebito: 1.99,
+            taxaCred1: 4.99,
+            taxaCredMax: 12.00,
+            lucroDesejado: 30
         };
 
         const KANBAN_COLS = [
@@ -469,8 +475,10 @@
             document.getElementById('cfgTel').value = configOficina.telefone;
             document.getElementById('cfgEmail').value = configOficina.email;
             document.getElementById('cfgLogo').value = configOficina.logoUrl || '';
-            document.getElementById('cfgTaxaCredito').value = configOficina.taxaCredito || 3.5;
-            document.getElementById('cfgMargemMinima').value = configOficina.margemMinima || 40;
+            document.getElementById('cfgTaxaDebito').value = configOficina.taxaDebito || 1.99;
+            document.getElementById('cfgTaxaCred1').value = configOficina.taxaCred1 || 4.99;
+            document.getElementById('cfgTaxaCredMax').value = configOficina.taxaCredMax || 12.00;
+            document.getElementById('cfgLucroDesejado').value = configOficina.lucroDesejado || 30;
         }
 
         document.getElementById('formConfigOficina').addEventListener('submit', (e) => {
@@ -481,44 +489,37 @@
             configOficina.telefone = document.getElementById('cfgTel').value.trim();
             configOficina.email = document.getElementById('cfgEmail').value.trim();
             configOficina.logoUrl = document.getElementById('cfgLogo').value.trim();
-            configOficina.taxaCredito = parseFloat(document.getElementById('cfgTaxaCredito').value) || 3.5;
-            configOficina.margemMinima = parseFloat(document.getElementById('cfgMargemMinima').value) || 40;
+            configOficina.taxaDebito = parseFloat(document.getElementById('cfgTaxaDebito').value) || 1.99;
+            configOficina.taxaCred1 = parseFloat(document.getElementById('cfgTaxaCred1').value) || 4.99;
+            configOficina.taxaCredMax = parseFloat(document.getElementById('cfgTaxaCredMax').value) || 12.00;
+            configOficina.lucroDesejado = parseFloat(document.getElementById('cfgLucroDesejado').value) || 30;
             
             localStorage.setItem('motoflowConfig', JSON.stringify(configOficina));
             alert("Configurações salvas com sucesso!");
         });
 
-        // Substitua estas funções no seu script do index.html:
-
-        let mecanicosCache = JSON.parse(localStorage.getItem('motoflowMecanicos')) || [
-            { id: 1, nome: "JEAN", percentualComissao: 40 },
-            { id: 2, nome: "VICTOR", percentualComissao: 40 },
-            { id: 3, nome: "FELIPINHO", percentualComissao: 40 }
-        ];
-
-        function carregarDados() {
-            // Carrega mecânicos do localStorage diretamente
-            preencherSelectsMecanicos();
+        async function carregarDados() {
+            preencherSelectsMecanicos(); 
             renderizarTabelaMecanicosConfig();
 
-            // Carrega o restante das ordens da API
-            fetch(API, { headers: { 'Authorization': 'Bearer ' + tokenVal } })
-                .then(res => res.json())
-                .then(dados => {
-                    ordensCache = dados;
+            try {
+                const resO = await fetch(API, { headers: { 'Authorization': 'Bearer ' + tokenVal } });
+                if(resO.ok) { 
+                    ordensCache = await resO.json(); 
+                    localStorage.setItem('motoflowOrdensPublicas', JSON.stringify(ordensCache)); // Para o rastreio funcionar
                     renderizarKanban(); 
                     renderTabelaCli(); 
                     renderFinanceiro(); 
                     renderRelatorioPecas(); 
                     atualizarDatalistsSugestoes();
-                }).catch(e => console.error(e));
+                }
 
-            fetch('/api/agendamentos', { headers: { 'Authorization': 'Bearer ' + tokenVal } })
-                .then(res => res.json())
-                .then(dados => { agendaCache = dados; renderAgenda(); })
-                .catch(e => {});
+                const resA = await fetch('/api/agendamentos', { headers: { 'Authorization': 'Bearer ' + tokenVal } });
+                if(resA.ok) { agendaCache = await resA.json(); renderAgenda(); }
+            } catch (e) { console.error(e); }
         }
 
+        // GESTÃO DE MECÂNICOS ROBUSTA NO LOCALSTORAGE
         function renderizarTabelaMecanicosConfig() {
             const tb = document.getElementById('tabelaMecanicosConfig');
             if(!tb) return; tb.innerHTML = '';
@@ -528,7 +529,6 @@
             });
             preencherSelectsMecanicos();
         }
-
         function abrirModalMecanico(id = null, nome = '', comissao = 40) {
             document.getElementById('mecanicoEditandoId').value = id || '';
             document.getElementById('inputNomeMecanico').value = nome;
@@ -536,12 +536,10 @@
             document.getElementById('tituloModalMecanico').innerText = id ? "Editar Mecânico" : "Adicionar Mecânico";
             document.getElementById('modalMecanico').classList.remove('hidden');
         }
-
         function editarMecanico(id) {
-            const m = mecanicosCache.find(x => x.id == id);
+            const m = mecanicosCache.find(x => String(x.id) === String(id));
             if(m) abrirModalMecanico(m.id, m.nome, m.percentualComissao || 40);
         }
-
         function salvarMecanicoConfig() {
             const id = document.getElementById('mecanicoEditandoId').value;
             const nome = document.getElementById('inputNomeMecanico').value.trim().toUpperCase();
@@ -549,7 +547,7 @@
             if(!nome) return alert("Digite o nome do mecânico.");
 
             if (id) {
-                const m = mecanicosCache.find(x => x.id == id);
+                const m = mecanicosCache.find(x => String(x.id) === String(id));
                 if (m) { m.nome = nome; m.percentualComissao = comissao; }
             } else {
                 const novoId = mecanicosCache.length > 0 ? Math.max(...mecanicosCache.map(x => x.id)) + 1 : 1;
@@ -560,10 +558,9 @@
             document.getElementById('modalMecanico').classList.add('hidden');
             renderizarTabelaMecanicosConfig();
         }
-
         function excluirMecanico(id) {
             if(confirm("Deseja realmente apagar este mecânico?")) {
-                mecanicosCache = mecanicosCache.filter(x => x.id != id);
+                mecanicosCache = mecanicosCache.filter(x => String(x.id) !== String(id));
                 localStorage.setItem('motoflowMecanicos', JSON.stringify(mecanicosCache));
                 renderizarTabelaMecanicosConfig();
             }
@@ -599,20 +596,35 @@
             if (sel) { sel.innerHTML = '<option value="">-- Selecione o Mecânico --</option>'; mecanicosCache.forEach(m => sel.innerHTML += `<option value="${m.id}">${m.nome}</option>`); }
         }
         function atualizarComissaoMecanicoInput() {
-            const mId = document.getElementById('osMecanicoSelect').value; const mec = mecanicosCache.find(m => m.id == mId);
+            const mId = document.getElementById('osMecanicoSelect').value; const mec = mecanicosCache.find(m => String(m.id) === String(mId));
             if (mec) document.getElementById('osComissaoMecanico').value = mec.percentualComissao || 40;
         }
 
         // CÁLCULO INTELIGENTE COM MARGEM MÍNIMA ANTIJUÍZO
-        function calcularVendaMargemNovaOS() {
+        function calcularVendaMargemNovaOS(forcarSugestao = true) {
             const c = parseFloat(document.getElementById('novaOsItemCusto').value) || 0; 
-            let m = parseFloat(document.getElementById('novaOsItemMargem').value) || 0;
+            let mInput = document.getElementById('novaOsItemMargem');
+            let m = parseFloat(mInput.value) || 0;
             
-            // Garante que a margem nunca fique abaixo da configurada para cobrir taxa de cartão e gerar lucro
-            const margemMin = configOficina.margemMinima || 40;
-            if(m < margemMin) {
-                m = margemMin;
-                document.getElementById('novaOsItemMargem').value = m;
+            const piorTaxa = Math.max(configOficina.taxaDebito, configOficina.taxaCred1, configOficina.taxaCredMax);
+            const lucroDesejado = configOficina.lucroDesejado || 30;
+            
+            let fatorDivisao = 1 - (piorTaxa/100) - (lucroDesejado/100);
+            if (fatorDivisao <= 0) fatorDivisao = 0.1; // fallback
+            
+            const vendaIdeal = c / fatorDivisao;
+            let margemMinimaSegura = 0;
+            
+            if(c > 0) {
+                margemMinimaSegura = ((vendaIdeal / c) - 1) * 100;
+            }
+
+            const labelSug = document.getElementById('labelSugestaoMargem');
+            if(labelSug) labelSug.innerText = `Mín: ${Math.ceil(margemMinimaSegura)}%`;
+
+            if (forcarSugestao && m < margemMinimaSegura && c > 0) {
+                m = Math.ceil(margemMinimaSegura);
+                mInput.value = m;
             }
 
             if (c > 0) {
@@ -622,7 +634,7 @@
 
         function adicionarServicoNaOS() {
             const mId = document.getElementById('osMecanicoSelect').value; const val = parseFloat(document.getElementById('osValorServico').value);
-            const mec = mecanicosCache.find(m => m.id == mId);
+            const mec = mecanicosCache.find(m => String(m.id) === String(mId));
             if (!mId || isNaN(val)) return alert("Selecione o mecânico e preencha o valor.");
             itensNovaOSCache.push({ descricao: `MÃO DE OBRA - ${mec.nome.toUpperCase()}`, valorUnitario: val, valorCusto: 0, quantidade: 1, tipo: 'SERVICO' });
             document.getElementById('osValorServico').value = ''; renderItensNovaOS();
@@ -742,19 +754,26 @@
             const t = (o.valorTotal || 0) - desc;
             document.getElementById('recTotalPagar').innerText = `R$ ${Math.max(t, 0).toFixed(2)}`;
         }
+
+        // SALVA O PAGAMENTO NAS OBSERVAÇÕES PARA GARANTIR GRAVAÇÃO NO SERVIDOR
         async function confirmarRecebimentoPagamento() {
             const o = ordensCache.find(x => x.id === osRecebendoId); if(!o) return;
             const desc = parseFloat(document.getElementById('recDesconto').value) || 0;
             const forma = document.getElementById('recFormaPgto').value;
             const totalPago = Math.max((o.valorTotal || 0) - desc, 0);
 
-            o.pagamentoFinal = { desconto: desc, formaPagamento: forma, valorRecebido: totalPago };
+            // Bypass: Empacota as info de pagamento dentro das observações
+            const obsAtual = o.observacoes || "";
+            const obsLimpa = obsAtual.split(' | 💰 PAGO:')[0];
+            o.observacoes = `${obsLimpa} | 💰 PAGO: ${forma} | DESC: ${desc} | TOTAL: ${totalPago}`;
+
             try { 
+                await fetch(`${API}/${o.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenVal }, body: JSON.stringify(o) });
                 await fetch(`${API}/${o.id}/status?novoStatus=FINALIZADA`, { method:'PATCH', headers:{'Authorization':'Bearer '+tokenVal}}); 
             } catch(e){}
             
             document.getElementById('modalReceberPagamento').classList.add('hidden');
-            alert(`Pagamento registrado com sucesso! Lançado no DRE e Relatório de Peças.`);
+            alert(`Pagamento registrado com sucesso! Lançado no DRE.`);
             carregarDados();
         }
 
@@ -770,7 +789,7 @@
         }
         async function excluirOS(id) { if(confirm('Deseja excluir esta OS?')) { await fetch(`${API}/${id}`,{method:'DELETE',headers:{'Authorization':'Bearer '+tokenVal}}); carregarDados(); } }
 
-        // DOCUMENTO DE OS COM LOGO E QR CODE DO WHATSAPP DA LOJA
+        // DOCUMENTO DE OS
         function construirDocumentoOSHtml(o) {
             let servHtml = '', pecHtml = ''; let totalServ = 0, totalPec = 0;
             if(o.itens) {
@@ -782,8 +801,23 @@
             }
             
             let logoHtml = configOficina.logoUrl ? `<img src="${configOficina.logoUrl}" style="max-height: 60px; max-width: 120px; object-fit: contain;" />` : `<div style="width: 70px; height: 70px; background: #111; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; border-radius: 6px; font-size: 9px;">MOTOFLOW</div>`;
-            let condicaoPgtoHtml = o.observacoes && o.observacoes.includes('Condição de Pgto:') ? `<div style="padding: 8px; background: #eef2ff; border-left: 4px solid #4f46e5; font-size: 11px; margin-bottom: 10px;"><strong>Condição de Pagamento:</strong> ${o.observacoes.replace('Condição de Pgto: ', '')}</div>` : '';
-            let fechamentoFinalHtml = o.pagamentoFinal ? `<div style="border-top: 2px dashed #222; margin-top: 10px; padding-top: 8px; text-align: right; font-size: 12px;"><div>Desconto: <strong>- R$ ${o.pagamentoFinal.desconto.toFixed(2)}</strong></div><div style="font-size: 14px; margin-top: 3px; color: #16a34a;"><strong>TOTAL PAGO (${o.pagamentoFinal.formaPagamento}): R$ ${o.pagamentoFinal.valorRecebido.toFixed(2)}</strong></div></div>` : '';
+            
+            // Decodifica a observação para formatar o pagamento na via do cliente
+            let condicaoPgtoHtml = '';
+            let fechamentoFinalHtml = '';
+            if (o.observacoes) {
+                const obsBase = o.observacoes.split(' | 💰 PAGO:')[0];
+                if (obsBase.includes('Condição de Pgto:')) {
+                    condicaoPgtoHtml = `<div style="padding: 8px; background: #eef2ff; border-left: 4px solid #4f46e5; font-size: 11px; margin-bottom: 10px;"><strong>Condição de Pagamento:</strong> ${obsBase.replace('Condição de Pgto: ', '')}</div>`;
+                }
+                if (o.observacoes.includes('| 💰 PAGO:')) {
+                    const parts = o.observacoes.split('|');
+                    const pagoPart = parts.find(p => p.includes('💰 PAGO:'))?.replace('💰 PAGO:', '')?.trim();
+                    const descPart = parts.find(p => p.includes('DESC:'))?.replace('DESC:', '')?.trim();
+                    const totalPart = parts.find(p => p.includes('TOTAL:'))?.replace('TOTAL:', '')?.trim();
+                    fechamentoFinalHtml = `<div style="border-top: 2px dashed #222; margin-top: 10px; padding-top: 8px; text-align: right; font-size: 12px;"><div>Desconto: <strong>- R$ ${parseFloat(descPart).toFixed(2)}</strong></div><div style="font-size: 14px; margin-top: 3px; color: #16a34a;"><strong>TOTAL PAGO (${pagoPart}): R$ ${parseFloat(totalPart).toFixed(2)}</strong></div></div>`;
+                }
+            }
 
             return `
             <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #111; line-height: 1.3;">
@@ -837,7 +871,6 @@
             document.getElementById('previewOsContent').innerHTML = construirDocumentoOSHtml(o);
             document.getElementById('modalVisualizarOS').classList.remove('hidden');
 
-            // Gera o QR Code do WhatsApp oficial no rodapé do documento impresso
             setTimeout(() => {
                 const el = document.getElementById('qrCodeWppPrint');
                 if(el) {
@@ -925,12 +958,22 @@
             ordensCache.forEach(o => {
                 const d = (o.dataEntrada||'').split('T')[0];
                 const isDRE = d >= di && d <= df; const isMO = d >= moi && d <= mof;
-                let tt = o.valorTotal||0; let mOS=0, pOS=0;
+                let mOS=0, pOS=0;
+                
                 if(o.itens) o.itens.forEach(i=>{ const s=i.quantidade*i.valorUnitario; if(i.tipo==='PECA') pOS+=s; else mOS+=s; });
                 const mn = o.mecanicoResponsavel?o.mecanicoResponsavel.nome:'MECÂNICO';
                 const pc = (o.percentualComissaoMecanico||40)/100, cOS=mOS*pc;
+                
+                // DECODIFICA O PAGAMENTO DA OBSERVAÇÃO
+                let tt = o.valorTotal || 0; 
                 let pgtoLabel = 'Pendente';
-                if(o.pagamentoFinal) { tt = o.pagamentoFinal.valorRecebido; pgtoLabel = o.pagamentoFinal.formaPagamento; }
+                if(o.observacoes && o.observacoes.includes('| 💰 PAGO:')) {
+                    const parts = o.observacoes.split('|');
+                    const pagoPart = parts.find(p => p.includes('💰 PAGO:'));
+                    const totalPart = parts.find(p => p.includes('TOTAL:'));
+                    if(pagoPart) pgtoLabel = pagoPart.replace('💰 PAGO:', '').trim();
+                    if(totalPart) tt = parseFloat(totalPart.replace('TOTAL:', '').trim());
+                }
 
                 if(isDRE) {
                     tb+=tt; tp+=pOS*0.6; tc+=cOS; 
@@ -951,9 +994,7 @@
         }
 
         function imprimirFechamentoMOPDF() {
-            const dataIni = document.getElementById('moFiltroIni').value; const dataFim = document.getElementById('moFiltroFim').value;
             const tbHTML = document.getElementById('tabelaControleMOCorpo').innerHTML;
-            const tMo = document.getElementById('moTotalSoma').innerText; const cMo = document.getElementById('moComissaoSoma').innerText; const lMo = document.getElementById('moLucroSoma').innerText;
             const win = window.open('','_blank');
             win.document.write(`<html><head><title>Relatório M.O</title><style>body{font-family:Arial;padding:30px;color:#000;} table{width:100%;border-collapse:collapse;margin-top:20px;} th,td{border:1px solid #ccc;padding:10px;} th{background:#f4f4f4;}</style></head><body><h2>RELATÓRIO MÃO DE OBRA - ${configOficina.nome}</h2><table><thead><tr><th>MECÂNICO</th><th>MOTO</th><th>TOTAL</th><th>COMISSÃO</th></tr></thead><tbody>${tbHTML.replace(/text-white|text-emerald-400|text-amber-400|font-bold|p-2|py-3/g, '')}</tbody></table><script>setTimeout(()=>{window.print();},300);<\/script></body></html>`);
             win.document.close();
