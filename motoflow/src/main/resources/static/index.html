@@ -756,21 +756,22 @@
         }
 
         // SALVA O PAGAMENTO NAS OBSERVAÇÕES PARA GARANTIR GRAVAÇÃO NO SERVIDOR
+        // 1. NOVA FUNÇÃO DE RECEBIMENTO (Ignora o PUT que dava erro 404 e usa LocalStorage)
         async function confirmarRecebimentoPagamento() {
             const o = ordensCache.find(x => x.id === osRecebendoId); if(!o) return;
             const desc = parseFloat(document.getElementById('recDesconto').value) || 0;
             const forma = document.getElementById('recFormaPgto').value;
             const totalPago = Math.max((o.valorTotal || 0) - desc, 0);
 
-            // Bypass: Empacota as info de pagamento dentro das observações
-            const obsAtual = o.observacoes || "";
-            const obsLimpa = obsAtual.split(' | 💰 PAGO:')[0];
-            o.observacoes = `${obsLimpa} | 💰 PAGO: ${forma} | DESC: ${desc} | TOTAL: ${totalPago}`;
+            // Salva o histórico de pagamento de forma segura no LocalStorage do navegador
+            let pagamentosSalvos = JSON.parse(localStorage.getItem('motoflowPagamentos')) || {};
+            pagamentosSalvos[o.id] = { formaPagamento: forma, desconto: desc, valorRecebido: totalPago, data: new Date().toISOString() };
+            localStorage.setItem('motoflowPagamentos', JSON.stringify(pagamentosSalvos));
 
             try { 
-                await fetch(`${API}/${o.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenVal }, body: JSON.stringify(o) });
+                // Apenas altera o status para FINALIZADA (esta rota funciona bem no seu servidor)
                 await fetch(`${API}/${o.id}/status?novoStatus=FINALIZADA`, { method:'PATCH', headers:{'Authorization':'Bearer '+tokenVal}}); 
-            } catch(e){}
+            } catch(e) { console.error("Erro ao finalizar OS no servidor:", e); }
             
             document.getElementById('modalReceberPagamento').classList.add('hidden');
             alert(`Pagamento registrado com sucesso! Lançado no DRE.`);
@@ -949,11 +950,50 @@
         }
 
         // FINANCEIRO E PEÇAS
+       // 2. NOVA FUNÇÃO DO FINANCEIRO (Lê os pagamentos do LocalStorage)
         function renderFinanceiro() {
             const di = document.getElementById('dreDataInicio')?.value, df = document.getElementById('dreDataFim')?.value;
             const moi = document.getElementById('moFiltroIni')?.value || di, mof = document.getElementById('moFiltroFim')?.value || df;
             let tb=0, tp=0, tc=0, tm=0, tMoC=0; const th=document.getElementById('tabelaFinanceiroCorpo'), tmoc=document.getElementById('tabelaControleMOCorpo');
             if(th) th.innerHTML=''; if(tmoc) tmoc.innerHTML='';
+
+            const pagamentosSalvos = JSON.parse(localStorage.getItem('motoflowPagamentos')) || {};
+
+            ordensCache.forEach(o => {
+                const d = (o.dataEntrada||'').split('T')[0];
+                const isDRE = d >= di && d <= df; const isMO = d >= moi && d <= mof;
+                let mOS=0, pOS=0;
+                
+                if(o.itens) o.itens.forEach(i=>{ const s=i.quantidade*i.valorUnitario; if(i.tipo==='PECA') pOS+=s; else mOS+=s; });
+                const mn = o.mecanicoResponsavel?o.mecanicoResponsavel.nome:'MECÂNICO';
+                const pc = (o.percentualComissaoMecanico||40)/100, cOS=mOS*pc;
+                
+                // Mescla os dados do servidor com os pagamentos locais
+                let tt = o.valorTotal || 0; 
+                let pgtoLabel = 'Pendente';
+                
+                if (pagamentosSalvos[o.id]) {
+                    pgtoLabel = pagamentosSalvos[o.id].formaPagamento;
+                    tt = pagamentosSalvos[o.id].valorRecebido;
+                }
+
+                if(isDRE) {
+                    tb+=tt; tp+=pOS*0.6; tc+=cOS; 
+                    if(th) th.innerHTML+=`<tr><td class="p-2">${new Date(o.dataEntrada).toLocaleDateString()}</td><td class="p-2 text-amber-400 font-bold">${o.codigoRastreio}</td><td class="p-2 font-bold">${pgtoLabel}</td><td class="p-2">R$ ${tt.toFixed(2)}</td><td class="p-2 text-green-400 font-bold">R$ ${(tt-(pOS*0.6)-cOS).toFixed(2)}</td></tr>`;
+                }
+                if(isMO && mOS > 0) {
+                    tm+=mOS; tMoC+=cOS;
+                    if(tmoc) tmoc.innerHTML+=`<tr><td class="p-2 py-3 font-bold text-white">${mn}</td><td class="p-2 py-3">${o.moto?o.moto.modelo:''}</td><td class="p-2 py-3 font-bold text-emerald-400">R$ ${mOS.toFixed(2)}</td><td class="p-2 py-3 font-bold text-amber-400">R$ ${cOS.toFixed(2)}</td></tr>`;
+                }
+            });
+
+            if(document.getElementById('dreBruto')) {
+                document.getElementById('dreBruto').innerText=`R$ ${tb.toFixed(2)}`; document.getElementById('dreCusto').innerText=`R$ ${tp.toFixed(2)}`; document.getElementById('dreComissao').innerText=`R$ ${tc.toFixed(2)}`; document.getElementById('dreLucro').innerText=`R$ ${(tb-tp-tc).toFixed(2)}`;
+                document.getElementById('moTotalSoma').innerText=`R$ ${tm.toFixed(2)}`; document.getElementById('moComissaoSoma').innerText=`R$ ${tMoC.toFixed(2)}`; document.getElementById('moLucroSoma').innerText=`R$ ${(tm-tMoC).toFixed(2)}`;
+            }
+            if(chartFatLucro) chartFatLucro.destroy();
+            if(document.getElementById('chartFaturamentoLucro')) chartFatLucro = new Chart(document.getElementById('chartFaturamentoLucro'),{type:'bar',data:{labels:['DRE Geral'],datasets:[{label:'Faturamento',data:[tb],backgroundColor:'#3b82f6'},{label:'Lucro',data:[tb-tp-tc],backgroundColor:'#22c55e'}]},options:{responsive:true,maintainAspectRatio:false}});
+        }
 
             ordensCache.forEach(o => {
                 const d = (o.dataEntrada||'').split('T')[0];
