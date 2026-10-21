@@ -454,19 +454,22 @@
             document.getElementById('cfgEmail').value = configOficina.email;
         }
 
-        // Salvar Configurações
-        document.getElementById('formConfigOficina').addEventListener('submit', (e) => {
-            e.preventDefault();
-            configOficina = {
-                nome: document.getElementById('cfgNome').value,
-                cnpj: document.getElementById('cfgCnpj').value,
-                endereco: document.getElementById('cfgEndereco').value,
-                telefone: document.getElementById('cfgTel').value,
-                email: document.getElementById('cfgEmail').value
-            };
-                sessionStorage.setItem('motoFlowToken', 'token_de_acesso_valido');
-                window.location.href = 'index.html';
-        });
+        // Salvar Configurações da Oficina (Corrigido)
+        const formConfig = document.getElementById('formConfigOficina');
+        if (formConfig) {
+            formConfig.addEventListener('submit', (e) => {
+                e.preventDefault();
+                configOficina = {
+                    nome: document.getElementById('cfgNome').value.trim(),
+                    cnpj: document.getElementById('cfgCnpj').value.trim(),
+                    endereco: document.getElementById('cfgEndereco').value.trim(),
+                    telefone: document.getElementById('cfgTel').value.trim(),
+                    email: document.getElementById('cfgEmail').value.trim()
+                };
+                localStorage.setItem('motoflowConfig', JSON.stringify(configOficina));
+                alert("Configurações da oficina salvas com sucesso!");
+            });
+        }
 
         async function carregarDados() {
             try {
