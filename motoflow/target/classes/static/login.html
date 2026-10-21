@@ -9,7 +9,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         body { 
             font-family: 'Inter', sans-serif; 
-            background-color: #121418; /* Fundo hiper escuro AG Diesel */
+            background-color: #121418; 
         }
         .input-dark { 
             background-color: #121418; 
@@ -22,7 +22,6 @@
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
-    <!-- Caixa de Login Centralizada (Estilo AG Diesel) -->
     <div class="bg-[#1f232b] border border-[#2d333f] rounded-xl p-8 w-full max-w-sm shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
         
         <div class="text-center mb-8">
@@ -72,10 +71,11 @@
 
                 if (res.ok) {
                     const dados = await res.json();
-                    // Guarda o Token e os dados da sessão
-                    localStorage.setItem('motoFlowToken', dados.token);
-                    localStorage.setItem('motoFlowUserNome', dados.nome);
-                    localStorage.setItem('motoFlowUserCargo', dados.cargo);
+                    
+                    // CORRIGIDO: Utiliza sessionStorage para garantir segurança e fechar ao sair da aba
+                    sessionStorage.setItem('motoFlowToken', dados.token);
+                    sessionStorage.setItem('motoFlowUserNome', dados.nome);
+                    sessionStorage.setItem('motoFlowUserCargo', dados.cargo);
 
                     window.location.href = "index.html";
                 } else {
