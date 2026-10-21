@@ -432,7 +432,10 @@
             { id: 'FINALIZADA', tit: 'PAGO / ENTREGUE', cor: 'border-t-slate-500', accepts: ['FINALIZADA'] }
         ];
 
-        function fazerLogout() { localStorage.clear(); window.location.href = 'login.html'; }
+        function fazerLogout() { 
+                sessionStorage.clear(); 
+                window.location.href = 'login.html'; 
+        }
 
         function configurarDatasAutomaticas() {
             const h = new Date(); const seg = new Date(h);
@@ -461,8 +464,8 @@
                 telefone: document.getElementById('cfgTel').value,
                 email: document.getElementById('cfgEmail').value
             };
-            localStorage.setItem('motoflowConfig', JSON.stringify(configOficina));
-            alert("Configurações da oficina salvas com sucesso!");
+                sessionStorage.setItem('motoFlowToken', 'token_de_acesso_valido');
+                window.location.href = 'index.html';
         });
 
         async function carregarDados() {
