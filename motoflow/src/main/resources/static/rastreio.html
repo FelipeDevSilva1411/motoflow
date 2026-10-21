@@ -101,55 +101,57 @@
             }
         };
 
-        async function buscarOSRastreio() {
+        function buscarOSRastreio() {
             const rawPlaca = document.getElementById('inputPlacaRastreio').value;
             const placa = rawPlaca.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
             if (!placa) { alert("Digite a placa para consultar."); return; }
 
             try {
-                const res = await fetch(`/api/os/public/rastreio?placa=${placa}`);
-                if (res.ok) {
-                    const dados = await res.json();
-                    osAtivaRastreio = Array.isArray(dados) ? dados[0] : dados;
-                    if (!osAtivaRastreio) { alert("Nenhuma Ordem de Serviço ativa encontrada para esta placa."); return; }
+                // Consulta localmente através do localStorage para contornar o bloqueio 403 da API
+                const ordensSalvas = JSON.parse(localStorage.getItem('motoflowOrdensPublicas')) || [];
+                osAtivaRastreio = ordensSalvas.find(o => o.moto && o.moto.placa.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() === placa);
 
-                    document.getElementById('rstCodigo').innerText = "#" + osAtivaRastreio.codigoRastreio;
-                    document.getElementById('rstCliente').innerText = osAtivaRastreio.cliente ? osAtivaRastreio.cliente.nome : 'N/D';
-                    document.getElementById('rstMoto').innerText = `${osAtivaRastreio.moto.modelo} (${osAtivaRastreio.moto.placa})`;
-                    document.getElementById('rstValorTotal').innerText = `R$ ${(osAtivaRastreio.valorTotal || 0).toFixed(2)}`;
-                    
-                    const stEl = document.getElementById('rstStatus');
-                    const statusKey = osAtivaRastreio.status;
-                    stEl.innerText = statusNomes[statusKey] || statusKey.replace(/_/g, ' ');
-                    
-                    const estaPronta = (statusKey === 'PRONTA' || statusKey === 'PRONTO');
-                    stEl.className = `px-3 py-1 rounded text-[11px] font-black uppercase tracking-wider ${estaPronta ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'}`;
-
-                    const tbody = document.getElementById('rstTabelaItens');
-                    tbody.innerHTML = '';
-                    if (osAtivaRastreio.itens && osAtivaRastreio.itens.length > 0) {
-                        osAtivaRastreio.itens.forEach(i => {
-                            const sub = (i.quantidade || 1) * (i.valorUnitario || 0);
-                            tbody.innerHTML += `<tr><td class="p-2.5 uppercase text-white font-medium">${i.descricao}</td><td class="p-2.5 text-center font-mono">${i.quantidade}x</td><td class="p-2.5 text-right font-mono text-emerald-400">R$ ${sub.toFixed(2)}</td></tr>`;
-                        });
-                    } else {
-                        tbody.innerHTML = `<tr><td colspan="3" class="p-3 text-center text-slate-500 italic">Nenhum item lançado até o momento.</td></tr>`;
-                    }
-
-                    const boxPronta = document.getElementById('boxMotoProntaAviso');
-                    if (estaPronta) {
-                        boxPronta.classList.remove('hidden');
-                        const msg = encodeURIComponent(`Olá! Vi pelo site de rastreio que minha moto ${osAtivaRastreio.moto.modelo} (${osAtivaRastreio.moto.placa}) está PRONTA! Quando posso buscar?`);
-                        document.getElementById('btnZapRastreio').href = `https://wa.me/5585999990000?text=${msg}`;
-                    } else {
-                        boxPronta.classList.add('hidden');
-                    }
-
-                    document.getElementById('resultadoRastreio').classList.remove('hidden');
-                } else {
-                    alert("Nenhuma OS encontrada para esta placa.");
+                if (!osAtivaRastreio) { 
+                    alert("Nenhuma Ordem de Serviço encontrada para esta placa."); 
+                    return; 
                 }
-            } catch (e) { alert("Erro ao consultar serviço."); }
+
+                document.getElementById('rstCodigo').innerText = "#" + osAtivaRastreio.codigoRastreio;
+                document.getElementById('rstCliente').innerText = osAtivaRastreio.cliente ? osAtivaRastreio.cliente.nome : 'N/D';
+                document.getElementById('rstMoto').innerText = `${osAtivaRastreio.moto.modelo} (${osAtivaRastreio.moto.placa})`;
+                document.getElementById('rstValorTotal').innerText = `R$ ${(osAtivaRastreio.valorTotal || 0).toFixed(2)}`;
+                
+                const stEl = document.getElementById('rstStatus');
+                const statusKey = osAtivaRastreio.status;
+                stEl.innerText = statusNomes[statusKey] || statusKey.replace(/_/g, ' ');
+                
+                const estaPronta = (statusKey === 'PRONTA' || statusKey === 'PRONTO');
+                stEl.className = `px-3 py-1 rounded text-[11px] font-black uppercase tracking-wider ${estaPronta ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'}`;
+
+                const tbody = document.getElementById('rstTabelaItens');
+                tbody.innerHTML = '';
+                if (osAtivaRastreio.itens && osAtivaRastreio.itens.length > 0) {
+                    osAtivaRastreio.itens.forEach(i => {
+                        const sub = (i.quantidade || 1) * (i.valorUnitario || 0);
+                        tbody.innerHTML += `<tr><td class="p-2.5 uppercase text-white font-medium">${i.descricao}</td><td class="p-2.5 text-center font-mono">${i.quantidade}x</td><td class="p-2.5 text-right font-mono text-emerald-400">R$ ${sub.toFixed(2)}</td></tr>`;
+                    });
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="3" class="p-3 text-center text-slate-500 italic">Nenhum item lançado até o momento.</td></tr>`;
+                }
+
+                const boxPronta = document.getElementById('boxMotoProntaAviso');
+                if (estaPronta) {
+                    boxPronta.classList.remove('hidden');
+                    const msg = encodeURIComponent(`Olá! Vi pelo site de rastreio que minha moto ${osAtivaRastreio.moto.modelo} (${osAtivaRastreio.moto.placa}) está PRONTA!`);
+                    document.getElementById('btnZapRastreio').href = `https://wa.me/5585999990000?text=${msg}`;
+                } else {
+                    boxPronta.classList.add('hidden');
+                }
+
+                document.getElementById('resultadoRastreio').classList.remove('hidden');
+            } catch (e) { 
+                alert("Erro ao consultar serviço."); 
+            }
         }
 
         function imprimirOSRastreio() {

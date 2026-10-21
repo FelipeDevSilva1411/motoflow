@@ -488,27 +488,37 @@
             alert("Configurações salvas com sucesso!");
         });
 
-        async function carregarDados() {
-            try {
-                const resM = await fetch('/api/mecanicos', { headers: { 'Authorization': 'Bearer ' + tokenVal } });
-                if(resM.ok) { mecanicosCache = await resM.json(); preencherSelectsMecanicos(); renderizarTabelaMecanicosConfig(); }
+        // Substitua estas funções no seu script do index.html:
 
-                const resO = await fetch(API, { headers: { 'Authorization': 'Bearer ' + tokenVal } });
-                if(resO.ok) { 
-                    ordensCache = await resO.json(); 
+        let mecanicosCache = JSON.parse(localStorage.getItem('motoflowMecanicos')) || [
+            { id: 1, nome: "JEAN", percentualComissao: 40 },
+            { id: 2, nome: "VICTOR", percentualComissao: 40 },
+            { id: 3, nome: "FELIPINHO", percentualComissao: 40 }
+        ];
+
+        function carregarDados() {
+            // Carrega mecânicos do localStorage diretamente
+            preencherSelectsMecanicos();
+            renderizarTabelaMecanicosConfig();
+
+            // Carrega o restante das ordens da API
+            fetch(API, { headers: { 'Authorization': 'Bearer ' + tokenVal } })
+                .then(res => res.json())
+                .then(dados => {
+                    ordensCache = dados;
                     renderizarKanban(); 
                     renderTabelaCli(); 
                     renderFinanceiro(); 
                     renderRelatorioPecas(); 
                     atualizarDatalistsSugestoes();
-                }
+                }).catch(e => console.error(e));
 
-                const resA = await fetch('/api/agendamentos', { headers: { 'Authorization': 'Bearer ' + tokenVal } });
-                if(resA.ok) { agendaCache = await resA.json(); renderAgenda(); }
-            } catch (e) { console.error(e); }
+            fetch('/api/agendamentos', { headers: { 'Authorization': 'Bearer ' + tokenVal } })
+                .then(res => res.json())
+                .then(dados => { agendaCache = dados; renderAgenda(); })
+                .catch(e => {});
         }
 
-        // GESTÃO DE MECÂNICOS
         function renderizarTabelaMecanicosConfig() {
             const tb = document.getElementById('tabelaMecanicosConfig');
             if(!tb) return; tb.innerHTML = '';
@@ -516,7 +526,9 @@
             mecanicosCache.forEach(m => {
                 tb.innerHTML += `<tr class="hover:bg-[#1f232b]"><td class="p-3 uppercase font-bold text-white">${m.nome}</td><td class="p-3 font-mono text-amber-400 font-bold">${m.percentualComissao || 40}%</td><td class="p-3 text-right"><button onclick="editarMecanico(${m.id})" class="text-blue-400 hover:underline mr-3 text-xs">Editar</button><button onclick="excluirMecanico(${m.id})" class="text-red-500 hover:underline text-xs">Apagar</button></td></tr>`;
             });
+            preencherSelectsMecanicos();
         }
+
         function abrirModalMecanico(id = null, nome = '', comissao = 40) {
             document.getElementById('mecanicoEditandoId').value = id || '';
             document.getElementById('inputNomeMecanico').value = nome;
@@ -524,31 +536,36 @@
             document.getElementById('tituloModalMecanico').innerText = id ? "Editar Mecânico" : "Adicionar Mecânico";
             document.getElementById('modalMecanico').classList.remove('hidden');
         }
+
         function editarMecanico(id) {
             const m = mecanicosCache.find(x => x.id == id);
             if(m) abrirModalMecanico(m.id, m.nome, m.percentualComissao || 40);
         }
-        async function salvarMecanicoConfig() {
+
+        function salvarMecanicoConfig() {
             const id = document.getElementById('mecanicoEditandoId').value;
-            const nome = document.getElementById('inputNomeMecanico').value.trim();
+            const nome = document.getElementById('inputNomeMecanico').value.trim().toUpperCase();
             const comissao = parseFloat(document.getElementById('inputComissaoMecanico').value) || 40;
             if(!nome) return alert("Digite o nome do mecânico.");
 
-            const url = id ? `/api/mecanicos/${id}` : '/api/mecanicos';
-            const method = id ? 'PUT' : 'POST';
+            if (id) {
+                const m = mecanicosCache.find(x => x.id == id);
+                if (m) { m.nome = nome; m.percentualComissao = comissao; }
+            } else {
+                const novoId = mecanicosCache.length > 0 ? Math.max(...mecanicosCache.map(x => x.id)) + 1 : 1;
+                mecanicosCache.push({ id: novoId, nome, percentualComissao: comissao });
+            }
 
-            try {
-                await fetch(url, { method, headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenVal }, body: JSON.stringify({ nome, percentualComissao: comissao }) });
-                document.getElementById('modalMecanico').classList.add('hidden');
-                carregarDados();
-            } catch(e) { alert("Erro ao salvar mecânico."); }
+            localStorage.setItem('motoflowMecanicos', JSON.stringify(mecanicosCache));
+            document.getElementById('modalMecanico').classList.add('hidden');
+            renderizarTabelaMecanicosConfig();
         }
-        async function excluirMecanico(id) {
+
+        function excluirMecanico(id) {
             if(confirm("Deseja realmente apagar este mecânico?")) {
-                try {
-                    await fetch(`/api/mecanicos/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + tokenVal } });
-                    carregarDados();
-                } catch(e) { alert("Erro ao apagar."); }
+                mecanicosCache = mecanicosCache.filter(x => x.id != id);
+                localStorage.setItem('motoflowMecanicos', JSON.stringify(mecanicosCache));
+                renderizarTabelaMecanicosConfig();
             }
         }
 
