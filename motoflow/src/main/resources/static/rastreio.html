@@ -10,32 +10,26 @@
         body { font-family: 'Inter', sans-serif; background-color: #121418; color: #d1d5db; }
         .panel { background-color: #1a1c23; border: 1px solid #2d333f; }
         .input-dark { background-color: #121418; border: 1px solid #2d333f; color: #f3f4f6; }
-        .input-dark:focus { border-color: #dc2626; outline: none; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-4">
 
     <div class="panel rounded-xl p-6 max-w-xl w-full shadow-2xl border-t-4 border-t-red-600 space-y-6">
         
-        <!-- Cabeçalho -->
         <div class="text-center border-b border-[#2d333f] pb-4">
             <h1 class="text-2xl font-black text-white tracking-wider">MOTOFLOW <span class="text-red-600">PRO</span></h1>
-            <p class="text-xs text-slate-400 mt-1 uppercase font-semibold">Portal de Autoatendimento do Cliente</p>
+            <p class="text-xs text-slate-400 mt-1 uppercase font-semibold">Portal de Acompanhamento do Cliente</p>
         </div>
 
-        <!-- Formulário de Consulta -->
         <div class="space-y-3">
             <label class="block text-xs uppercase text-slate-400 font-bold">Digite a Placa do Veículo:</label>
             <div class="flex gap-2">
-                <input type="text" id="inputPlacaRastreio" placeholder="Ex: ABC1D23" class="input-dark w-full rounded p-3 text-sm uppercase font-bold text-amber-400 font-mono tracking-wider">
-                <button onclick="buscarOSRastreio()" class="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded text-xs uppercase shadow transition">Consultar</button>
+                <input type="text" id="inputPlacaRastreio" placeholder="Ex: ABC1D23" class="input-dark w-full rounded p-3 text-sm uppercase font-bold text-amber-400 font-mono">
+                <button onclick="buscarOSRastreio()" class="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded text-xs uppercase transition shadow">Consultar</button>
             </div>
         </div>
 
-        <!-- Área de Resultados (Oculta inicialmente) -->
         <div id="resultadoRastreio" class="hidden space-y-5">
-            
-            <!-- Bloco de Dados Principais -->
             <div class="bg-[#121418] border border-[#2d333f] rounded-lg p-4 space-y-3 text-xs">
                 <div class="flex justify-between items-center border-b border-[#2d333f] pb-2">
                     <span class="text-slate-400 font-bold uppercase">Código da OS:</span>
@@ -50,12 +44,11 @@
                     <span id="rstMoto" class="text-white uppercase font-bold"></span>
                 </div>
                 <div class="flex justify-between items-center pt-2 border-t border-[#2d333f]">
-                    <span class="text-slate-400 font-bold uppercase">Status Atual:</span>
+                    <span class="text-slate-400 font-bold uppercase">Status Atual no Pátio:</span>
                     <span id="rstStatus" class="px-3 py-1 rounded text-[11px] font-black uppercase tracking-wider"></span>
                 </div>
             </div>
 
-            <!-- Aviso de Moto Pronta -->
             <div id="boxMotoProntaAviso" class="hidden bg-emerald-950/60 border border-emerald-500/50 rounded-lg p-4 text-center space-y-2">
                 <p class="text-xs font-bold text-emerald-400 uppercase tracking-wide">🎉 Sua moto está PRONTA para retirada!</p>
                 <a id="btnZapRastreio" href="#" target="_blank" class="block bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-3 rounded text-xs uppercase transition shadow">
@@ -63,30 +56,23 @@
                 </a>
             </div>
 
-            <!-- Tabela Detalhada de Itens e Serviços -->
             <div class="space-y-2">
                 <h3 class="text-xs uppercase text-slate-400 font-bold">Serviços e Peças Lançados:</h3>
                 <div class="overflow-x-auto bg-[#121418] rounded border border-[#2d333f]">
                     <table class="w-full text-left text-xs">
                         <thead class="text-red-500 uppercase border-b border-[#2d333f]">
-                            <tr>
-                                <th class="p-2.5">Descrição</th>
-                                <th class="p-2.5 text-center">Qtd</th>
-                                <th class="p-2.5 text-right">Total</th>
-                            </tr>
+                            <tr><th class="p-2.5">Descrição</th><th class="p-2.5 text-center">Qtd</th><th class="p-2.5 text-right">Total</th></tr>
                         </thead>
                         <tbody id="rstTabelaItens" class="divide-y divide-[#2d333f] text-slate-300"></tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Rodapé com Valor Total -->
             <div class="flex justify-between items-center bg-[#121418] p-3.5 rounded-lg border border-[#2d333f]">
                 <span class="text-xs uppercase text-slate-300 font-bold">Valor Total da OS:</span>
                 <span class="text-xl font-mono font-black text-emerald-400" id="rstValorTotal">R$ 0,00</span>
             </div>
 
-            <!-- Botão de Download / Impressão -->
             <button onclick="imprimirOSRastreio()" class="w-full bg-[#2d333f] hover:bg-[#374151] text-white font-bold py-3 rounded text-xs uppercase border border-[#4b5563] transition flex items-center justify-center gap-2 shadow">
                 🖨️ Baixar / Imprimir Ordem de Serviço
             </button>
@@ -106,7 +92,6 @@
             'FINALIZADA': 'Serviço Concluído e Entregue'
         };
 
-        // Auto-executa a busca caso o link venha com a placa na URL (?placa=ABC1D23)
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             const placaUrl = urlParams.get('placa');
@@ -119,7 +104,6 @@
         async function buscarOSRastreio() {
             const rawPlaca = document.getElementById('inputPlacaRastreio').value;
             const placa = rawPlaca.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-            
             if (!placa) { alert("Digite a placa para consultar."); return; }
 
             try {
@@ -141,18 +125,12 @@
                     const estaPronta = (statusKey === 'PRONTA' || statusKey === 'PRONTO');
                     stEl.className = `px-3 py-1 rounded text-[11px] font-black uppercase tracking-wider ${estaPronta ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'}`;
 
-                    // Preenche a tabela de itens
                     const tbody = document.getElementById('rstTabelaItens');
                     tbody.innerHTML = '';
                     if (osAtivaRastreio.itens && osAtivaRastreio.itens.length > 0) {
                         osAtivaRastreio.itens.forEach(i => {
                             const sub = (i.quantidade || 1) * (i.valorUnitario || 0);
-                            tbody.innerHTML += `
-                                <tr>
-                                    <td class="p-2.5 uppercase text-white font-medium">${i.descricao}</td>
-                                    <td class="p-2.5 text-center font-mono">${i.quantidade}x</td>
-                                    <td class="p-2.5 text-right font-mono text-emerald-400">R$ ${sub.toFixed(2)}</td>
-                                </tr>`;
+                            tbody.innerHTML += `<tr><td class="p-2.5 uppercase text-white font-medium">${i.descricao}</td><td class="p-2.5 text-center font-mono">${i.quantidade}x</td><td class="p-2.5 text-right font-mono text-emerald-400">R$ ${sub.toFixed(2)}</td></tr>`;
                         });
                     } else {
                         tbody.innerHTML = `<tr><td colspan="3" class="p-3 text-center text-slate-500 italic">Nenhum item lançado até o momento.</td></tr>`;
@@ -177,84 +155,7 @@
         function imprimirOSRastreio() {
             if (!osAtivaRastreio) { alert("Nenhuma OS selecionada para impressão."); return; }
             const win = window.open('', '_blank');
-            const dataFormatted = new Date(osAtivaRastreio.dataEntrada || Date.now()).toLocaleString('pt-BR');
-            const clienteNome = osAtivaRastreio.cliente ? osAtivaRastreio.cliente.nome : 'N/D';
-            const motoModelo = osAtivaRastreio.moto ? osAtivaRastreio.moto.modelo : 'N/D';
-            const motoPlaca = osAtivaRastreio.moto ? osAtivaRastreio.moto.placa : 'N/D';
-
-            let itensHTML = '';
-            let total = 0;
-            if (osAtivaRastreio.itens && osAtivaRastreio.itens.length > 0) {
-                osAtivaRastreio.itens.forEach(i => {
-                    const sub = (i.quantidade || 1) * (i.valorUnitario || 0);
-                    total += sub;
-                    itensHTML += `
-                        <tr>
-                            <td style="padding:8px; border-bottom:1px solid #ddd; text-align:center;">${i.quantidade}x</td>
-                            <td style="padding:8px; border-bottom:1px solid #ddd; font-weight:bold;">${i.descricao}</td>
-                            <td style="padding:8px; border-bottom:1px solid #ddd; text-align:right;">R$ ${(i.valorUnitario || 0).toFixed(2)}</td>
-                            <td style="padding:8px; border-bottom:1px solid #ddd; text-align:right; font-weight:bold;">R$ ${sub.toFixed(2)}</td>
-                        </tr>`;
-                });
-            } else {
-                itensHTML = `<tr><td colspan="4" style="padding:10px; text-align:center; color:#777;">Nenhum item/serviço registrado.</td></tr>`;
-            }
-
-            win.document.write(`
-                <!DOCTYPE html>
-                <html lang="pt-BR">
-                <head>
-                    <meta charset="UTF-8">
-                    <title>Comprovante OS #${osAtivaRastreio.codigoRastreio}</title>
-                    <style>
-                        body { font-family: 'Courier New', Courier, monospace; margin: 0; padding: 20px; color: #000; background: #fff; }
-                        .ticket { max-width: 600px; margin: 0 auto; border: 1px solid #000; padding: 20px; }
-                        .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
-                        .header h2 { margin: 0; font-size: 22px; text-transform: uppercase; }
-                        .header p { margin: 2px 0; font-size: 11px; }
-                        .info-grid { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 15px; border-bottom: 1px dashed #000; padding-bottom: 10px; }
-                        table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 15px; }
-                        th { background: #f0f0f0; padding: 6px; border-bottom: 2px solid #000; text-align: left; }
-                        .totais { text-align: right; font-size: 14px; border-top: 2px solid #000; padding-top: 10px; }
-                    </style>
-                </head>
-                <body>
-                    <div class="ticket">
-                        <div class="header">
-                            <h2>MOTOFLOW PRO</h2>
-                            <p>COMPROVANTE DE ACOMPANHAMENTO DE SERVIÇO</p>
-                        </div>
-                        <div class="info-grid">
-                            <div>
-                                <p><strong>CÓDIGO OS:</strong> #${osAtivaRastreio.codigoRastreio}</p>
-                                <p><strong>DATA:</strong> ${dataFormatted}</p>
-                            </div>
-                            <div style="text-align: right;">
-                                <p><strong>CLIENTE:</strong> ${clienteNome}</p>
-                                <p><strong>VEÍCULO:</strong> ${motoModelo} (${motoPlaca})</p>
-                            </div>
-                        </div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th style="width:10%; text-align:center;">Qtd</th>
-                                    <th style="width:50%;">Descrição</th>
-                                    <th style="width:20%; text-align:right;">Unitário</th>
-                                    <th style="width:20%; text-align:right;">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>${itensHTML}</tbody>
-                        </table>
-                        <div class="totais">
-                            <p style="margin:0;"><strong>TOTAL GERAL: R$ ${total.toFixed(2)}</strong></p>
-                        </div>
-                    </div>
-                    <script>
-                        window.onload = function() { window.print(); }
-                    <\/script>
-                </body>
-                </html>
-            `);
+            win.document.write(`<html><body style="font-family:monospace; padding:20px;"><h2>COMPROVANTE DE OS #${osAtivaRastreio.codigoRastreio}</h2><p>Cliente: ${osAtivaRastreio.cliente?.nome}</p><p>Moto: ${osAtivaRastreio.moto?.modelo} (${osAtivaRastreio.moto?.placa})</p><p>Status: ${osAtivaRastreio.status}</p><p><b>Total: R$ ${(osAtivaRastreio.valorTotal||0).toFixed(2)}</b></p><script>setTimeout(()=>{window.print();},300);<\/script></body></html>`);
             win.document.close();
         }
     </script>

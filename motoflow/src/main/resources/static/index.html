@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel de Controle - MotoFlow Pro</title>
-    <!-- SEGURANÇA: EXIGE LOGIN SEMPRE QUE A SESSÃO FOR FECHADA -->
     <style> body { display: none; } </style>
     <script>
         const tokenVal = sessionStorage.getItem('motoFlowToken');
@@ -23,7 +22,6 @@
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #1a1d24; }
         ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
         .panel-bg { background-color: #1a1c23; border: 1px solid #2d333f; }
         .input-dark { background-color: #121418; border: 1px solid #2d333f; color: #f3f4f6; transition: border 0.2s; }
         .input-dark:focus { border-color: #3b82f6; outline: none; }
@@ -35,11 +33,10 @@
 </head>
 <body class="min-h-screen flex-col">
 
-    <!-- Header -->
     <header class="px-4 sm:px-6 pt-4 sm:pt-5 pb-0">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
             <div><h1 class="text-lg sm:text-xl font-bold text-white tracking-tight flex items-center gap-2">Painel de Controle <span class="text-xs sm:text-sm font-normal text-slate-500">MotoFlow Pro</span></h1></div>
-            <div class="text-xs text-slate-400">Usuário: <span id="lblUserNome" class="text-red-500 font-bold">Felipe (Admin)</span> | <button onclick="fazerLogout()" class="text-blue-400 hover:underline">Sair</button></div>
+            <div class="text-xs text-slate-400">Sessão Segura | <button onclick="fazerLogout()" class="text-blue-400 hover:underline">Sair</button></div>
         </div>
 
         <div class="flex gap-2 pb-3 border-b border-[#2d333f] overflow-x-auto no-scrollbar">
@@ -47,10 +44,9 @@
             <button onclick="navegarPara('kanban')" id="nav-kanban" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">Pátio Kanban</button>
             <button onclick="navegarPara('agenda')" id="nav-agenda" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">📅 Agenda</button>
             <button onclick="navegarPara('clientes')" id="nav-clientes" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">👥 Clientes</button>
-            <button onclick="navegarPara('qrcode')" id="nav-qrcode" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">📱 QR Code Balcão</button>
             <button onclick="navegarPara('financeiro')" id="nav-financeiro" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">💰 Financeiro (DRE)</button>
             <button onclick="navegarPara('pecas')" id="nav-pecas" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">📦 Relatório Peças</button>
-            <button onclick="navegarPara('config')" id="nav-config" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">⚙️ Configurações</button>
+            <button onclick="navegarPara('config')" id="nav-config" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">⚙️ Configurações & Taxas</button>
             <button onclick="navegarPara('backup')" id="nav-backup" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">🔒 Backup</button>
         </div>
     </header>
@@ -76,7 +72,7 @@
                     </div>
 
                     <div class="panel-bg rounded-lg p-5 border-l-4 border-l-blue-500">
-                        <h3 class="text-sm font-bold text-white mb-4 border-b border-[#2d333f] pb-2 flex items-center gap-2">🛠️ Fechamento de Mão de Obra e Mecânico</h3>
+                        <h3 class="text-sm font-bold text-white mb-4 border-b border-[#2d333f] pb-2">🛠️ Fechamento de Mão de Obra e Mecânico</h3>
                         <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
                             <div class="md:col-span-5"><label class="block text-[10px] uppercase text-slate-400 mb-1">Mecânico:</label><select id="osMecanicoSelect" onchange="atualizarComissaoMecanicoInput()" class="input-dark w-full rounded p-2.5 text-xs font-bold text-slate-200"></select></div>
                             <div class="md:col-span-2"><label class="block text-[10px] uppercase text-amber-400 mb-1 font-bold">Comissão (%):</label><input type="number" id="osComissaoMecanico" value="40" class="input-dark w-full rounded p-2.5 text-xs font-bold text-amber-400 font-mono"></div>
@@ -87,12 +83,27 @@
 
                     <div class="panel-bg rounded-lg p-5 border-l-4 border-l-amber-500">
                         <div class="flex justify-between items-center mb-4 border-b border-[#2d333f] pb-2">
-                            <h3 class="text-sm font-bold text-white uppercase">📦 Peças e Reposição</h3>
+                            <h3 class="text-sm font-bold text-white uppercase">📦 Peças e Reposição (Com Sugestões Inteligentes e Margem Antijuízo)</h3>
                             <span id="txtTotalNovaOS" class="text-sm font-bold text-emerald-400 font-mono">Total Geral: R$ 0,00</span>
                         </div>
                         <div class="grid grid-cols-12 gap-3 mb-4 items-end">
                             <div class="col-span-2"><label class="block text-[9px] uppercase text-slate-400 mb-0.5">Qtd:</label><input type="number" id="novaOsItemQtd" value="1" min="1" class="input-dark w-full rounded p-2 text-xs text-center font-bold"></div>
-                            <div class="col-span-10"><label class="block text-[9px] uppercase text-slate-400 mb-0.5">Descrição da Peça:</label><input type="text" id="novaOsItemDesc" class="input-dark w-full rounded p-2 text-xs uppercase"></div>
+                            <div class="col-span-10">
+                                <label class="block text-[9px] uppercase text-slate-400 mb-0.5">Descrição da Peça:</label>
+                                <input type="text" id="novaOsItemDesc" list="sugestoesPecasBanco" class="input-dark w-full rounded p-2 text-xs uppercase" autocomplete="off">
+                                <datalist id="sugestoesPecasBanco">
+                                    <option value="ÓLEO 20W50 MOBIL">
+                                    <option value="ÓLEO 10W30 SEMi-SINTÉTICO">
+                                    <option value="PASTILHA DE FREIO DIANTEIRA">
+                                    <option value="PATIM DE FREIO TRASEIRO">
+                                    <option value="KIT RELAÇÃO (COROA, CORRENTE E PINHÃO)">
+                                    <option value="VELA DE IGNIÇÃO NGK">
+                                    <option value="FILtro DE AR">
+                                    <option value="CABO DE EMBREAGEM">
+                                    <option value="PNEU DIANTEIRO">
+                                    <option value="PNEU TRASEIRO">
+                                </datalist>
+                            </div>
                             <div class="col-span-4"><label class="block text-[9px] uppercase text-slate-400 mb-0.5">Custo Limpo (R$):</label><input type="number" id="novaOsItemCusto" oninput="calcularVendaMargemNovaOS()" step="0.01" class="input-dark w-full rounded p-2 text-xs font-mono"></div>
                             <div class="col-span-4"><label class="block text-[9px] uppercase text-amber-400 mb-0.5 font-bold">Margem (%):</label><input type="number" id="novaOsItemMargem" value="50" oninput="calcularVendaMargemNovaOS()" class="input-dark w-full rounded p-2 text-xs font-bold text-amber-400 font-mono"></div>
                             <div class="col-span-4"><label class="block text-[9px] uppercase text-emerald-400 mb-0.5 font-bold">Venda (R$):</label><input type="number" id="novaOsItemValor" step="0.01" class="input-dark w-full rounded p-2 text-xs font-mono font-bold text-emerald-400"></div>
@@ -127,7 +138,7 @@
                 <p class="text-slate-400 mb-8" id="subMsgSucessoOS">O veículo foi adicionado ao Pátio Digital.</p>
                 <div class="flex flex-col sm:flex-row justify-center gap-4">
                     <button id="btnPosVisualizar" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded uppercase text-xs flex items-center justify-center gap-2 transition">👁️ VISUALIZAR / IMPRIMIR</button>
-                    <button id="btnPosWpp" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded uppercase text-xs flex items-center justify-center gap-2 transition">📱 ENVIAR WHATSAPP (COM LINK)</button>
+                    <button id="btnPosWpp" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded uppercase text-xs flex items-center justify-center gap-2 transition">📱 ENVIAR WHATSAPP (COM LINK DE RASTREIO)</button>
                     <button onclick="resetarTelaNovaOS()" class="bg-[#2d333f] hover:bg-[#374151] text-white font-bold py-3 px-6 rounded uppercase text-xs flex items-center justify-center gap-2 transition">🔄 NOVA OS</button>
                 </div>
             </div>
@@ -173,62 +184,53 @@
             </div>
         </section>
 
-        <!-- ABA: QR CODE BALCÃO INTELIGENTE -->
-        <section id="aba-qrcode" class="hidden space-y-6">
-            <div class="panel-bg rounded-lg p-5">
-                <h2 class="text-xl font-bold text-white mb-2">📱 Gerador de QR Code para Balcão / Folha</h2>
-                <p class="text-xs text-slate-400">Escolha o que deseja gerar, imprima e cole no balcão ou insira no rodapé da folha de OS.</p>
-            </div>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div class="lg:col-span-5 panel-bg rounded-lg p-5 space-y-4">
-                    <div>
-                        <label class="block text-xs uppercase text-slate-400 mb-1 font-bold">Tipo de QR Code:</label>
-                        <select id="tipoQrCodeSelect" onchange="mudarTipoQrCode()" class="input-dark w-full rounded p-3 text-xs font-bold text-amber-400">
-                            <option value="rastreio">Link de Rastreio do Cliente (Por Placa)</option>
-                            <option value="whatsapp">Falar no WhatsApp da Oficina</option>
-                            <option value="pix">Chave Pix para Pagamento Rápido</option>
-                        </select>
-                    </div>
-
-                    <div id="divCampoDinamicoQr">
-                        <label class="block text-xs uppercase text-slate-400 mb-1" id="labelCampoDinamico">Placa Exemplo (Para teste):</label>
-                        <input type="text" id="inputValorQr" value="ABC1D23" oninput="gerarQRCodeBalcao()" class="input-dark w-full rounded p-3 text-xs uppercase font-mono font-bold">
-                    </div>
-                    
-                    <p class="text-[11px] text-slate-500" id="infoTextoQr">Gera um QR Code onde o cliente digita a placa e acompanha a moto.</p>
-                </div>
-
-                <div class="lg:col-span-7 flex justify-center items-center">
-                    <div class="bg-white text-slate-900 rounded-xl p-8 border-4 border-red-600 text-center shadow-2xl">
-                        <h2 class="text-xl font-black text-slate-900 mb-3 uppercase" id="tituloQrCard">CONSULTE SUA MOTO</h2>
-                        <div id="containerQRCodeBalcao" class="flex justify-center mb-3"></div>
-                        <p class="text-xs font-bold mt-2" id="subTituloQrCard">Aponte a câmera do celular</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ABA: CONFIGURAÇÕES -->
+        <!-- ABA: CONFIGURAÇÕES & TAXAS -->
         <section id="aba-config" class="hidden space-y-6 max-w-4xl mx-auto">
-            <div class="panel-bg rounded-lg p-6">
-                <h2 class="text-xl font-bold text-white mb-2">⚙️ Configurações da Oficina</h2>
-                <p class="text-xs text-slate-400 mb-6">Personalize os dados impressos nas Ordens de Serviço.</p>
+            <div class="panel-bg rounded-lg p-6 space-y-6">
+                <div>
+                    <h2 class="text-xl font-bold text-white mb-2">⚙️ Configurações da Oficina e Impressão</h2>
+                    <p class="text-xs text-slate-400">Personalize os dados, a logo e insira as taxas da maquininha para o sistema calcular sua margem de segurança antijuízo.</p>
+                </div>
                 
                 <form id="formConfigOficina" class="space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div><label class="block text-xs uppercase text-slate-400 mb-1">Nome:</label><input type="text" id="cfgNome" class="input-dark w-full rounded p-2.5 text-sm uppercase font-bold text-white"></div>
+                        <div><label class="block text-xs uppercase text-slate-400 mb-1">Nome da Oficina:</label><input type="text" id="cfgNome" class="input-dark w-full rounded p-2.5 text-sm uppercase font-bold text-white"></div>
                         <div><label class="block text-xs uppercase text-slate-400 mb-1">CNPJ:</label><input type="text" id="cfgCnpj" class="input-dark w-full rounded p-2.5 text-sm font-mono"></div>
                     </div>
-                    <div><label class="block text-xs uppercase text-slate-400 mb-1">Endereço:</label><input type="text" id="cfgEndereco" class="input-dark w-full rounded p-2.5 text-sm uppercase"></div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div><label class="block text-xs uppercase text-slate-400 mb-1">WhatsApp:</label><input type="text" id="cfgTel" class="input-dark w-full rounded p-2.5 text-sm font-mono"></div>
+                    <div><label class="block text-xs uppercase text-slate-400 mb-1">Endereço Completo:</label><input type="text" id="cfgEndereco" class="input-dark w-full rounded p-2.5 text-sm uppercase"></div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div><label class="block text-xs uppercase text-slate-400 mb-1">WhatsApp da Loja:</label><input type="text" id="cfgTel" class="input-dark w-full rounded p-2.5 text-sm font-mono"></div>
                         <div><label class="block text-xs uppercase text-slate-400 mb-1">E-mail:</label><input type="email" id="cfgEmail" class="input-dark w-full rounded p-2.5 text-sm"></div>
+                        <div><label class="block text-xs uppercase text-slate-400 mb-1">URL da Logo (Imagem):</label><input type="text" id="cfgLogo" placeholder="https://exemplo.com/logo.png" class="input-dark w-full rounded p-2.5 text-sm font-mono"></div>
                     </div>
+
+                    <div class="border-t border-[#2d333f] pt-4 mt-4">
+                        <h3 class="text-sm font-bold text-amber-400 mb-2 uppercase">💳 Taxas de Maquininha & Margem Antijuízo</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label class="block text-xs uppercase text-slate-400 mb-1">Taxa Média Cartão Crédito (%):</label><input type="number" step="0.1" id="cfgTaxaCredito" value="3.5" class="input-dark w-full rounded p-2.5 text-sm font-mono text-amber-400 font-bold"></div>
+                            <div><label class="block text-xs uppercase text-slate-400 mb-1">Margem de Lucro Mínima Sugerida (%):</label><input type="number" step="1" id="cfgMargemMinima" value="40" class="input-dark w-full rounded p-2.5 text-sm font-mono text-emerald-400 font-bold"></div>
+                        </div>
+                        <p class="text-[10px] text-slate-500 mt-1">O sistema usará esta margem mínima para alertar ou sugerir preços que evitem prejuízos nas vendas no cartão.</p>
+                    </div>
+
                     <div class="pt-4 border-t border-[#2d333f] flex justify-end">
                         <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded text-xs uppercase shadow transition">💾 Salvar Configurações</button>
                     </div>
                 </form>
+
+                <!-- GESTÃO DE MECÂNICOS -->
+                <div class="border-t border-[#2d333f] pt-6 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-bold text-white uppercase">🛠️ Gestão de Mecânicos</h3>
+                        <button onclick="abrirModalMecanico()" class="bg-green-600 hover:bg-green-700 text-white font-bold px-3 py-2 rounded text-xs uppercase">+ Adicionar Mecânico</button>
+                    </div>
+                    <div class="overflow-x-auto bg-[#121418] rounded border border-[#2d333f]">
+                        <table class="w-full text-left text-xs">
+                            <thead class="text-red-500 uppercase border-b border-[#2d333f]"><tr><th class="p-3">Nome</th><th class="p-3">Comissão Padrão (%)</th><th class="p-3 text-right">Ações</th></tr></thead>
+                            <tbody id="tabelaMecanicosConfig" class="divide-y divide-[#2d333f] text-slate-300"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -328,7 +330,7 @@
     <datalist id="sugestoesClientes"></datalist>
     <datalist id="sugestoesPlacas"></datalist>
 
-    <!-- MODAL RECEBER PAGAMENTO -->
+    <!-- MODAL RECEBER PAGAMENTO (VAI DIRETO PARA FINANÇAS E PEÇAS) -->
     <div id="modalReceberPagamento" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-[80]">
         <div class="bg-[#1f232b] border border-[#2d333f] rounded-lg w-full max-w-md shadow-2xl overflow-hidden">
             <div class="bg-green-600 p-4 text-center"><h3 class="text-white font-bold text-lg uppercase tracking-wider">💲 Fechar Conta / Receber</h3></div>
@@ -356,7 +358,7 @@
                 </div>
                 <div class="flex gap-2 pt-4 border-t border-[#2d333f]">
                     <button onclick="document.getElementById('modalReceberPagamento').classList.add('hidden')" class="w-1/3 bg-[#2d333f] text-white font-bold py-3 rounded text-xs uppercase">Cancelar</button>
-                    <button onclick="confirmarRecebimentoPagamento()" class="w-2/3 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded text-xs uppercase shadow-lg">✅ Confirmar</button>
+                    <button onclick="confirmarRecebimentoPagamento()" class="w-2/3 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded text-xs uppercase shadow-lg">✅ Confirmar & Baixar no Caixa</button>
                 </div>
             </div>
         </div>
@@ -398,6 +400,20 @@
         </div>
     </div>
 
+    <!-- MODAL ADICIONAR/EDITAR MECÂNICO -->
+    <div id="modalMecanico" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-[85]">
+        <div class="bg-[#1f232b] border border-[#2d333f] rounded-lg w-full max-w-sm shadow-2xl p-6 space-y-4">
+            <h3 class="text-white font-bold text-lg" id="tituloModalMecanico">Adicionar Mecânico</h3>
+            <input type="hidden" id="mecanicoEditandoId">
+            <div><label class="block text-xs uppercase text-slate-400 mb-1">Nome do Mecânico:</label><input type="text" id="inputNomeMecanico" class="input-dark w-full rounded p-2 text-sm uppercase font-bold text-white"></div>
+            <div><label class="block text-xs uppercase text-slate-400 mb-1">Comissão Padrão (%):</label><input type="number" id="inputComissaoMecanico" value="40" class="input-dark w-full rounded p-2 text-sm font-mono font-bold text-amber-400"></div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="document.getElementById('modalMecanico').classList.add('hidden')" class="bg-[#2d333f] text-white px-3 py-2 rounded text-xs uppercase">Cancelar</button>
+                <button onclick="salvarMecanicoConfig()" class="bg-blue-600 text-white px-4 py-2 rounded text-xs uppercase font-bold">Salvar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL HISTÓRICO -->
     <div id="modalHistoricoCliente" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-[50]">
         <div class="bg-[#1f232b] border border-[#2d333f] rounded-lg w-full max-w-5xl shadow-2xl overflow-hidden">
@@ -411,21 +427,21 @@
         </div>
     </div>
 
-    <!-- SCRIPT GERAL -->
     <script>
         const API = '/api/os';
         let ordensCache = [], mecanicosCache = [], agendaCache = [], itensNovaOSCache = [];
         let chartFatLucro = null;
-        let osEditandoId = null; 
-        let osVisualizandoAtualmente = null;
-        let osRecebendoId = null;
+        let osEditandoId = null, osVisualizandoAtualmente = null, osRecebendoId = null;
         
         let configOficina = JSON.parse(localStorage.getItem('motoflowConfig')) || {
             nome: "MOTOFLOW OFICINA",
             cnpj: "00.000.000/0001-00",
             endereco: "Rua Exemplo, 123 - Centro",
             telefone: "85999999999",
-            email: "oficina@motoflow.com"
+            email: "oficina@motoflow.com",
+            logoUrl: "",
+            taxaCredito: 3.5,
+            margemMinima: 40
         };
 
         const KANBAN_COLS = [
@@ -436,11 +452,7 @@
             { id: 'FINALIZADA', tit: 'PAGO / ENTREGUE', cor: 'border-t-slate-500', accepts: ['FINALIZADA'] }
         ];
 
-        // LOGOUT LIMPA A SESSÃO E VOLTA AO LOGIN
-        function fazerLogout() { 
-            sessionStorage.clear(); 
-            window.location.href = 'login.html'; 
-        }
+        function fazerLogout() { sessionStorage.clear(); window.location.href = 'login.html'; }
 
         function configurarDatasAutomaticas() {
             const h = new Date(); const seg = new Date(h);
@@ -456,28 +468,30 @@
             document.getElementById('cfgEndereco').value = configOficina.endereco;
             document.getElementById('cfgTel').value = configOficina.telefone;
             document.getElementById('cfgEmail').value = configOficina.email;
+            document.getElementById('cfgLogo').value = configOficina.logoUrl || '';
+            document.getElementById('cfgTaxaCredito').value = configOficina.taxaCredito || 3.5;
+            document.getElementById('cfgMargemMinima').value = configOficina.margemMinima || 40;
         }
 
-        const formConfig = document.getElementById('formConfigOficina');
-        if (formConfig) {
-            formConfig.addEventListener('submit', (e) => {
-                e.preventDefault();
-                configOficina = {
-                    nome: document.getElementById('cfgNome').value.trim(),
-                    cnpj: document.getElementById('cfgCnpj').value.trim(),
-                    endereco: document.getElementById('cfgEndereco').value.trim(),
-                    telefone: document.getElementById('cfgTel').value.trim(),
-                    email: document.getElementById('cfgEmail').value.trim()
-                };
-                localStorage.setItem('motoflowConfig', JSON.stringify(configOficina));
-                alert("Configurações salvas com sucesso!");
-            });
-        }
+        document.getElementById('formConfigOficina').addEventListener('submit', (e) => {
+            e.preventDefault();
+            configOficina.nome = document.getElementById('cfgNome').value.trim();
+            configOficina.cnpj = document.getElementById('cfgCnpj').value.trim();
+            configOficina.endereco = document.getElementById('cfgEndereco').value.trim();
+            configOficina.telefone = document.getElementById('cfgTel').value.trim();
+            configOficina.email = document.getElementById('cfgEmail').value.trim();
+            configOficina.logoUrl = document.getElementById('cfgLogo').value.trim();
+            configOficina.taxaCredito = parseFloat(document.getElementById('cfgTaxaCredito').value) || 3.5;
+            configOficina.margemMinima = parseFloat(document.getElementById('cfgMargemMinima').value) || 40;
+            
+            localStorage.setItem('motoflowConfig', JSON.stringify(configOficina));
+            alert("Configurações salvas com sucesso!");
+        });
 
         async function carregarDados() {
             try {
                 const resM = await fetch('/api/mecanicos', { headers: { 'Authorization': 'Bearer ' + tokenVal } });
-                if(resM.ok) { mecanicosCache = await resM.json(); preencherSelectsMecanicos(); }
+                if(resM.ok) { mecanicosCache = await resM.json(); preencherSelectsMecanicos(); renderizarTabelaMecanicosConfig(); }
 
                 const resO = await fetch(API, { headers: { 'Authorization': 'Bearer ' + tokenVal } });
                 if(resO.ok) { 
@@ -492,6 +506,50 @@
                 const resA = await fetch('/api/agendamentos', { headers: { 'Authorization': 'Bearer ' + tokenVal } });
                 if(resA.ok) { agendaCache = await resA.json(); renderAgenda(); }
             } catch (e) { console.error(e); }
+        }
+
+        // GESTÃO DE MECÂNICOS
+        function renderizarTabelaMecanicosConfig() {
+            const tb = document.getElementById('tabelaMecanicosConfig');
+            if(!tb) return; tb.innerHTML = '';
+            if(mecanicosCache.length === 0) { tb.innerHTML = `<tr><td colspan="3" class="p-3 text-center text-slate-500">Nenhum mecânico cadastrado.</td></tr>`; return; }
+            mecanicosCache.forEach(m => {
+                tb.innerHTML += `<tr class="hover:bg-[#1f232b]"><td class="p-3 uppercase font-bold text-white">${m.nome}</td><td class="p-3 font-mono text-amber-400 font-bold">${m.percentualComissao || 40}%</td><td class="p-3 text-right"><button onclick="editarMecanico(${m.id})" class="text-blue-400 hover:underline mr-3 text-xs">Editar</button><button onclick="excluirMecanico(${m.id})" class="text-red-500 hover:underline text-xs">Apagar</button></td></tr>`;
+            });
+        }
+        function abrirModalMecanico(id = null, nome = '', comissao = 40) {
+            document.getElementById('mecanicoEditandoId').value = id || '';
+            document.getElementById('inputNomeMecanico').value = nome;
+            document.getElementById('inputComissaoMecanico').value = comissao;
+            document.getElementById('tituloModalMecanico').innerText = id ? "Editar Mecânico" : "Adicionar Mecânico";
+            document.getElementById('modalMecanico').classList.remove('hidden');
+        }
+        function editarMecanico(id) {
+            const m = mecanicosCache.find(x => x.id == id);
+            if(m) abrirModalMecanico(m.id, m.nome, m.percentualComissao || 40);
+        }
+        async function salvarMecanicoConfig() {
+            const id = document.getElementById('mecanicoEditandoId').value;
+            const nome = document.getElementById('inputNomeMecanico').value.trim();
+            const comissao = parseFloat(document.getElementById('inputComissaoMecanico').value) || 40;
+            if(!nome) return alert("Digite o nome do mecânico.");
+
+            const url = id ? `/api/mecanicos/${id}` : '/api/mecanicos';
+            const method = id ? 'PUT' : 'POST';
+
+            try {
+                await fetch(url, { method, headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenVal }, body: JSON.stringify({ nome, percentualComissao: comissao }) });
+                document.getElementById('modalMecanico').classList.add('hidden');
+                carregarDados();
+            } catch(e) { alert("Erro ao salvar mecânico."); }
+        }
+        async function excluirMecanico(id) {
+            if(confirm("Deseja realmente apagar este mecânico?")) {
+                try {
+                    await fetch(`/api/mecanicos/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + tokenVal } });
+                    carregarDados();
+                } catch(e) { alert("Erro ao apagar."); }
+            }
         }
 
         function atualizarDatalistsSugestoes() {
@@ -527,10 +585,24 @@
             const mId = document.getElementById('osMecanicoSelect').value; const mec = mecanicosCache.find(m => m.id == mId);
             if (mec) document.getElementById('osComissaoMecanico').value = mec.percentualComissao || 40;
         }
+
+        // CÁLCULO INTELIGENTE COM MARGEM MÍNIMA ANTIJUÍZO
         function calcularVendaMargemNovaOS() {
-            const c = parseFloat(document.getElementById('novaOsItemCusto').value) || 0; const m = parseFloat(document.getElementById('novaOsItemMargem').value) || 0;
-            if (c > 0) document.getElementById('novaOsItemValor').value = (c * (1 + (m / 100))).toFixed(2);
+            const c = parseFloat(document.getElementById('novaOsItemCusto').value) || 0; 
+            let m = parseFloat(document.getElementById('novaOsItemMargem').value) || 0;
+            
+            // Garante que a margem nunca fique abaixo da configurada para cobrir taxa de cartão e gerar lucro
+            const margemMin = configOficina.margemMinima || 40;
+            if(m < margemMin) {
+                m = margemMin;
+                document.getElementById('novaOsItemMargem').value = m;
+            }
+
+            if (c > 0) {
+                document.getElementById('novaOsItemValor').value = (c * (1 + (m / 100))).toFixed(2);
+            }
         }
+
         function adicionarServicoNaOS() {
             const mId = document.getElementById('osMecanicoSelect').value; const val = parseFloat(document.getElementById('osValorServico').value);
             const mec = mecanicosCache.find(m => m.id == mId);
@@ -539,7 +611,7 @@
             document.getElementById('osValorServico').value = ''; renderItensNovaOS();
         }
         function adicionarItemNovaOS() {
-            const desc = document.getElementById('novaOsItemDesc').value; const val = parseFloat(document.getElementById('novaOsItemValor').value);
+            const desc = document.getElementById('novaOsItemDesc').value.trim(); const val = parseFloat(document.getElementById('novaOsItemValor').value);
             const cst = parseFloat(document.getElementById('novaOsItemCusto').value) || (val*0.6); const qtd = parseInt(document.getElementById('novaOsItemQtd').value) || 1;
             if (!desc || isNaN(val)) return alert("Preencha descrição e valor da peça.");
             itensNovaOSCache.push({ descricao: desc, valorUnitario: val, valorCusto: cst, quantidade: qtd, tipo: 'PECA' });
@@ -555,7 +627,6 @@
             document.getElementById('txtTotalNovaOS').innerText = `Total Geral: R$ ${t.toFixed(2)}`;
         }
 
-        // CORREÇÃO DA EDIÇÃO E CRIAÇÃO DE OS
         document.getElementById('formOS').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnGerarOS'); btn.disabled = true; btn.innerText = "PROCESSANDO..."; btn.classList.add('opacity-50');
@@ -569,23 +640,11 @@
 
             try {
                 if (osEditandoId) {
-                    // Atualiza dados gerais da OS
                     await fetch(`${API}/${osEditandoId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenVal }, body: JSON.stringify(payload) });
+                    for(const it of itensNovaOSCache) await fetch(`${API}/${osEditandoId}/itens`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenVal }, body: JSON.stringify(it) });
                     
-                    // Como limpamos a OS para reescrever, cadastramos os novos itens atualizados
-                    for(const it of itensNovaOSCache) {
-                        await fetch(`${API}/${osEditandoId}/itens`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenVal }, body: JSON.stringify(it) });
-                    }
-
-                    document.getElementById('msgSucessoOS').innerText = "OS Atualizada com Sucesso!";
-                    document.getElementById('subMsgSucessoOS').innerText = "As alterações e novos itens foram gravados.";
+                    document.getElementById('msgSucessoOS').innerText = "OS Atualizada!";
                     document.getElementById('btnPosVisualizar').onclick = () => abrirPreviewVisualizacao(osEditandoId);
-                    document.getElementById('btnPosWpp').onclick = () => {
-                        const urlDominio = window.location.origin;
-                        const linkRastreio = `${urlDominio}/rastreio.html?placa=${payload.moto.placa}`;
-                        const txtWpp = `Olá, ${payload.cliente.nome}! Sua Ordem de Serviço foi atualizada na ${configOficina.nome}. Acompanhe pelo link: ${linkRastreio}`;
-                        window.open(`https://wa.me/55${payload.cliente.telefoneWhatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(txtWpp)}`, '_blank');
-                    };
                 } else {
                     const res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenVal }, body: JSON.stringify(payload) });
                     if(res.ok) {
@@ -595,12 +654,10 @@
                         for(const it of itensNovaOSCache) await fetch(`${API}/${osS.id}/itens`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenVal }, body: JSON.stringify(it) });
                         
                         document.getElementById('msgSucessoOS').innerText = "OS Gerada com Sucesso!";
-                        document.getElementById('subMsgSucessoOS').innerText = "O veículo foi adicionado ao Pátio Digital.";
                         document.getElementById('btnPosVisualizar').onclick = () => abrirPreviewVisualizacao(osS.id);
                         document.getElementById('btnPosWpp').onclick = () => {
-                            const urlDominio = window.location.origin;
-                            const linkRastreio = `${urlDominio}/rastreio.html?placa=${payload.moto.placa}`;
-                            const txtWpp = `Olá, ${payload.cliente.nome}! Sua Ordem de Serviço *#${osS.codigoRastreio}* foi gerada na ${configOficina.nome}. Acompanhe o andamento da moto pelo link: ${linkRastreio}`;
+                            const linkRastreio = `${window.location.origin}/rastreio.html?placa=${payload.moto.placa}`;
+                            const txtWpp = `Olá, ${payload.cliente.nome}! Sua OS *#${osS.codigoRastreio}* foi gerada na ${configOficina.nome}. Acompanhe o andamento da moto em tempo real pelo link: ${linkRastreio}`;
                             window.open(`https://wa.me/55${payload.cliente.telefoneWhatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(txtWpp)}`, '_blank');
                         };
                     }
@@ -619,7 +676,7 @@
             document.getElementById('tituloAbaOS').innerText = "Módulo de OS";
         }
 
-        // KANBAN COM BOTÃO DE WPP DINÂMICO E LINK DE RASTREIO
+        // KANBAN
         function renderizarKanban() {
             const cont = document.getElementById('secaoKanban'); if(!cont) return; cont.innerHTML = '';
             const fPlaca = (document.getElementById('filtroKanbanPlaca')?.value||'').toUpperCase();
@@ -636,21 +693,19 @@
             const d = document.createElement('div'); d.draggable = true; d.ondragstart = e => e.dataTransfer.setData('text', o.id);
             d.className = "bg-[#1a1c23] border border-[#2d333f] rounded-lg p-3 shadow-md";
             const tel = o.cliente ? o.cliente.telefoneWhatsapp.replace(/\D/g,'') : '';
-            const placaMoto = o.moto ? o.moto.placa : '';
-            const urlDominio = window.location.origin;
-            const linkRastreio = `${urlDominio}/rastreio.html?placa=${placaMoto}`;
-            const msgWpp = encodeURIComponent(`Olá, ${o.cliente?.nome || 'Cliente'}! Passando para atualizar sobre a sua moto (${o.moto?.modelo || ''}). Acompanhe o andamento por aqui: ${linkRastreio}`);
+            const linkRastreio = `${window.location.origin}/rastreio.html?placa=${o.moto?.placa||''}`;
+            const msgWpp = encodeURIComponent(`Olá, ${o.cliente?.nome || 'Cliente'}! Atualização sobre sua moto (${o.moto?.modelo||''}). Acompanhe aqui: ${linkRastreio}`);
 
             let extraButtons = colId === 'PRONTA' ? `<button onclick="abrirModalRecebimento(${o.id})" class="bg-green-600 hover:bg-green-700 text-[9px] text-white px-2 py-1.5 rounded font-bold transition w-full mt-1 shadow-md">💲 RECEBER</button>` : '';
 
             d.innerHTML = `
-                <div class="mb-2"><h4 class="text-xs font-bold text-white uppercase">${o.moto?o.moto.modelo:''} - <span class="text-amber-400">${placaMoto}</span></h4></div>
+                <div class="mb-2"><h4 class="text-xs font-bold text-white uppercase">${o.moto?o.moto.modelo:''} - <span class="text-amber-400">${o.moto?o.moto.placa:''}</span></h4></div>
                 <div class="bg-[#121418] p-1.5 text-center text-[10px] font-bold mb-2 uppercase text-slate-400 border border-[#2d333f] rounded">⚙ ${o.status.replace('_',' ')}</div>
                 <div class="flex flex-wrap gap-1 mt-3">
-                    <button onclick="abrirPreviewVisualizacao(${o.id})" class="bg-[#3b82f6] hover:bg-[#2563eb] text-[9px] text-white px-2 py-1.5 rounded font-bold">DOC</button>
-                    <button onclick="window.open('https://wa.me/55${tel}?text=${msgWpp}','_blank')" class="bg-[#22c55e] hover:bg-[#16a34a] text-[9px] text-white px-2 py-1.5 rounded font-bold">WPP</button>
-                    <button onclick="editarOSPreencher(${o.id})" class="bg-amber-500 hover:bg-amber-600 text-[9px] text-slate-900 px-2 py-1.5 rounded font-bold">EDIT</button>
-                    <button onclick="excluirOS(${o.id})" class="bg-red-600 hover:bg-red-700 text-[9px] text-white px-2 py-1.5 rounded font-bold">DEL</button>
+                    <button onclick="abrirPreviewVisualizacao(${o.id})" class="bg-[#3b82f6] text-[9px] text-white px-2 py-1.5 rounded font-bold">DOC</button>
+                    <button onclick="window.open('https://wa.me/55${tel}?text=${msgWpp}','_blank')" class="bg-[#22c55e] text-[9px] text-white px-2 py-1.5 rounded font-bold">WPP</button>
+                    <button onclick="editarOSPreencher(${o.id})" class="bg-amber-500 text-[9px] text-slate-900 px-2 py-1.5 rounded font-bold">EDIT</button>
+                    <button onclick="excluirOS(${o.id})" class="bg-red-600 text-[9px] text-white px-2 py-1.5 rounded font-bold">DEL</button>
                 </div>
                 ${extraButtons}`;
             return d;
@@ -677,11 +732,13 @@
             const totalPago = Math.max((o.valorTotal || 0) - desc, 0);
 
             o.pagamentoFinal = { desconto: desc, formaPagamento: forma, valorRecebido: totalPago };
-            try { await fetch(`${API}/${o.id}/status?novoStatus=FINALIZADA`, { method:'PATCH', headers:{'Authorization':'Bearer '+tokenVal}}); } catch(e){}
+            try { 
+                await fetch(`${API}/${o.id}/status?novoStatus=FINALIZADA`, { method:'PATCH', headers:{'Authorization':'Bearer '+tokenVal}}); 
+            } catch(e){}
             
             document.getElementById('modalReceberPagamento').classList.add('hidden');
-            alert(`Pagamento de R$ ${totalPago.toFixed(2)} registrado!`);
-            renderizarKanban(); renderFinanceiro(); renderRelatorioPecas();
+            alert(`Pagamento registrado com sucesso! Lançado no DRE e Relatório de Peças.`);
+            carregarDados();
         }
 
         function editarOSPreencher(id) {
@@ -696,8 +753,7 @@
         }
         async function excluirOS(id) { if(confirm('Deseja excluir esta OS?')) { await fetch(`${API}/${id}`,{method:'DELETE',headers:{'Authorization':'Bearer '+tokenVal}}); carregarDados(); } }
 
-
-        // DOCUMENTO DE OS
+        // DOCUMENTO DE OS COM LOGO E QR CODE DO WHATSAPP DA LOJA
         function construirDocumentoOSHtml(o) {
             let servHtml = '', pecHtml = ''; let totalServ = 0, totalPec = 0;
             if(o.itens) {
@@ -708,47 +764,52 @@
                 });
             }
             
-            let condicaoPgtoHtml = o.observacoes && o.observacoes.includes('Condição de Pgto:') ? `<div style="padding: 10px; background: #eef2ff; border-left: 4px solid #4f46e5; font-size: 12px; margin-bottom: 15px;"><strong>Previsão / Forma de Pagamento:</strong> ${o.observacoes.replace('Condição de Pgto: ', '')}</div>` : '';
-            let fechamentoFinalHtml = o.pagamentoFinal ? `<div style="border-top: 2px dashed #222; margin-top: 15px; padding-top: 10px; text-align: right; font-size: 13px;"><div>Desconto: <strong>- R$ ${o.pagamentoFinal.desconto.toFixed(2)}</strong></div><div style="font-size: 16px; margin-top: 5px; color: #16a34a;"><strong>TOTAL PAGO (${o.pagamentoFinal.formaPagamento}): R$ ${o.pagamentoFinal.valorRecebido.toFixed(2)}</strong></div></div>` : '';
+            let logoHtml = configOficina.logoUrl ? `<img src="${configOficina.logoUrl}" style="max-height: 60px; max-width: 120px; object-fit: contain;" />` : `<div style="width: 70px; height: 70px; background: #111; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; border-radius: 6px; font-size: 9px;">MOTOFLOW</div>`;
+            let condicaoPgtoHtml = o.observacoes && o.observacoes.includes('Condição de Pgto:') ? `<div style="padding: 8px; background: #eef2ff; border-left: 4px solid #4f46e5; font-size: 11px; margin-bottom: 10px;"><strong>Condição de Pagamento:</strong> ${o.observacoes.replace('Condição de Pgto: ', '')}</div>` : '';
+            let fechamentoFinalHtml = o.pagamentoFinal ? `<div style="border-top: 2px dashed #222; margin-top: 10px; padding-top: 8px; text-align: right; font-size: 12px;"><div>Desconto: <strong>- R$ ${o.pagamentoFinal.desconto.toFixed(2)}</strong></div><div style="font-size: 14px; margin-top: 3px; color: #16a34a;"><strong>TOTAL PAGO (${o.pagamentoFinal.formaPagamento}): R$ ${o.pagamentoFinal.valorRecebido.toFixed(2)}</strong></div></div>` : '';
 
             return `
-            <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #111; line-height: 1.4;">
-                <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #222; padding-bottom: 15px; margin-bottom: 20px;">
-                    <div style="width: 80px; height: 80px; background: #111; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; border-radius: 8px; text-align: center; font-size: 10px;">MOTOFLOW</div>
-                    <div style="text-align: center; flex-grow: 1; padding-top: 5px;">
-                        <h1 style="margin: 0 0 5px 0; font-size: 16px; font-weight: 900; text-transform: uppercase;">${configOficina.nome}</h1>
-                        <div style="font-size:11px;">CNPJ: ${configOficina.cnpj} | ${configOficina.endereco}</div>
+            <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #111; line-height: 1.3;">
+                <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #222; padding-bottom: 12px; margin-bottom: 15px; align-items: center;">
+                    <div>${logoHtml}</div>
+                    <div style="text-align: center; flex-grow: 1;">
+                        <h1 style="margin: 0 0 3px 0; font-size: 15px; font-weight: 900; text-transform: uppercase;">${configOficina.nome}</h1>
+                        <div style="font-size:10px;">CNPJ: ${configOficina.cnpj} | ${configOficina.endereco}</div>
                     </div>
-                    <div style="text-align: right; font-size: 11px; padding-top: 5px;">
+                    <div style="text-align: right; font-size: 10px;">
                         <div><strong>DATA:</strong> ${new Date(o.dataEntrada).toLocaleDateString()}</div>
                         <div><strong>OS Nº:</strong> ${o.codigoRastreio}</div>
                         <div>Tel: ${configOficina.telefone}</div>
                     </div>
                 </div>
 
-                <div style="font-weight:900; margin-bottom: 10px; font-size: 13px; text-transform: uppercase;">DADOS DO CLIENTE E VEÍCULO</div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size:12px;">
+                <div style="font-weight:900; margin-bottom: 6px; font-size: 12px; text-transform: uppercase;">DADOS DO CLIENTE E VEÍCULO</div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px; font-size:11px;">
                     <div style="width: 50%;"><strong>CLIENTE:</strong> ${o.cliente?o.cliente.nome.toUpperCase():''}</div>
                     <div style="width: 50%; text-align: right;"><strong>CONTATO:</strong> ${o.cliente?o.cliente.telefoneWhatsapp:''}</div>
                 </div>
-                <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size:12px;">
+                <div style="display: flex; justify-content: space-between; font-size:11px; margin-bottom: 12px;">
                     <div style="width: 50%;"><strong>VEÍCULO:</strong> ${o.moto?o.moto.modelo.toUpperCase():''}</div>
                     <div style="width: 50%; text-align: right;"><strong>PLACA:</strong> ${o.moto?o.moto.placa.toUpperCase():''}</div>
                 </div>
 
-                ${servHtml ? `<div style="background: #f4f4f5; font-weight: bold; padding: 8px; margin: 20px 0 10px 0; font-size: 12px; border-left: 4px solid #222;">SERVIÇOS EXECUTADOS</div><table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;"><thead><tr><th style="border-bottom: 2px solid #222; padding: 8px 6px; text-align: left; font-size: 11px;">Descrição</th><th style="border-bottom: 2px solid #222; padding: 8px 6px; text-align:center; font-size: 11px;">Qtd</th><th style="border-bottom: 2px solid #222; padding: 8px 6px; text-align:center; font-size: 11px;">Un</th><th style="border-bottom: 2px solid #222; padding: 8px 6px; text-align:right; font-size: 11px;">V. Unitário</th><th style="border-bottom: 2px solid #222; padding: 8px 6px; text-align:right; font-size: 11px;">V. Total</th></tr></thead><tbody>${servHtml}</tbody></table><div style="display: flex; justify-content: flex-end; gap: 40px; font-size: 12px; padding-top: 8px;"><span>Total Serviços:</span><strong>R$ ${totalServ.toFixed(2)}</strong></div>` : ''}
+                ${servHtml ? `<div style="background: #f4f4f5; font-weight: bold; padding: 6px; margin: 10px 0 6px 0; font-size: 11px; border-left: 3px solid #222;">SERVIÇOS EXECUTADOS</div><table style="width: 100%; border-collapse: collapse; margin-bottom: 6px;"><thead><tr><th style="border-bottom: 2px solid #222; padding: 6px; text-align: left; font-size: 10px;">Descrição</th><th style="border-bottom: 2px solid #222; padding: 6px; text-align:center; font-size: 10px;">Qtd</th><th style="border-bottom: 2px solid #222; padding: 6px; text-align:center; font-size: 10px;">Un</th><th style="border-bottom: 2px solid #222; padding: 6px; text-align:right; font-size: 10px;">V. Unit.</th><th style="border-bottom: 2px solid #222; padding: 6px; text-align:right; font-size: 10px;">Total</th></tr></thead><tbody>${servHtml}</tbody></table><div style="display: flex; justify-content: flex-end; gap: 30px; font-size: 11px;"><span>Total Serviços:</span><strong>R$ ${totalServ.toFixed(2)}</strong></div>` : ''}
 
-                ${pecHtml ? `<div style="background: #f4f4f5; font-weight: bold; padding: 8px; margin: 20px 0 10px 0; font-size: 12px; border-left: 4px solid #222;">PEÇAS APLICADAS</div><table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;"><thead><tr><th style="border-bottom: 2px solid #222; padding: 8px 6px; text-align: left; font-size: 11px;">Descrição</th><th style="border-bottom: 2px solid #222; padding: 8px 6px; text-align:center; font-size: 11px;">Qtd</th><th style="border-bottom: 2px solid #222; padding: 8px 6px; text-align:center; font-size: 11px;">Un</th><th style="border-bottom: 2px solid #222; padding: 8px 6px; text-align:right; font-size: 11px;">V. Unitário</th><th style="border-bottom: 2px solid #222; padding: 8px 6px; text-align:right; font-size: 11px;">V. Total</th></tr></thead><tbody>${pecHtml}</tbody></table><div style="display: flex; justify-content: flex-end; gap: 40px; font-size: 12px; padding-top: 8px;"><span>Total Peças:</span><strong>R$ ${totalPec.toFixed(2)}</strong></div>` : ''}
+                ${pecHtml ? `<div style="background: #f4f4f5; font-weight: bold; padding: 6px; margin: 10px 0 6px 0; font-size: 11px; border-left: 3px solid #222;">PEÇAS APLICADAS</div><table style="width: 100%; border-collapse: collapse; margin-bottom: 6px;"><thead><tr><th style="border-bottom: 2px solid #222; padding: 6px; text-align: left; font-size: 10px;">Descrição</th><th style="border-bottom: 2px solid #222; padding: 6px; text-align:center; font-size: 10px;">Qtd</th><th style="border-bottom: 2px solid #222; padding: 6px; text-align:center; font-size: 10px;">Un</th><th style="border-bottom: 2px solid #222; padding: 6px; text-align:right; font-size: 10px;">V. Unit.</th><th style="border-bottom: 2px solid #222; padding: 6px; text-align:right; font-size: 10px;">Total</th></tr></thead><tbody>${pecHtml}</tbody></table><div style="display: flex; justify-content: flex-end; gap: 30px; font-size: 11px;"><span>Total Peças:</span><strong>R$ ${totalPec.toFixed(2)}</strong></div>` : ''}
                 
-                <div style="border-top: 2px solid #222; margin-top: 15px; padding-top: 15px; margin-bottom: 15px;">
-                    <div style="display: flex; justify-content: flex-end; gap: 40px; font-size: 16px;"><span><strong>TOTAL DA OS:</strong></span><strong>R$ ${(o.valorTotal||0).toFixed(2)}</strong></div>
+                <div style="border-top: 2px solid #222; margin-top: 10px; padding-top: 10px;">
+                    <div style="display: flex; justify-content: flex-end; gap: 30px; font-size: 15px;"><span><strong>TOTAL DA OS:</strong></span><strong>R$ ${(o.valorTotal||0).toFixed(2)}</strong></div>
                 </div>
 
                 ${condicaoPgtoHtml}
                 ${fechamentoFinalHtml}
 
-                <div style="background: #f4f4f5; font-weight: bold; padding: 8px; margin: 20px 0 10px 0; font-size: 12px; border-left: 4px solid #222;">GARANTIA</div>
-                <div style="padding: 10px; border: 1px dashed #999; font-size: 11px; background: #fafafa;">Garantia Legal de 90 dias válida a partir da data de entrega do veículo.</div>
+                <div style="margin-top: 15px; border-top: 1px dashed #666; padding-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-size: 10px; max-width: 400px;">
+                        <strong>Garantia Legal de 90 dias</strong> válida para serviços executados. Não cobre mau uso. Escaneie o QR Code ao lado para falar diretamente com a nossa loja no WhatsApp!
+                    </div>
+                    <div id="qrCodeWppPrint" style="width: 75px; height: 75px;"></div>
+                </div>
             </div>`;
         }
 
@@ -758,76 +819,32 @@
             document.getElementById('previewOsId').innerText = "#" + o.codigoRastreio;
             document.getElementById('previewOsContent').innerHTML = construirDocumentoOSHtml(o);
             document.getElementById('modalVisualizarOS').classList.remove('hidden');
+
+            // Gera o QR Code do WhatsApp oficial no rodapé do documento impresso
+            setTimeout(() => {
+                const el = document.getElementById('qrCodeWppPrint');
+                if(el) {
+                    el.innerHTML = '';
+                    const telLimpo = (configOficina.telefone || '85999999999').replace(/\D/g,'');
+                    new QRCode(el, { text: `https://wa.me/55${telLimpo}`, width: 75, height: 75 });
+                }
+            }, 100);
         }
 
         function imprimirPreviewA4() {
             if(!osVisualizandoAtualmente) return;
             const win = window.open('','_blank');
-            win.document.write(`<html><body style="padding:20px; max-width:800px; margin:0 auto; border: 1px solid #ccc;">${construirDocumentoOSHtml(osVisualizandoAtualmente)}<div style="display:flex;justify-content:space-between;margin-top:80px;text-align:center;"><div style="width:45%;border-top:1px solid #000;padding-top:5px;font-size:10px;font-weight:bold;">${configOficina.nome}</div><div style="width:45%;border-top:1px solid #000;padding-top:5px;font-size:10px;font-weight:bold;">CLIENTE</div></div><script>window.onload=()=>window.print();<\/script></body></html>`);
+            win.document.write(`<html><body style="padding:20px; max-width:800px; margin:0 auto;">${construirDocumentoOSHtml(osVisualizandoAtualmente)}<div style="display:flex;justify-content:space-between;margin-top:50px;text-align:center;"><div style="width:45%;border-top:1px solid #000;padding-top:4px;font-size:10px;font-weight:bold;">${configOficina.nome}</div><div style="width:45%;border-top:1px solid #000;padding-top:4px;font-size:10px;font-weight:bold;">CLIENTE</div></div><script>setTimeout(()=>{window.print();},300);<\/script></body></html>`);
             win.document.close();
         }
 
         function imprimirPreviewCupom() {
             if(!osVisualizandoAtualmente) return;
             const o = osVisualizandoAtualmente;
-            let it = ''; 
-            if(o.itens) o.itens.forEach(i => { it += `<div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>${i.quantidade}x ${i.descricao}</span><span>R$ ${(i.quantidade*i.valorUnitario).toFixed(2)}</span></div>`; });
-            let cond = o.observacoes && o.observacoes.includes('Condição de Pgto:') ? `<div style="margin-top:5px; border-top:1px dashed #000; padding-top:5px;"><strong>Pgto:</strong> ${o.observacoes.replace('Condição de Pgto: ', '')}</div>` : '';
-            let final = `<div style="border-top:1px dashed #000; margin:10px 0; padding-top:10px; text-align:right; font-size:14px;"><strong>TOTAL: R$ ${(o.valorTotal||0).toFixed(2)}</strong></div>`;
-
+            let it = ''; if(o.itens) o.itens.forEach(i => { it += `<div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>${i.quantidade}x ${i.descricao}</span><span>R$ ${(i.quantidade*i.valorUnitario).toFixed(2)}</span></div>`; });
             const win = window.open('','_blank', 'width=350,height=600');
-            win.document.write(`<html><body style="font-family:monospace; font-size:12px; width:300px; margin:0; padding:10px; color:#000;"><div style="text-align:center; font-weight:bold; font-size:16px; margin-bottom:5px;">${configOficina.nome}</div><div style="text-align:center; margin-bottom:10px; border-bottom:1px dashed #000; padding-bottom:10px;">CNPJ: ${configOficina.cnpj}<br>${configOficina.endereco}</div><div><strong>OS: #${o.codigoRastreio}</strong></div><div>Cliente: ${o.cliente?o.cliente.nome:''}</div><div>Placa: ${o.moto?o.moto.placa:''}</div><div style="border-top:1px dashed #000; margin:10px 0; padding-top:10px;"><strong>ITENS</strong></div>${it}${final}${cond}<div style="text-align:center; margin-top:20px; font-size:10px;">Garantia de 90 dias.</div><script>window.onload=()=>window.print();<\/script></body></html>`);
+            win.document.write(`<html><body style="font-family:monospace; font-size:11px; width:300px; margin:0; padding:10px; color:#000;"><div style="text-align:center; font-weight:bold; font-size:14px;">${configOficina.nome}</div><div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:8px; margin-bottom:8px;">Tel: ${configOficina.telefone}</div><div><strong>OS: #${o.codigoRastreio}</strong></div><div>Cliente: ${o.cliente?.nome}</div><div>Placa: ${o.moto?.placa}</div><div style="border-top:1px dashed #000; margin:8px 0; padding-top:8px;"><strong>ITENS</strong></div>${it}<div style="border-top:1px dashed #000; margin-top:8px; padding-top:8px; text-align:right; font-size:13px;"><strong>TOTAL: R$ ${(o.valorTotal||0).toFixed(2)}</strong></div><script>setTimeout(()=>{window.print();},300);<\/script></body></html>`);
             win.document.close();
-        }
-
-        // QR CODE BALCÃO INTELIGENTE
-        function gerarQRCodeBalcao() {
-            const tipo = document.getElementById('tipoQrCodeSelect').value;
-            const val = document.getElementById('inputValorQr').value.trim();
-            const cont = document.getElementById('containerQRCodeBalcao');
-            if(!cont) return;
-            cont.innerHTML = '';
-            
-            let linkFinal = val;
-            const urlDominio = window.location.origin;
-
-            if (tipo === 'rastreio') {
-                linkFinal = `${urlDominio}/rastreio.html?placa=${encodeURIComponent(val)}`;
-            } else if (tipo === 'whatsapp') {
-                const telLimpo = val.replace(/\D/g, '');
-                linkFinal = `https://wa.me/55${telLimpo}?text=Olá,%20vim%20pelo%20QR%20Code%20da%20oficina%20e%20gostaria%20de%20atendimento.`;
-            } else if (tipo === 'pix') {
-                // Formato padrão de payload Pix se necessário ou texto livre
-                linkFinal = val; 
-            }
-
-            new QRCode(cont, { text: linkFinal || urlDominio, width: 220, height: 220, colorDark : "#000000", colorLight : "#ffffff" });
-        }
-
-        function mudarTipoQrCode() {
-            const tipo = document.getElementById('tipoQrCodeSelect').value;
-            const lbl = document.getElementById('labelCampoDinamico');
-            const inp = document.getElementById('inputValorQr');
-            const info = document.getElementById('infoTextoQr');
-            const tituloCard = document.getElementById('tituloQrCard');
-
-            if (tipo === 'rastreio') {
-                lbl.innerText = "Placa do Veículo (Exemplo p/ teste):";
-                inp.value = "ABC1D23";
-                info.innerText = "Gera um QR Code direcionado para o rastreio da placa informada.";
-                tituloCard.innerText = "ACOMPANHE SUA MOTO";
-            } else if (tipo === 'whatsapp') {
-                lbl.innerText = "Número do WhatsApp (Com DDD):";
-                inp.value = configOficina.telefone;
-                info.innerText = "Gera um QR Code direto para o chat do WhatsApp da oficina.";
-                tituloCard.innerText = "FALE CONOSCO NO ZAP";
-            } else if (tipo === 'pix') {
-                lbl.innerText = "Chave Pix (CNPJ, Celular ou E-mail):";
-                inp.value = configOficina.cnpj;
-                info.innerText = "Gera um QR Code com sua chave Pix para pagamento rápido no balcão.";
-                tituloCard.innerText = "PAGUE COM PIX";
-            }
-            gerarQRCodeBalcao();
         }
 
         // CLIENTES
@@ -846,10 +863,8 @@
         }
 
         document.getElementById('formAddEditCliente').addEventListener('submit', (e) => {
-            e.preventDefault(); 
-            alert("Cliente salvo com sucesso!");
-            document.getElementById('modalAddEditCliente').classList.add('hidden'); 
-            renderTabelaCli();
+            e.preventDefault(); alert("Cliente salvo com sucesso!");
+            document.getElementById('modalAddEditCliente').classList.add('hidden'); renderTabelaCli();
         });
 
         function renderTabelaCli() {
@@ -874,7 +889,6 @@
             document.getElementById('histCliNome').innerText = `Histórico: ${osC[0].cliente.nome}`;
             const tb = document.getElementById('histCliTabelaCorpo'); tb.innerHTML='';
             const hoje = new Date();
-
             osC.forEach(o => {
                 const dataE = new Date(o.dataEntrada); const venc = new Date(dataE); venc.setDate(venc.getDate() + 90);
                 const diasRestantes = Math.ceil((venc - hoje) / (1000 * 60 * 60 * 24));
@@ -924,7 +938,7 @@
             const tbHTML = document.getElementById('tabelaControleMOCorpo').innerHTML;
             const tMo = document.getElementById('moTotalSoma').innerText; const cMo = document.getElementById('moComissaoSoma').innerText; const lMo = document.getElementById('moLucroSoma').innerText;
             const win = window.open('','_blank');
-            win.document.write(`<html><head><title>Relatório M.O</title><style>body{font-family:Arial;padding:30px;color:#000;} table{width:100%;border-collapse:collapse;margin-top:20px;} th,td{border:1px solid #ccc;padding:10px;} th{background:#f4f4f4;}</style></head><body><h2>RELATÓRIO MÃO DE OBRA - ${configOficina.nome}</h2><table><thead><tr><th>MECÂNICO</th><th>MOTO</th><th>TOTAL</th><th>COMISSÃO</th></tr></thead><tbody>${tbHTML.replace(/text-white|text-emerald-400|text-amber-400|font-bold|p-2|py-3/g, '')}</tbody></table><script>window.onload=()=>window.print();<\/script></body></html>`);
+            win.document.write(`<html><head><title>Relatório M.O</title><style>body{font-family:Arial;padding:30px;color:#000;} table{width:100%;border-collapse:collapse;margin-top:20px;} th,td{border:1px solid #ccc;padding:10px;} th{background:#f4f4f4;}</style></head><body><h2>RELATÓRIO MÃO DE OBRA - ${configOficina.nome}</h2><table><thead><tr><th>MECÂNICO</th><th>MOTO</th><th>TOTAL</th><th>COMISSÃO</th></tr></thead><tbody>${tbHTML.replace(/text-white|text-emerald-400|text-amber-400|font-bold|p-2|py-3/g, '')}</tbody></table><script>setTimeout(()=>{window.print();},300);<\/script></body></html>`);
             win.document.close();
         }
 
@@ -964,14 +978,13 @@
         function exportarPecasExcel() { const ws=XLSX.utils.json_to_sheet(ordensCache.map(o=>({OS:o.codigoRastreio}))); const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,"Pecas"); XLSX.writeFile(wb,"Pecas.xlsx"); }
 
         function navegarPara(a) {
-            ['os','kanban','agenda','clientes','qrcode','config','financeiro','pecas','backup'].forEach(n => {
+            ['os','kanban','agenda','clientes','config','financeiro','pecas','backup'].forEach(n => {
                 const e=document.getElementById(`aba-${n}`), b=document.getElementById(`nav-${n}`);
                 if(e) e.classList.add('hidden'); if(b) b.classList.remove('tab-active');
             });
             const al=document.getElementById(`aba-${a}`), ba=document.getElementById(`nav-${a}`);
             if(al) al.classList.remove('hidden'); if(ba) ba.classList.add('tab-active');
             if(a==='kanban') renderizarKanban();
-            if(a==='qrcode') gerarQRCodeBalcao();
         }
 
         window.onload = () => { configurarDatasAutomaticas(); carregarDados(); navegarPara('os'); };
