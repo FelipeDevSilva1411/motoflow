@@ -740,6 +740,32 @@
             win.document.close();
         }
 
+        // AGENDA
+        document.getElementById('formAgendamento').addEventListener('submit', async e=>{
+            e.preventDefault(); const p={clienteNome:document.getElementById('agNome').value, telefoneWhatsapp:document.getElementById('agTel').value, motoModelo:document.getElementById('agMoto').value, dataHora:document.getElementById('agDataHora').value};
+            await fetch('/api/agendamentos',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tokenVal},body:JSON.stringify(p)});
+            document.getElementById('formAgendamento').reset(); carregarDados();
+        });
+        
+        function renderAgenda() {
+            const tb=document.getElementById('tabelaAgendaCorpo'); if(!tb) return; tb.innerHTML='';
+            agendaCache.forEach(a => tb.innerHTML+=`<tr><td class="p-3">${new Date(a.dataHora).toLocaleString()}</td><td class="p-3 font-bold uppercase">${a.clienteNome}</td><td class="p-3 uppercase">${a.motoModelo}</td><td class="p-3 text-right"><button onclick="fetch('/api/agendamentos/${a.id}',{method:'DELETE',headers:{'Authorization':'Bearer '+tokenVal}}).then(()=>carregarDados())" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs transition">X</button></td></tr>`);
+        }
+
+        // PEÇAS
+        function renderRelatorioPecas() {
+            const di=document.getElementById('pecasDataInicio')?.value, df=document.getElementById('pecasDataFim')?.value, tb=document.getElementById('tabelaPecasCorpo');
+            if(!di||!df||!tb) return; tb.innerHTML=''; let ct=0, vt=0;
+            ordensCache.filter(o=>{const d=(o.dataEntrada||'').split('T')[0]; return d>=di&&d<=df;}).forEach(o=>{
+                if(o.itens) o.itens.filter(i=>i.tipo==='PECA').forEach(p=>{
+                    const c=p.quantidade*(p.valorCusto||p.valorUnitario*0.6), v=p.quantidade*p.valorUnitario; ct+=c; vt+=v;
+                    const cInfo = `${o.cliente?o.cliente.nome.split(' ')[0]:''} - ${o.moto?o.moto.placa:''}`;
+                    tb.innerHTML+=`<tr><td class="p-3">${new Date(o.dataEntrada).toLocaleDateString()}</td><td class="p-3 uppercase text-amber-400 font-bold">${cInfo}</td><td class="p-3 uppercase text-white">${p.quantidade}x ${p.descricao}</td><td class="p-3 text-right">R$ ${c.toFixed(2)}</td><td class="p-3 text-right text-blue-400">R$ ${v.toFixed(2)}</td><td class="p-3 text-right text-green-400 font-bold">R$ ${(v-c).toFixed(2)}</td></tr>`;
+                });
+            });
+            if(document.getElementById('cardPecasCusto')){ document.getElementById('cardPecasCusto').innerText=`R$ ${ct.toFixed(2)}`; document.getElementById('cardPecasVenda').innerText=`R$ ${vt.toFixed(2)}`; document.getElementById('cardPecasLucro').innerText=`R$ ${(vt-ct).toFixed(2)}`; }
+        }
+
         // OUTROS (Peças, Backup) MANTIDOS
         function renderRelatorioPecas() { /* ... código mantido, abreviado por espaço, já estava funcional ... */ }
         function atualizarQRCodeManual() { const u = document.getElementById('inputUrlRastreio').value; const cont = document.getElementById('containerQRCode'); if(cont) { cont.innerHTML=''; new QRCode(cont, {text:u||window.location.origin, width:240, height:240}); } }
