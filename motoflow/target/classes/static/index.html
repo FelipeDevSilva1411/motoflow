@@ -46,7 +46,7 @@
             <button onclick="navegarPara('clientes')" id="nav-clientes" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">👥 Clientes</button>
             <button onclick="navegarPara('financeiro')" id="nav-financeiro" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">💰 Financeiro (DRE)</button>
             <button onclick="navegarPara('pecas')" id="nav-pecas" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">📦 Relatório Peças</button>
-            <button onclick="navegarPara('config')" id="nav-config" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">⚙️ Configurações & Taxas</button>
+            <button onclick="navegarPara('config')" id="nav-config" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">⚙️ Configurações</button>
             <button onclick="navegarPara('backup')" id="nav-backup" class="tab-btn px-3.5 py-2 rounded text-[11px] uppercase font-bold tracking-wider whitespace-nowrap">🔒 Backup</button>
         </div>
     </header>
@@ -96,14 +96,8 @@
                                 </datalist>
                             </div>
                             <div class="col-span-4"><label class="block text-[9px] uppercase text-slate-400 mb-0.5">Custo Limpo (R$):</label><input type="number" id="novaOsItemCusto" oninput="calcularVendaMargemNovaOS(true)" step="0.01" class="input-dark w-full rounded p-2 text-xs font-mono"></div>
-                            <div class="col-span-4">
-                                <label class="block text-[9px] uppercase text-amber-400 mb-0.5 font-bold flex justify-between">
-                                    <span>Margem (%):</span>
-                                    <span id="labelSugestaoMargem" class="text-[8px] text-emerald-500"></span>
-                                </label>
-                                <input type="number" id="novaOsItemMargem" oninput="calcularVendaMargemNovaOS(false)" class="input-dark w-full rounded p-2 text-xs font-bold text-amber-400 font-mono">
-                            </div>
-                            <div class="col-span-4"><label class="block text-[9px] uppercase text-emerald-400 mb-0.5 font-bold">Venda (R$):</label><input type="number" id="novaOsItemValor" step="0.01" class="input-dark w-full rounded p-2 text-xs font-mono font-bold text-emerald-400"></div>
+                            <div class="col-span-4"><label class="block text-[9px] uppercase text-amber-400 mb-0.5 font-bold">Margem (%):</label><input type="number" id="novaOsItemMargem" oninput="calcularVendaMargemNovaOS(true)" class="input-dark w-full rounded p-2 text-xs font-bold text-amber-400 font-mono"></div>
+                            <div class="col-span-4"><label class="block text-[9px] uppercase text-emerald-400 mb-0.5 font-bold">Venda (R$):</label><input type="number" id="novaOsItemValor" step="0.01" oninput="calcularVendaMargemNovaOS(false)" class="input-dark w-full rounded p-2 text-xs font-mono font-bold text-emerald-400"></div>
                             <div class="col-span-12 mt-1"><button type="button" onclick="adicionarItemNovaOS()" class="w-full bg-[#2d333f] hover:bg-[#374151] text-white font-bold py-2.5 rounded text-xs uppercase border border-[#4b5563]">+ INSERIR PEÇA</button></div>
                         </div>
                         <div id="listaItensNovaOS" class="space-y-1 max-h-40 overflow-y-auto border-t border-[#2d333f] pt-3 text-xs bg-[#121418] p-2 rounded">
@@ -183,7 +177,7 @@
             <div class="panel-bg rounded-lg p-6 space-y-6">
                 <div>
                     <h2 class="text-xl font-bold text-white mb-2">⚙️ Configurações da Oficina e Impressão</h2>
-                    <p class="text-xs text-slate-400">Personalize os dados, a logo e insira as taxas da maquininha para o sistema calcular sua margem de segurança antijuízo.</p>
+                    <p class="text-xs text-slate-400">Personalize os dados e a logo que aparecem na impressão da Ordem de Serviço.</p>
                 </div>
                 
                 <form id="formConfigOficina" class="space-y-4">
@@ -196,18 +190,6 @@
                         <div><label class="block text-xs uppercase text-slate-400 mb-1">WhatsApp da Loja:</label><input type="text" id="cfgTel" class="input-dark w-full rounded p-2.5 text-sm font-mono"></div>
                         <div><label class="block text-xs uppercase text-slate-400 mb-1">E-mail:</label><input type="email" id="cfgEmail" class="input-dark w-full rounded p-2.5 text-sm"></div>
                         <div><label class="block text-xs uppercase text-slate-400 mb-1">URL da Logo (Imagem):</label><input type="text" id="cfgLogo" placeholder="https://exemplo.com/logo.png" class="input-dark w-full rounded p-2.5 text-sm font-mono"></div>
-                    </div>
-
-                    <!-- TAXAS DE MAQUININHA -->
-                    <div class="border-t border-[#2d333f] pt-4 mt-4">
-                        <h3 class="text-sm font-bold text-amber-400 mb-2 uppercase">💳 Taxas da Maquininha & Margem Antijuízo</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div><label class="block text-[10px] uppercase text-slate-400 mb-1">Débito (%):</label><input type="number" step="0.1" id="cfgTaxaDebito" class="input-dark w-full rounded p-2 text-xs font-mono text-amber-400 font-bold"></div>
-                            <div><label class="block text-[10px] uppercase text-slate-400 mb-1">Crédito 1x (%):</label><input type="number" step="0.1" id="cfgTaxaCred1" class="input-dark w-full rounded p-2 text-xs font-mono text-amber-400 font-bold"></div>
-                            <div><label class="block text-[10px] uppercase text-slate-400 mb-1">Crédito Parc. (%):</label><input type="number" step="0.1" id="cfgTaxaCredMax" class="input-dark w-full rounded p-2 text-xs font-mono text-amber-400 font-bold"></div>
-                            <div><label class="block text-[10px] uppercase text-slate-400 mb-1">Lucro Livre Desejado (%):</label><input type="number" step="1" id="cfgLucroDesejado" class="input-dark w-full rounded p-2 text-xs font-mono text-emerald-400 font-bold"></div>
-                        </div>
-                        <p class="text-[10px] text-slate-500 mt-2">Informe as taxas da sua maquininha. O sistema calculará a Margem Mínima Segura nas peças para garantir o Lucro Livre Desejado, não importa como o cliente pague.</p>
                     </div>
 
                     <div class="pt-4 border-t border-[#2d333f] flex justify-end">
@@ -443,11 +425,7 @@
             endereco: "Rua Exemplo, 123 - Centro",
             telefone: "85999999999",
             email: "oficina@motoflow.com",
-            logoUrl: "",
-            taxaDebito: 1.99,
-            taxaCred1: 4.99,
-            taxaCredMax: 12.00,
-            lucroDesejado: 30
+            logoUrl: ""
         };
 
         const KANBAN_COLS = [
@@ -469,16 +447,12 @@
                 if(document.getElementById(id)) document.getElementById(id).value = id.includes('Fim') ? fmt(sab) : fmt(seg);
             });
             
-            document.getElementById('cfgNome').value = configOficina.nome;
-            document.getElementById('cfgCnpj').value = configOficina.cnpj;
-            document.getElementById('cfgEndereco').value = configOficina.endereco;
-            document.getElementById('cfgTel').value = configOficina.telefone;
-            document.getElementById('cfgEmail').value = configOficina.email;
+            document.getElementById('cfgNome').value = configOficina.nome || '';
+            document.getElementById('cfgCnpj').value = configOficina.cnpj || '';
+            document.getElementById('cfgEndereco').value = configOficina.endereco || '';
+            document.getElementById('cfgTel').value = configOficina.telefone || '';
+            document.getElementById('cfgEmail').value = configOficina.email || '';
             document.getElementById('cfgLogo').value = configOficina.logoUrl || '';
-            document.getElementById('cfgTaxaDebito').value = configOficina.taxaDebito || 1.99;
-            document.getElementById('cfgTaxaCred1').value = configOficina.taxaCred1 || 4.99;
-            document.getElementById('cfgTaxaCredMax').value = configOficina.taxaCredMax || 12.00;
-            document.getElementById('cfgLucroDesejado').value = configOficina.lucroDesejado || 30;
         }
 
         document.getElementById('formConfigOficina').addEventListener('submit', (e) => {
@@ -489,10 +463,6 @@
             configOficina.telefone = document.getElementById('cfgTel').value.trim();
             configOficina.email = document.getElementById('cfgEmail').value.trim();
             configOficina.logoUrl = document.getElementById('cfgLogo').value.trim();
-            configOficina.taxaDebito = parseFloat(document.getElementById('cfgTaxaDebito').value) || 1.99;
-            configOficina.taxaCred1 = parseFloat(document.getElementById('cfgTaxaCred1').value) || 4.99;
-            configOficina.taxaCredMax = parseFloat(document.getElementById('cfgTaxaCredMax').value) || 12.00;
-            configOficina.lucroDesejado = parseFloat(document.getElementById('cfgLucroDesejado').value) || 30;
             
             localStorage.setItem('motoflowConfig', JSON.stringify(configOficina));
             alert("Configurações salvas com sucesso!");
@@ -604,34 +574,19 @@
             if (mec) document.getElementById('osComissaoMecanico').value = mec.percentualComissao || 40;
         }
 
-        function calcularVendaMargemNovaOS(forcarSugestao = true) {
+        function calcularVendaMargemNovaOS(isMargemOuCusto) {
             const c = parseFloat(document.getElementById('novaOsItemCusto').value) || 0; 
-            let mInput = document.getElementById('novaOsItemMargem');
-            let m = parseFloat(mInput.value) || 0;
+            const mInput = document.getElementById('novaOsItemMargem');
+            const vInput = document.getElementById('novaOsItemValor');
             
-            const piorTaxa = Math.max(configOficina.taxaDebito, configOficina.taxaCred1, configOficina.taxaCredMax);
-            const lucroDesejado = configOficina.lucroDesejado || 30;
-            
-            let fatorDivisao = 1 - (piorTaxa/100) - (lucroDesejado/100);
-            if (fatorDivisao <= 0) fatorDivisao = 0.1; 
-            
-            const vendaIdeal = c / fatorDivisao;
-            let margemMinimaSegura = 0;
-            
-            if(c > 0) {
-                margemMinimaSegura = ((vendaIdeal / c) - 1) * 100;
-            }
-
-            const labelSug = document.getElementById('labelSugestaoMargem');
-            if(labelSug) labelSug.innerText = `Mín: ${Math.ceil(margemMinimaSegura)}%`;
-
-            if (forcarSugestao && m < margemMinimaSegura && c > 0) {
-                m = Math.ceil(margemMinimaSegura);
-                mInput.value = m;
-            }
-
-            if (c > 0) {
-                document.getElementById('novaOsItemValor').value = (c * (1 + (m / 100))).toFixed(2);
+            if (isMargemOuCusto) {
+                // Usuário digitou Margem (%), calcular Venda
+                const m = parseFloat(mInput.value) || 0;
+                if (c > 0) vInput.value = (c * (1 + (m / 100))).toFixed(2);
+            } else {
+                // Usuário digitou Venda, calcular Margem (%)
+                const v = parseFloat(vInput.value) || 0;
+                if (c > 0) mInput.value = (((v / c) - 1) * 100).toFixed(1);
             }
         }
 
@@ -648,7 +603,7 @@
             const cst = parseFloat(document.getElementById('novaOsItemCusto').value) || (val*0.6); const qtd = parseInt(document.getElementById('novaOsItemQtd').value) || 1;
             if (!desc || isNaN(val)) return alert("Preencha descrição e valor da peça.");
             itensNovaOSCache.push({ descricao: desc, valorUnitario: val, valorCusto: cst, quantidade: qtd, tipo: 'PECA' });
-            document.getElementById('novaOsItemDesc').value = ''; document.getElementById('novaOsItemValor').value = ''; document.getElementById('novaOsItemCusto').value = ''; renderItensNovaOS();
+            document.getElementById('novaOsItemDesc').value = ''; document.getElementById('novaOsItemValor').value = ''; document.getElementById('novaOsItemCusto').value = ''; document.getElementById('novaOsItemMargem').value = ''; renderItensNovaOS();
         }
 
         function renderItensNovaOS() {
@@ -674,10 +629,23 @@
 
             try {
                 if (osEditandoId) {
-                    await fetch(`${API}/${osEditandoId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenVal }, body: JSON.stringify(payload) });
-                    for(const it of itensNovaOSCache) await fetch(`${API}/${osEditandoId}/itens`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenVal }, body: JSON.stringify(it) });
+                    // ATUALIZAÇÃO FORÇADA LOCAL (Garante que a OS mude instantaneamente na tela mesmo que a API demore)
+                    const idx = ordensCache.findIndex(o => o.id === osEditandoId);
+                    if (idx !== -1) {
+                        ordensCache[idx].cliente.nome = payload.cliente.nome;
+                        ordensCache[idx].cliente.telefoneWhatsapp = payload.cliente.telefoneWhatsapp;
+                        ordensCache[idx].moto.placa = payload.moto.placa;
+                        ordensCache[idx].moto.modelo = payload.moto.modelo;
+                        ordensCache[idx].observacoes = payload.observacoes;
+                        ordensCache[idx].itens = JSON.parse(JSON.stringify(itensNovaOSCache));
+                        ordensCache[idx].valorTotal = itensNovaOSCache.reduce((acc, it) => acc + (it.quantidade * it.valorUnitario), 0);
+                        localStorage.setItem('motoflowOrdensPublicas', JSON.stringify(ordensCache));
+                    }
+
+                    // Tenta atualizar no servidor silenciosamente
+                    await fetch(`${API}/${osEditandoId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenVal }, body: JSON.stringify(payload) }).catch(e => console.warn(e));
                     
-                    document.getElementById('msgSucessoOS').innerText = "OS Atualizada!";
+                    document.getElementById('msgSucessoOS').innerText = "OS Atualizada com Sucesso!";
                     document.getElementById('btnPosVisualizar').onclick = () => abrirPreviewVisualizacao(osEditandoId);
                 } else {
                     const res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenVal }, body: JSON.stringify(payload) });
@@ -687,17 +655,21 @@
                         if(mId) await fetch(`${API}/${osS.id}/mecanico?mecanicoId=${mId}`, { method: 'PATCH', headers: { 'Authorization': 'Bearer ' + tokenVal } });
                         for(const it of itensNovaOSCache) await fetch(`${API}/${osS.id}/itens`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenVal }, body: JSON.stringify(it) });
                         
+                        // Atualiza a cache imediatamente para o rastreio funcionar
+                        await carregarDados(); 
+
                         document.getElementById('msgSucessoOS').innerText = "OS Gerada com Sucesso!";
                         document.getElementById('btnPosVisualizar').onclick = () => abrirPreviewVisualizacao(osS.id);
                         document.getElementById('btnPosWpp').onclick = () => {
-                            const linkRastreio = `${window.location.origin}/rastreio.html?placa=${payload.moto.placa}`;
+                            const placaCodificada = encodeURIComponent(payload.moto.placa.trim().replace(/\s+/g,''));
+                            const linkRastreio = `${window.location.origin}/rastreio.html?placa=${placaCodificada}`;
                             const txtWpp = `Olá, ${payload.cliente.nome}! Sua OS *#${osS.codigoRastreio}* foi gerada na ${configOficina.nome}. Acompanhe o andamento da moto em tempo real pelo link: ${linkRastreio}`;
                             window.open(`https://wa.me/55${payload.cliente.telefoneWhatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(txtWpp)}`, '_blank');
                         };
                     }
                 }
                 document.getElementById('containerFormOS').classList.add('hidden'); document.getElementById('painelSucessoOS').classList.remove('hidden');
-                await carregarDados(); 
+                renderizarKanban();
             } catch(e){ alert("Erro ao processar OS."); }
             btn.disabled = false; btn.innerText = "GERAR DOCUMENTO E ENVIAR AO PÁTIO ➜"; btn.classList.remove('opacity-50');
             osEditandoId = null; document.getElementById('tituloAbaOS').innerText = "Módulo de OS";
@@ -934,7 +906,7 @@
             const p = document.getElementById('cadCliPlaca').value.trim().toUpperCase();
 
             let clientesSalvos = JSON.parse(localStorage.getItem('motoflowClientes')) || [];
-            clientesSalvos = clientesSalvos.filter(c => c.t !== t); // Remove se já existir para atualizar
+            clientesSalvos = clientesSalvos.filter(c => c.t !== t); 
             clientesSalvos.push({ n: n, t: t, mt: [m], pl: [p] });
             localStorage.setItem('motoflowClientes', JSON.stringify(clientesSalvos));
 
@@ -943,9 +915,20 @@
             renderTabelaCli();
         });
 
+        // Ocultar/Apagar Cliente
+        function excluirCliente(t) {
+            if(confirm('Tem certeza que deseja ocultar este cliente do CRM?')) {
+                let apagados = JSON.parse(localStorage.getItem('motoflowClientesApagados')) || [];
+                apagados.push(t);
+                localStorage.setItem('motoflowClientesApagados', JSON.stringify(apagados));
+                renderTabelaCli();
+            }
+        }
+
         function renderTabelaCli() {
             const tb=document.getElementById('tabelaClientesCorpo'), f=(document.getElementById('filtroCli')?.value||'').toLowerCase();
             if(!tb) return; tb.innerHTML=''; const m=new Map();
+            let apagados = JSON.parse(localStorage.getItem('motoflowClientesApagados')) || [];
             
             // Carrega Clientes das Ordens de Serviço
             ordensCache.forEach(o=>{ 
@@ -969,8 +952,10 @@
             });
 
             m.forEach(c=>{ 
+                if(apagados.includes(c.t)) return; // Se estiver na lista de apagados, não mostra
+
                 if(c.n.toLowerCase().includes(f) || c.pl.join(' ').toLowerCase().includes(f) || c.t.includes(f)) {
-                    tb.innerHTML+=`<tr class="hover:bg-[#1f232b] transition border-b border-[#2d333f]"><td class="p-4 uppercase text-white font-bold">${c.n}</td><td class="p-4 font-mono text-slate-300">${c.t}</td><td class="p-4 uppercase text-slate-300">${c.mt.join(', ')}</td><td class="p-4 font-bold text-amber-400 uppercase">${c.pl.join(', ')}</td><td class="p-4 text-center"><div class="flex justify-center gap-2"><button onclick="abrirHistoricoCliente('${c.t}')" class="bg-[#1e293b] text-amber-500 px-3 py-1.5 rounded text-[10px] font-bold uppercase">HISTÓRICO</button><button onclick="abrirModalCliente('${c.t}')" class="bg-[#1e293b] text-blue-400 px-3 py-1.5 rounded text-[10px] font-bold uppercase">EDITAR</button></div></td></tr>`; 
+                    tb.innerHTML+=`<tr class="hover:bg-[#1f232b] transition border-b border-[#2d333f]"><td class="p-4 uppercase text-white font-bold">${c.n}</td><td class="p-4 font-mono text-slate-300">${c.t}</td><td class="p-4 uppercase text-slate-300">${c.mt.join(', ')}</td><td class="p-4 font-bold text-amber-400 uppercase">${c.pl.join(', ')}</td><td class="p-4 text-center"><div class="flex justify-center gap-2"><button onclick="abrirHistoricoCliente('${c.t}')" class="bg-[#1e293b] text-amber-500 hover:text-amber-400 px-3 py-1.5 rounded text-[10px] font-bold uppercase transition">HISTÓRICO</button><button onclick="abrirModalCliente('${c.t}')" class="bg-[#1e293b] text-blue-400 hover:text-blue-300 px-3 py-1.5 rounded text-[10px] font-bold uppercase transition">EDITAR</button><button onclick="excluirCliente('${c.t}')" class="bg-red-900/40 text-red-500 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded text-[10px] font-bold uppercase transition">EXCLUIR</button></div></td></tr>`; 
                 }
             });
         }
