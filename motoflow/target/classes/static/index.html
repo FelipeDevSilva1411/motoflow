@@ -451,11 +451,11 @@
         };
 
         const KANBAN_COLS = [
-            { id: 'ORCAMENTO', tit: 'ORÇAMENTOS', cor: 'border-t-amber-500', accepts: ['RECEBIDA', 'ORCAMENTO'] },
+            { id: 'ORCAMENTO', tit: 'ORÇAMENTOS', cor: 'border-t-amber-500', accepts: ['RECEBIDA', 'ORCAMENTO', 'PENDENTE', 'NOVA', 'CRIADA', 'ABERTA'] },
             { id: 'AGUARDANDO_PECAS', tit: 'AGUARDANDO PEÇAS', cor: 'border-t-blue-500', accepts: ['APROVADA', 'AGUARDANDO', 'AGUARDANDO_PECAS'] },
-            { id: 'EM_MANUTENCAO', tit: 'EM SERVIÇO', cor: 'border-t-red-500', accepts: ['EM_MANUTENCAO', 'TESTE_RODAGEM', 'EM_SERVICO'] },
-            { id: 'PRONTA', tit: 'PRONTO / PÁTIO', cor: 'border-t-green-500', accepts: ['PRONTA'] },
-            { id: 'FINALIZADA', tit: 'PAGO / ENTREGUE', cor: 'border-t-slate-500', accepts: ['FINALIZADA'] }
+            { id: 'EM_MANUTENCAO', tit: 'EM SERVIÇO', cor: 'border-t-red-500', accepts: ['EM_MANUTENCAO', 'TESTE_RODAGEM', 'EM_SERVICO', 'MANUTENCAO'] },
+            { id: 'PRONTA', tit: 'PRONTO / PÁTIO', cor: 'border-t-green-500', accepts: ['PRONTA', 'PRONTO', 'FINALIZADO'] },
+            { id: 'FINALIZADA', tit: 'PAGO / ENTREGUE', cor: 'border-t-slate-500', accepts: ['FINALIZADA', 'PAGO', 'ENTREGUE'] }
         ];
 
         function fazerLogout() { sessionStorage.clear(); window.location.href = 'login.html'; }
@@ -516,7 +516,7 @@
 
                 const resA = await fetch('/api/agendamentos', { headers: { 'Authorization': 'Bearer ' + tokenVal } });
                 if(resA.ok) { agendaCache = await resA.json(); renderAgenda(); }
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("Erro ao carregar os dados:", e); }
         }
 
         function renderizarTabelaMecanicosConfig() {
@@ -528,6 +528,7 @@
             });
             preencherSelectsMecanicos();
         }
+
         function abrirModalMecanico(id = null, nome = '', comissao = 40) {
             document.getElementById('mecanicoEditandoId').value = id || '';
             document.getElementById('inputNomeMecanico').value = nome;
@@ -535,10 +536,12 @@
             document.getElementById('tituloModalMecanico').innerText = id ? "Editar Mecânico" : "Adicionar Mecânico";
             document.getElementById('modalMecanico').classList.remove('hidden');
         }
+
         function editarMecanico(id) {
             const m = mecanicosCache.find(x => String(x.id) === String(id));
             if(m) abrirModalMecanico(m.id, m.nome, m.percentualComissao || 40);
         }
+
         function salvarMecanicoConfig() {
             const id = document.getElementById('mecanicoEditandoId').value;
             const nome = document.getElementById('inputNomeMecanico').value.trim().toUpperCase();
@@ -557,6 +560,7 @@
             document.getElementById('modalMecanico').classList.add('hidden');
             renderizarTabelaMecanicosConfig();
         }
+
         function excluirMecanico(id) {
             if(confirm("Deseja realmente apagar este mecânico?")) {
                 mecanicosCache = mecanicosCache.filter(x => String(x.id) !== String(id));
@@ -594,6 +598,7 @@
             const sel = document.getElementById('osMecanicoSelect');
             if (sel) { sel.innerHTML = '<option value="">-- Selecione o Mecânico --</option>'; mecanicosCache.forEach(m => sel.innerHTML += `<option value="${m.id}">${m.nome}</option>`); }
         }
+
         function atualizarComissaoMecanicoInput() {
             const mId = document.getElementById('osMecanicoSelect').value; const mec = mecanicosCache.find(m => String(m.id) === String(mId));
             if (mec) document.getElementById('osComissaoMecanico').value = mec.percentualComissao || 40;
@@ -637,6 +642,7 @@
             itensNovaOSCache.push({ descricao: `MÃO DE OBRA - ${mec.nome.toUpperCase()}`, valorUnitario: val, valorCusto: 0, quantidade: 1, tipo: 'SERVICO' });
             document.getElementById('osValorServico').value = ''; renderItensNovaOS();
         }
+
         function adicionarItemNovaOS() {
             const desc = document.getElementById('novaOsItemDesc').value.trim(); const val = parseFloat(document.getElementById('novaOsItemValor').value);
             const cst = parseFloat(document.getElementById('novaOsItemCusto').value) || (val*0.6); const qtd = parseInt(document.getElementById('novaOsItemQtd').value) || 1;
@@ -644,6 +650,7 @@
             itensNovaOSCache.push({ descricao: desc, valorUnitario: val, valorCusto: cst, quantidade: qtd, tipo: 'PECA' });
             document.getElementById('novaOsItemDesc').value = ''; document.getElementById('novaOsItemValor').value = ''; document.getElementById('novaOsItemCusto').value = ''; renderItensNovaOS();
         }
+
         function renderItensNovaOS() {
             const cont = document.getElementById('listaItensNovaOS'); cont.innerHTML = ''; let t = 0;
             if (itensNovaOSCache.length === 0) { cont.innerHTML = '<div class="text-slate-500 italic text-center py-2">Nenhum item adicionado.</div>'; document.getElementById('txtTotalNovaOS').innerText = 'Total Geral: R$ 0,00'; return; }
@@ -703,12 +710,20 @@
             document.getElementById('tituloAbaOS').innerText = "Módulo de OS";
         }
 
+        // KANBAN PROTEGIDO (Não deixa sumir OS nenhuma)
         function renderizarKanban() {
             const cont = document.getElementById('secaoKanban'); if(!cont) return; cont.innerHTML = '';
             const fPlaca = (document.getElementById('filtroKanbanPlaca')?.value||'').toUpperCase();
             
+            const todosStatusMapeados = KANBAN_COLS.flatMap(c => c.accepts);
+
             KANBAN_COLS.forEach(c => {
-                const ord = ordensCache.filter(o => c.accepts.includes(o.status) && (fPlaca==='' || (o.moto && o.moto.placa.toUpperCase().includes(fPlaca))));
+                const ord = ordensCache.filter(o => {
+                    let st = o.status || 'ORCAMENTO';
+                    if (!todosStatusMapeados.includes(st)) st = 'ORCAMENTO'; // Filtro Inteligente Anti-Sumo
+                    return c.accepts.includes(st) && (fPlaca==='' || (o.moto && o.moto.placa.toUpperCase().includes(fPlaca)));
+                });
+                
                 const col = document.createElement('div'); col.className = `w-[280px] min-w-[280px] flex flex-col h-full`;
                 col.ondragover = e => e.preventDefault(); col.ondrop = async e => { e.preventDefault(); const id = e.dataTransfer.getData('text'); if(id) { await fetch(`${API}/${id}/status?novoStatus=${c.id}`, { method:'PATCH', headers:{'Authorization':'Bearer '+tokenVal}}); carregarDados(); }};
                 col.innerHTML = `<div class="text-[10px] font-bold text-center border-t-2 ${c.cor} py-2 mb-2 mx-1 tracking-widest text-slate-300">${c.tit}</div><div class="flex-1 space-y-2 p-1" id="cards-${c.id}"></div>`;
@@ -892,28 +907,47 @@
             win.document.close();
         }
 
+        // CLIENTES: LÓGICA DE SALVAMENTO FUNCIONAL
         function abrirModalCliente(telParaEditar = null) {
             document.getElementById('formAddEditCliente').reset();
             if(telParaEditar) {
                 const o = ordensCache.find(x => x.cliente && x.cliente.telefoneWhatsapp === telParaEditar);
-                if(o) { 
+                let clientesSalvos = JSON.parse(localStorage.getItem('motoflowClientes')) || [];
+                const local = clientesSalvos.find(x => x.t === telParaEditar);
+
+                if(o || local) { 
                     document.getElementById('tituloModalCliente').innerText = "Editar Cliente"; 
-                    document.getElementById('cadCliNome').value = o.cliente.nome; 
-                    document.getElementById('cadCliTel').value = o.cliente.telefoneWhatsapp;
-                    if(o.moto) { document.getElementById('cadCliMoto').value = o.moto.modelo || ''; document.getElementById('cadCliPlaca').value = o.moto.placa || ''; }
+                    document.getElementById('cadCliNome').value = o ? o.cliente.nome : local.n; 
+                    document.getElementById('cadCliTel').value = telParaEditar;
+                    document.getElementById('cadCliMoto').value = o && o.moto ? o.moto.modelo : (local && local.mt ? local.mt[0] : ''); 
+                    document.getElementById('cadCliPlaca').value = o && o.moto ? o.moto.placa : (local && local.pl ? local.pl[0] : ''); 
                 }
             } else { document.getElementById('tituloModalCliente').innerText = "Novo Cliente"; }
             document.getElementById('modalAddEditCliente').classList.remove('hidden');
         }
 
         document.getElementById('formAddEditCliente').addEventListener('submit', (e) => {
-            e.preventDefault(); alert("Cliente salvo com sucesso!");
-            document.getElementById('modalAddEditCliente').classList.add('hidden'); renderTabelaCli();
+            e.preventDefault(); 
+            const n = document.getElementById('cadCliNome').value.trim().toUpperCase();
+            const t = document.getElementById('cadCliTel').value.trim();
+            const m = document.getElementById('cadCliMoto').value.trim().toUpperCase();
+            const p = document.getElementById('cadCliPlaca').value.trim().toUpperCase();
+
+            let clientesSalvos = JSON.parse(localStorage.getItem('motoflowClientes')) || [];
+            clientesSalvos = clientesSalvos.filter(c => c.t !== t); // Remove se já existir para atualizar
+            clientesSalvos.push({ n: n, t: t, mt: [m], pl: [p] });
+            localStorage.setItem('motoflowClientes', JSON.stringify(clientesSalvos));
+
+            alert("Cliente salvo com sucesso!");
+            document.getElementById('modalAddEditCliente').classList.add('hidden'); 
+            renderTabelaCli();
         });
 
         function renderTabelaCli() {
             const tb=document.getElementById('tabelaClientesCorpo'), f=(document.getElementById('filtroCli')?.value||'').toLowerCase();
             if(!tb) return; tb.innerHTML=''; const m=new Map();
+            
+            // Carrega Clientes das Ordens de Serviço
             ordensCache.forEach(o=>{ 
                 if(o.cliente){ 
                     const k = o.cliente.telefoneWhatsapp || 'SEM NUMERO';
@@ -921,15 +955,29 @@
                     else if(o.moto&&!m.get(k).mt.includes(o.moto.modelo)) { m.get(k).mt.push(o.moto.modelo); m.get(k).pl.push(o.moto.placa); }
                 }
             });
+
+            // Junta os Clientes Novos Criados Manualmente (Salvos Localmente)
+            let clientesSalvos = JSON.parse(localStorage.getItem('motoflowClientes')) || [];
+            clientesSalvos.forEach(c => {
+                if(!m.has(c.t)) m.set(c.t, c);
+                else {
+                    let exist = m.get(c.t);
+                    exist.n = c.n;
+                    if(c.mt[0] && !exist.mt.includes(c.mt[0])) exist.mt.push(c.mt[0]);
+                    if(c.pl[0] && !exist.pl.includes(c.pl[0])) exist.pl.push(c.pl[0]);
+                }
+            });
+
             m.forEach(c=>{ 
-                if(c.n.toLowerCase().includes(f) || c.pl.join(' ').toLowerCase().includes(f)) {
+                if(c.n.toLowerCase().includes(f) || c.pl.join(' ').toLowerCase().includes(f) || c.t.includes(f)) {
                     tb.innerHTML+=`<tr class="hover:bg-[#1f232b] transition border-b border-[#2d333f]"><td class="p-4 uppercase text-white font-bold">${c.n}</td><td class="p-4 font-mono text-slate-300">${c.t}</td><td class="p-4 uppercase text-slate-300">${c.mt.join(', ')}</td><td class="p-4 font-bold text-amber-400 uppercase">${c.pl.join(', ')}</td><td class="p-4 text-center"><div class="flex justify-center gap-2"><button onclick="abrirHistoricoCliente('${c.t}')" class="bg-[#1e293b] text-amber-500 px-3 py-1.5 rounded text-[10px] font-bold uppercase">HISTÓRICO</button><button onclick="abrirModalCliente('${c.t}')" class="bg-[#1e293b] text-blue-400 px-3 py-1.5 rounded text-[10px] font-bold uppercase">EDITAR</button></div></td></tr>`; 
                 }
             });
         }
         
         function abrirHistoricoCliente(t) {
-            const osC = ordensCache.filter(o=>o.cliente&&o.cliente.telefoneWhatsapp===t); if(osC.length===0) return;
+            const osC = ordensCache.filter(o=>o.cliente&&o.cliente.telefoneWhatsapp===t); 
+            if(osC.length===0) { alert("Este cliente é novo e ainda não tem serviços registados."); return; }
             document.getElementById('histCliNome').innerText = `Histórico: ${osC[0].cliente.nome}`;
             const tb = document.getElementById('histCliTabelaCorpo'); tb.innerHTML='';
             const hoje = new Date();
@@ -1010,6 +1058,7 @@
             await fetch('/api/agendamentos',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tokenVal},body:JSON.stringify(p)});
             document.getElementById('formAgendamento').reset(); carregarDados();
         });
+        
         function renderAgenda() {
             const tb=document.getElementById('tabelaAgendaCorpo'); if(!tb) return; tb.innerHTML='';
             agendaCache.forEach(a => tb.innerHTML+=`<tr><td class="p-3">${new Date(a.dataHora).toLocaleString()}</td><td class="p-3 font-bold uppercase">${a.clienteNome}</td><td class="p-3 uppercase">${a.motoModelo}</td><td class="p-3 text-right"><button onclick="fetch('/api/agendamentos/${a.id}',{method:'DELETE',headers:{'Authorization':'Bearer '+tokenVal}}).then(()=>carregarDados())" class="bg-red-600 text-white px-2 py-1 rounded text-xs">X</button></td></tr>`);
