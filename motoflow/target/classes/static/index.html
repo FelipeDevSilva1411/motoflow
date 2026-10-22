@@ -13,7 +13,6 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -29,7 +28,6 @@
         .tab-btn:hover { background-color: #2d333f; color: #f3f4f6; }
         .tab-active { background-color: #dc2626 !important; border-color: #dc2626 !important; color: #ffffff !important; font-weight: bold; }
         
-        /* Oculta os botões originais no momento da impressão */
         @media print { 
             .no-print { display: none !important; } 
             body { background-color: white !important; }
@@ -132,7 +130,7 @@
                 <p class="text-slate-400 mb-8" id="subMsgSucessoOS">O Pátio Digital foi atualizado.</p>
                 <div class="flex flex-col sm:flex-row justify-center gap-4">
                     <button id="btnPosVisualizar" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded uppercase text-xs flex items-center justify-center gap-2 transition shadow">👁️ VISUALIZAR / IMPRIMIR</button>
-                    <button id="btnPosWpp" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded uppercase text-xs flex items-center justify-center gap-2 transition shadow">📱 ENVIAR WHATSAPP (COM LINK DE RASTREIO)</button>
+                    <button id="btnPosWpp" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded uppercase text-xs flex items-center justify-center gap-2 transition shadow">📱 ENVIAR WHATSAPP</button>
                     <button onclick="resetarTelaNovaOS()" class="bg-[#2d333f] hover:bg-[#374151] text-white font-bold py-3 px-6 rounded uppercase text-xs flex items-center justify-center gap-2 transition border border-[#4b5563]">🔄 NOVA OS</button>
                 </div>
             </div>
@@ -178,7 +176,7 @@
             </div>
         </section>
 
-        <!-- ABA: CONFIGURAÇÕES & TAXAS -->
+        <!-- ABA: CONFIGURAÇÕES -->
         <section id="aba-config" class="hidden space-y-6 max-w-4xl mx-auto">
             <div class="panel-bg rounded-lg p-6 space-y-6">
                 <div>
@@ -362,7 +360,6 @@
                 </div>
             </div>
             <div class="p-8 overflow-y-auto flex-1 bg-gray-200 flex justify-center" id="previewOsContentContainer">
-                <!-- O HTML da OS A4 vai ser injetado aqui -->
                 <div id="previewOsContent" class="bg-white shadow-xl min-h-[1050px] w-[794px] border border-gray-300"></div>
             </div>
         </div>
@@ -554,12 +551,10 @@
             
             const setCli = new Set(); const setPla = new Set();
             
-            // Puxar do histórico
             ordensCache.forEach(o => {
                 if(o.cliente && o.cliente.nome) setCli.add(o.cliente.nome.toUpperCase());
                 if(o.moto && o.moto.placa) setPla.add(o.moto.placa.toUpperCase());
             });
-            // Puxar dos salvos manualmente
             let clientesSalvos = JSON.parse(localStorage.getItem('motoflowClientes')) || [];
             clientesSalvos.forEach(c => {
                 if(c.n) setCli.add(c.n.toUpperCase());
@@ -570,7 +565,6 @@
             setPla.forEach(p => listPla.innerHTML += `<option value="${p}">`);
         }
 
-        // SISTEMA DE AUTOPREENCHIMENTO INTELIGENTE
         function autoPreencherPor(campo) {
             const valTel = document.getElementById('osTel').value.trim();
             const valNome = document.getElementById('osCliente').value.trim().toUpperCase();
@@ -579,7 +573,6 @@
             let encontrado = null;
             let clientesSalvos = JSON.parse(localStorage.getItem('motoflowClientes')) || [];
 
-            // Tenta procurar nas Ordens Antigas
             if(campo === 'telefone' && valTel.length >= 8) encontrado = ordensCache.find(o => o.cliente && o.cliente.telefoneWhatsapp.replace(/\D/g,'') === valTel.replace(/\D/g,''));
             if(campo === 'nome' && valNome.length > 3) encontrado = ordensCache.find(o => o.cliente && o.cliente.nome.toUpperCase() === valNome);
             if(campo === 'placa' && valPlaca.length >= 6) encontrado = ordensCache.find(o => o.moto && o.moto.placa.toUpperCase() === valPlaca);
@@ -592,7 +585,6 @@
                 return;
             }
 
-            // Se não encontrou no histórico, tenta nos cadastros manuais
             let encontradoManual = null;
             if(campo === 'telefone' && valTel.length >= 8) encontradoManual = clientesSalvos.find(c => c.t.replace(/\D/g,'') === valTel.replace(/\D/g,''));
             if(campo === 'nome' && valNome.length > 3) encontradoManual = clientesSalvos.find(c => c.n.toUpperCase() === valNome);
@@ -669,7 +661,6 @@
 
             try {
                 if (osEditandoId) {
-                    // ATUALIZAÇÃO FORÇADA NA MEMÓRIA (Mesmo se a API der erro 405[cite: 12], o ecrã atualiza perfeitamente)
                     const idx = ordensCache.findIndex(o => o.id === osEditandoId);
                     if (idx !== -1) {
                         ordensCache[idx].cliente.nome = payload.cliente.nome;
@@ -682,13 +673,12 @@
                         localStorage.setItem('motoflowOrdensPublicas', JSON.stringify(ordensCache));
                     }
 
-                    // Tenta enviar para a API (ignora o erro 405 se o backend não suportar PUT)
                     try {
                         const r = await fetch(`${API}/${osEditandoId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenVal }, body: JSON.stringify(payload) });
                         if(r.ok) {
                             for(const it of itensNovaOSCache) await fetch(`${API}/${osEditandoId}/itens`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenVal }, body: JSON.stringify(it) });
                         }
-                    } catch(err) { console.warn("API ignorou o PUT. Forçando update local."); }
+                    } catch(err) { console.warn("Modificado apenas localmente."); }
                     
                     document.getElementById('msgSucessoOS').innerText = "OS Atualizada com Sucesso!";
                     document.getElementById('btnPosVisualizar').onclick = () => abrirPreviewVisualizacao(osEditandoId);
@@ -726,6 +716,7 @@
             document.getElementById('tituloAbaOS').innerText = "Módulo de OS";
         }
 
+        // KANBAN COM PROTEÇÃO ANTI-FALHA DE SERVIDOR
         function renderizarKanban() {
             const cont = document.getElementById('secaoKanban'); if(!cont) return; cont.innerHTML = '';
             const fPlaca = (document.getElementById('filtroKanbanPlaca')?.value||'').toUpperCase();
@@ -739,7 +730,24 @@
                 });
                 
                 const col = document.createElement('div'); col.className = `w-[280px] min-w-[280px] flex flex-col h-full`;
-                col.ondragover = e => e.preventDefault(); col.ondrop = async e => { e.preventDefault(); const id = e.dataTransfer.getData('text'); if(id) { await fetch(`${API}/${id}/status?novoStatus=${c.id}`, { method:'PATCH', headers:{'Authorization':'Bearer '+tokenVal}}); carregarDados(); }};
+                col.ondragover = e => e.preventDefault(); 
+                col.ondrop = async e => { 
+                    e.preventDefault(); const id = e.dataTransfer.getData('text'); 
+                    if(id) { 
+                        // Atualiza no ecrã imediatamente para não depender do servidor
+                        const osIdx = ordensCache.findIndex(o => String(o.id) === String(id));
+                        if(osIdx !== -1) {
+                            ordensCache[osIdx].status = c.id;
+                            renderizarKanban();
+                        }
+                        // Envia o update, codificando espaços ou símbolos se necessário
+                        try {
+                            await fetch(`${API}/${id}/status?novoStatus=${encodeURIComponent(c.id)}`, { method:'PATCH', headers:{'Authorization':'Bearer '+tokenVal}}); 
+                        } catch(err) {
+                            console.warn("Update rejeitado pelo servidor, mas mantido ativo na tela.");
+                        }
+                    }
+                };
                 col.innerHTML = `<div class="text-[10px] font-bold text-center border-t-2 ${c.cor} py-2 mb-2 mx-1 tracking-widest text-slate-300">${c.tit}</div><div class="flex-1 space-y-2 p-1" id="cards-${c.id}"></div>`;
                 const cd = col.querySelector(`#cards-${c.id}`); ord.forEach(o => cd.appendChild(criarCard(o, c.id))); cont.appendChild(col);
             });
@@ -815,7 +823,7 @@
 
         async function excluirOS(id) { if(confirm('Deseja excluir permanentemente esta OS?')) { await fetch(`${API}/${id}`,{method:'DELETE',headers:{'Authorization':'Bearer '+tokenVal}}); carregarDados(); } }
 
-        // NOVO MODELO DE IMPRESSÃO A4 PROFISSIONAL (Substitui o layout problemático)
+        // NOVO MODELO DE IMPRESSÃO A4 (Profissional, com QR Code Injetado)
         function construirDocumentoOSHtml(o) {
             let servHtml = '', pecHtml = ''; let totalServ = 0, totalPec = 0;
             if(o.itens) {
@@ -823,17 +831,19 @@
                     const sub = i.quantidade * i.valorUnitario;
                     const row = `
                         <tr style="border-bottom: 1px solid #e5e7eb;">
-                            <td style="padding: 8px 12px; font-size: 13px; color: #111827;">${i.descricao}</td>
-                            <td style="padding: 8px 12px; font-size: 13px; text-align: center; color: #374151;">${i.quantidade}</td>
-                            <td style="padding: 8px 12px; font-size: 13px; text-align: right; color: #374151;">R$ ${i.valorUnitario.toFixed(2)}</td>
-                            <td style="padding: 8px 12px; font-size: 13px; text-align: right; font-weight: 700; color: #111827;">R$ ${sub.toFixed(2)}</td>
+                            <td style="padding: 10px 12px; font-size: 13px; color: #111827;">${i.descricao}</td>
+                            <td style="padding: 10px 12px; font-size: 13px; text-align: center; color: #374151;">${i.quantidade}</td>
+                            <td style="padding: 10px 12px; font-size: 13px; text-align: right; color: #374151;">R$ ${i.valorUnitario.toFixed(2)}</td>
+                            <td style="padding: 10px 12px; font-size: 13px; text-align: right; font-weight: 700; color: #111827;">R$ ${sub.toFixed(2)}</td>
                         </tr>`;
                     if(i.tipo === 'PECA') { pecHtml += row; totalPec += sub; } else { servHtml += row; totalServ += sub; }
                 });
             }
             
             let logoHtml = configOficina.logoUrl ? `<img src="${configOficina.logoUrl}" style="max-height: 80px; max-width: 180px; object-fit: contain;" />` : `<div style="font-size: 24px; font-weight: 900; letter-spacing: -1px; color: #111827;">MOTOFLOW</div>`;
-            
+            const linkRastreio = `${window.location.origin}/rastreio.html?placa=${encodeURIComponent(o.moto?.placa||'')}`;
+            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(linkRastreio)}`;
+
             return `
             <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #ffffff; padding: 40px; box-sizing: border-box; width: 100%; max-width: 800px; margin: 0 auto; color: #111827;">
                 
@@ -897,7 +907,7 @@
                 
                 <!-- TOTAIS -->
                 <div style="display: flex; justify-content: flex-end; margin-bottom: 40px;">
-                    <div style="width: 300px; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px;">
+                    <div style="width: 320px; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 13px; color: #4b5563;">
                             <span>Total de Serviços:</span>
                             <span>R$ ${totalServ.toFixed(2)}</span>
@@ -913,19 +923,20 @@
                     </div>
                 </div>
 
-                <!-- ASSINATURAS E QR CODE -->
-                <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px dashed #d1d5db; padding-top: 30px; margin-top: 30px;">
-                    <div style="width: 60%;">
-                        <p style="font-size: 11px; color: #6b7280; line-height: 1.5; margin-bottom: 30px;">
+                <!-- ASSINATURAS E QR CODE NO CANTO INFERIOR DIREITO -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px dashed #d1d5db; padding-top: 30px; margin-top: 20px;">
+                    <div style="width: 55%;">
+                        <p style="font-size: 11px; color: #6b7280; line-height: 1.5; margin-bottom: 40px;">
                             <strong>Garantia Legal de 90 dias</strong> sobre defeitos de fabricação de peças e execução de serviços de mão de obra. A garantia não cobre danos causados por mau uso, desgaste natural ou acidentes.
                         </p>
-                        <div style="border-top: 1px solid #111827; width: 250px; text-align: center; padding-top: 5px;">
+                        <div style="border-top: 1px solid #111827; width: 280px; text-align: center; padding-top: 5px;">
                             <p style="margin: 0; font-size: 11px; text-transform: uppercase; font-weight: bold;">Assinatura do Cliente</p>
                         </div>
                     </div>
-                    <div style="text-align: right; width: 30%;">
-                        <p style="margin: 0 0 10px 0; font-size: 10px; font-weight: bold; text-transform: uppercase; color: #4b5563;">Acompanhe a sua moto:</p>
-                        <div id="qrCodeWppPrint" style="display: inline-block; padding: 5px; border: 1px solid #e5e7eb; border-radius: 4px; background: white;"></div>
+                    <div style="text-align: right; width: 40%; display: flex; flex-direction: column; align-items: flex-end;">
+                        <p style="margin: 0 0 5px 0; font-size: 12px; font-weight: 900; text-transform: uppercase; color: #111827;">Acompanhe sua moto</p>
+                        <p style="margin: 0 0 10px 0; font-size: 10px; color: #4b5563; max-width: 200px;">Escaneie o código para acompanhar o serviço ou entrar em contato via WhatsApp.</p>
+                        <img src="${qrCodeUrl}" style="width: 90px; height: 90px; border: 1px solid #e5e7eb; padding: 4px; border-radius: 6px; background: white;" alt="QR Code" />
                     </div>
                 </div>
             </div>`;
@@ -937,15 +948,6 @@
             document.getElementById('previewOsId').innerText = "#" + o.codigoRastreio;
             document.getElementById('previewOsContent').innerHTML = construirDocumentoOSHtml(o);
             document.getElementById('modalVisualizarOS').classList.remove('hidden');
-
-            setTimeout(() => {
-                const el = document.getElementById('qrCodeWppPrint');
-                if(el) {
-                    el.innerHTML = '';
-                    const linkRastreio = `${window.location.origin}/rastreio.html?placa=${encodeURIComponent(o.moto?.placa||'')}`;
-                    new QRCode(el, { text: linkRastreio, width: 90, height: 90 });
-                }
-            }, 100);
         }
 
         function imprimirPreviewA4() {
@@ -955,12 +957,44 @@
             win.document.close();
         }
 
+        // NOVO MODELO DE IMPRESSÃO CUPOM (Recibo Térmico Profissional)
         function imprimirPreviewCupom() {
             if(!osVisualizandoAtualmente) return;
             const o = osVisualizandoAtualmente;
-            let it = ''; if(o.itens) o.itens.forEach(i => { it += `<div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>${i.quantidade}x ${i.descricao}</span><span>R$ ${(i.quantidade*i.valorUnitario).toFixed(2)}</span></div>`; });
-            const win = window.open('','_blank', 'width=350,height=600');
-            win.document.write(`<html><body style="font-family:monospace; font-size:11px; width:300px; margin:0; padding:10px; color:#000;"><div style="text-align:center; font-weight:bold; font-size:14px;">${configOficina.nome}</div><div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:8px; margin-bottom:8px;">Tel: ${configOficina.telefone}</div><div><strong>OS: #${o.codigoRastreio}</strong></div><div>Cliente: ${o.cliente?.nome}</div><div>Placa: ${o.moto?.placa}</div><div style="border-top:1px dashed #000; margin:8px 0; padding-top:8px;"><strong>ITENS</strong></div>${it}<div style="border-top:1px dashed #000; margin-top:8px; padding-top:8px; text-align:right; font-size:13px;"><strong>TOTAL: R$ ${(o.valorTotal||0).toFixed(2)}</strong></div><script>setTimeout(()=>{window.print();},300);<\/script></body></html>`);
+            let it = ''; if(o.itens) o.itens.forEach(i => { it += `<div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px;"><span style="width: 70%;">${i.quantidade}x ${i.descricao}</span><span style="width: 30%; text-align: right;">R$ ${(i.quantidade*i.valorUnitario).toFixed(2)}</span></div>`; });
+            
+            const linkRastreio = `${window.location.origin}/rastreio.html?placa=${encodeURIComponent(o.moto?.placa||'')}`;
+            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(linkRastreio)}`;
+            
+            const win = window.open('','_blank', 'width=400,height=700');
+            win.document.write(`
+                <html>
+                <body style="font-family: 'Courier New', Courier, monospace; font-size:12px; width:300px; margin:0 auto; padding:15px; color:#000;">
+                    <div style="text-align:center; font-weight:900; font-size:18px; margin-bottom:5px;">${configOficina.nome}</div>
+                    <div style="text-align:center; font-size:10px; margin-bottom:10px;">${configOficina.endereco}</div>
+                    <div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:10px; margin-bottom:10px;">WhatsApp: ${configOficina.telefone}</div>
+                    
+                    <div style="margin-bottom: 5px;"><strong>OS: #${o.codigoRastreio}</strong></div>
+                    <div style="margin-bottom: 5px;">Cliente: ${o.cliente?.nome}</div>
+                    <div style="margin-bottom: 10px;">Veículo: ${o.moto?.modelo} - ${o.moto?.placa}</div>
+                    
+                    <div style="border-top:1px dashed #000; border-bottom:1px dashed #000; margin:10px 0; padding:5px 0;"><strong>DESCRIÇÃO DOS ITENS</strong></div>
+                    ${it}
+                    
+                    <div style="border-top:1px dashed #000; margin-top:10px; padding-top:10px; text-align:right; font-size:16px;">
+                        <strong>TOTAL: R$ ${(o.valorTotal||0).toFixed(2)}</strong>
+                    </div>
+
+                    <div style="text-align:center; margin-top: 25px;">
+                        <p style="font-size: 11px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase;">ACOMPANHE SUA MOTO</p>
+                        <p style="font-size: 10px; margin-bottom: 10px;">Leia o QR Code para acompanhar o serviço e falar pelo WhatsApp.</p>
+                        <img src="${qrCodeUrl}" style="width: 100px; height: 100px;" alt="QR Code" />
+                    </div>
+                    
+                    <script>setTimeout(()=>{window.print();},800);<\/script>
+                </body>
+                </html>
+            `);
             win.document.close();
         }
 
@@ -1000,7 +1034,6 @@
             renderTabelaCli();
         });
 
-        // Ocultar/Apagar Cliente
         function excluirCliente(t) {
             if(confirm('Tem certeza que deseja ocultar este cliente do CRM?')) {
                 let apagados = JSON.parse(localStorage.getItem('motoflowClientesApagados')) || [];
@@ -1035,7 +1068,7 @@
             });
 
             m.forEach(c=>{ 
-                if(apagados.includes(c.t)) return; // Se estiver na lista de apagados, não mostra
+                if(apagados.includes(c.t)) return;
 
                 if(c.n.toLowerCase().includes(f) || c.pl.join(' ').toLowerCase().includes(f) || c.t.includes(f)) {
                     tb.innerHTML+=`<tr class="hover:bg-[#1f232b] transition border-b border-[#2d333f]"><td class="p-4 uppercase text-white font-bold">${c.n}</td><td class="p-4 font-mono text-slate-300">${c.t}</td><td class="p-4 uppercase text-slate-300">${c.mt.join(', ')}</td><td class="p-4 font-bold text-amber-400 uppercase">${c.pl.join(', ')}</td><td class="p-4 text-center"><div class="flex justify-center gap-2"><button onclick="abrirHistoricoCliente('${c.t}')" class="bg-[#1e293b] text-amber-500 hover:text-amber-400 px-3 py-1.5 rounded text-[10px] font-bold uppercase transition">HISTÓRICO</button><button onclick="abrirModalCliente('${c.t}')" class="bg-[#1e293b] text-blue-400 hover:text-blue-300 px-3 py-1.5 rounded text-[10px] font-bold uppercase transition">EDITAR</button><button onclick="excluirCliente('${c.t}')" class="bg-red-900/40 text-red-500 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded text-[10px] font-bold uppercase transition">EXCLUIR</button></div></td></tr>`; 
